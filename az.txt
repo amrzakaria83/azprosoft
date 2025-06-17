@@ -19,3 +19,9 @@ code is
 
     php artisan config:clear
     php artisan cache:clear
+
+
+
+    git remote add origin https://github.com/amrzakaria83/azprosoft.git
+    git remote add origin https://github.com/amrzakaria83/azprosoft.git
+    git remote add origin git@github.com:amrzakaria83/azprosoft.git
