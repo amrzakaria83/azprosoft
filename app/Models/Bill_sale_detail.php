@@ -26,6 +26,7 @@ class Bill_sale_detail extends Model
         'note', 
         'status_temporary', // 0 = temporary - 1 = permanent - 2 = cancel
         'status', //0 = active - 1 = not active 
+        'expiry_date', 
     ];
     public function getheader()
     {

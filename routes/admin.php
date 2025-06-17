@@ -108,6 +108,17 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/update', 'UnitesController@update')->name('update');
         });
 
+        Route::name('bill_sale_headers.')->prefix('bill_sale_headers')->group(function(){
+            Route::get('/','Bill_sale_headersController@index')->name('index');
+            Route::get('/show/{id}','Bill_sale_headersController@show')->name('show');
+            Route::post('/delete', 'Bill_sale_headersController@destroy')->name('delete');
+            Route::get('/create','Bill_sale_headersController@create')->name('create');
+            Route::post('/store','Bill_sale_headersController@store')->name('store');
+            Route::post('/storemodel','Bill_sale_headersController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Bill_sale_headersController@edit')->name('edit');
+            Route::post('/update', 'Bill_sale_headersController@update')->name('update');
+        });
+
         
     });
 

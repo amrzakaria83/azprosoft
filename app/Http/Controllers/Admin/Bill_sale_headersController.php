@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Http\Requests\RoleRequest;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Employee;
-use Spatie\Permission\Models\Bill_sale_header;
+use App\Models\Bill_sale_header;
+use App\Models\Bill_sale_detail;
+
 use DataTables;
 use Validator;
 

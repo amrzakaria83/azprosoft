@@ -23,6 +23,7 @@ class Azcustomer extends Model
         'status', // 0 = active - 1 = not active 
         'sale_type_prosoft', // 0 = cash - 1 = delayed - 2 = delivery
         'note',
+        'status',
         'sale_type_id', // sale_types table 1 = cash - 2 = delayed - 3 = delivery - 4 = visa
     ];
     // public function getsale_type()
