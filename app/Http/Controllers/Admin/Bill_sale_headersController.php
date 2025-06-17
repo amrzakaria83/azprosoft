@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Http\Requests\RoleRequest;
-use Spatie\Permission\Models\Employee;
+use App\Models\Employee;
 use App\Models\Bill_sale_header;
 use App\Models\Bill_sale_detail;
 
 use DataTables;
 use Validator;
+use Auth;
 
 class Bill_sale_headersController extends Controller
 {
@@ -87,10 +88,10 @@ class Bill_sale_headersController extends Controller
         $row = $this->objectModel::create([
             'emp_id' => Auth::guard('admin')->user()->id,
             'emp_code' => $emp_code,
-            'total_price' =>  $attendanceOutFrom,
-            'total_tax' => $attendanceOutFrom,
-            'total_extra_discount' => $attendanceOutFrom,
-            'sale_type_prosoft' => $attendanceInTo, // 0 = cash - 1 = delayed - 2 = delivery
+            'total_price' =>  $request->type_emp_att_request,
+            'total_tax' => $request->type_emp_att_request,
+            'total_extra_discount' => $request->type_emp_att_request,
+            'sale_type_prosoft' => $request->type_emp_att_request, // 0 = cash - 1 = delayed - 2 = delivery
             'cust_id' => $request->type_emp_att_request,//azcustomers
             'cust_code' => $request->type_emp_att_request,// code prosoft
             'status' => $request->noterequest,  // 0 = oredred - 1 = done - 3 = cancelled - 4 = paied
@@ -118,12 +119,12 @@ class Bill_sale_headersController extends Controller
         $data = Bill_sale_header::find($request->id);
         $data->update([
             'emp_id' => Auth::guard('admin')->user()->id,
-            'total_price' => Auth::guard('admin')->user()->id,
-            'total_tax' => $attendanceOutFrom,
-            'total_extra_discount' => $attendanceOutFrom,
-            'sale_type_prosoft' => $attendanceInTo, // 0 = cash - 1 = delayed - 2 = delivery
-            'cust_id' => $request->type_emp_att_request,//azcustomers
-            'cust_code' => $request->type_emp_att_request,// code prosoft
+            'total_price' => $request->total_tax,
+            'total_tax' => $request->total_tax,
+            'total_extra_discount' => $request->total_tax,
+            'sale_type_prosoft' => $request->total_tax, // 0 = cash - 1 = delayed - 2 = delivery
+            'cust_id' => $request->total_tax,//azcustomers
+            'cust_code' => $request->total_tax,// code prosoft
             'status' => $request->noterequest,  // 0 = oredred - 1 = done - 3 = cancelled - 4 = paied
         ]);
 

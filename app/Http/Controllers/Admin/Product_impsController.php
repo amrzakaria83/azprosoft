@@ -7,7 +7,6 @@ ini_set('memory_limit', '4096M');
 use App\Http\Controllers\Controller;
 use App\Jobs\SyncProductsFromPurImportJob;
 use Illuminate\Support\Facades\Redirect; // Or your preferred redirect method
-
 use Illuminate\Http\Request;
 use Rap2hpoutre\FastExcel\FastExcel; 
 // use App\Imports\Product_imp;
@@ -18,11 +17,10 @@ use App\Models\Site;
 use App\Jobs\ProcessProductImportChunk; // Add this import
 use App\Jobs\InitiateProductImportBatchingJob; // Add this
 use Illuminate\Support\Facades\Bus; // Add this import
-
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Auth;
 
 class Product_impsController extends Controller
 {
