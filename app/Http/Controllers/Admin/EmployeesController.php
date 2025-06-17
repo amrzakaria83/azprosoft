@@ -53,9 +53,7 @@ class EmployeesController extends Controller
                                 <a href="'.route('admin.employees.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                                     <i class="bi bi-pencil-square fs-1x"></i>
                                 </a>
-                                <a href="'.route('admin.employees.editpass', $row->id).'" class="btn btn-sm btn-icon btn-danger btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-                                <i class="bi bi-pencil-square fs-1x">p</i>
-                            </a>
+                                
                             </div>';
                     return $actions;
                 })

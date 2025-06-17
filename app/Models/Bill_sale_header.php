@@ -10,6 +10,8 @@ class Bill_sale_header extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
+        'emp_id', 
+        'emp_code', 
         'total_price', // decimal 8,2
         'total_tax', // decimal 8,2
         'total_extra_discount', // decimal 8,2
