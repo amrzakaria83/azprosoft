@@ -1,0 +1,21 @@
+
+
+
+cd public_html/tryaz/delevrey
+
+
+az3331515.com@ssh.us.stackcp.com
+
+code is  
+
+      $hours must be included $attendanceids->attendance_in_at and $attendanceids->attendance_out_at the same or between $$overtimeEnd->diffInHours($overtimeStart)
+
+
+
+      composer require spatie/laravel-permission
+      php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+      php artisan make:seeder AdditionalPermissionSeeder
+      php artisan db:seed --class=AdditionalPermissionSeeder
+
+    php artisan config:clear
+    php artisan cache:clear
