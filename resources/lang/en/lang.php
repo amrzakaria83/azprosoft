@@ -245,6 +245,7 @@ return [
     "project_name_en" => "Project name en",
     "email" => "Email",
     "email2" => "Email 2",
+    "password" => "Password",
     "phone" => "Phone",
     "phone2" => "Phone 2",
     "whatsapp" => "Whatsapp",

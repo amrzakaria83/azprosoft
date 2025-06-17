@@ -31,9 +31,7 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/create','EmployeesController@create')->name('create');
             Route::post('/store','EmployeesController@store')->name('store');
             Route::get('/edit/{id}', 'EmployeesController@edit')->name('edit');
-            Route::get('/editpass/{id}', 'EmployeesController@editpass')->name('editpass');
             Route::post('/update', 'EmployeesController@update')->name('update');
-            Route::post('/updatepass', 'EmployeesController@updatepass')->name('updatepass');
             Route::get('/import','EmployeesController@import')->name('import');
             Route::post('/importfile','EmployeesController@importfile')->name('importfile');
             Route::post('/importstore','EmployeesController@importstore')->name('importstore');

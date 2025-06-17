@@ -228,30 +228,6 @@ class EmployeesController extends Controller
         return back()->withInput($request->only('emp_code'));
     }}}}
     
-    public function editpass($id)
-    {
-        $data = Employee::find($id);
-        return view('admin.employee.editpass', compact('banks','jobs','salaries','data'));
-    }
-    public function updatepass(Request $request)
-    {
-        $rule = [];
-        $validate = Validator::make($request->all(), $rule);
-        if ($validate->fails()) {
-            return redirect()->back()->with('message', $validate->messages()->first())->with('status', 'error');
-        }
-        $data = Employee::find($request->id);
-        $data->update([
-            'password' => ($request->password) ? Hash::make($request->password): $data->password,
-            'role_id' => $request->role_id,
-
-        ]);
-        $role = Role::find($request->role_id);
-        $data->syncRoles([]);
-        $data->assignRole($role->name);
-
-
-        return redirect('admin/employees')->with('message', 'تم التعديل بنجاح')->with('status', 'success');
-    }
+    
 
 }

@@ -1,14 +1,7 @@
-
-
-
-cd public_html/tryaz/delevrey
-
-
 az3331515.com@ssh.us.stackcp.com
 
-code is  
+cd public_html/azprosoft/azprosoft
 
-      $hours must be included $attendanceids->attendance_in_at and $attendanceids->attendance_out_at the same or between $$overtimeEnd->diffInHours($overtimeStart)
 
 
 
@@ -19,8 +12,6 @@ code is
 
     php artisan config:clear
     php artisan cache:clear
-
-
 
     git remote add origin https://github.com/amrzakaria83/azprosoft.git
     git remote add origin https://github.com/amrzakaria83/azprosoft.git
