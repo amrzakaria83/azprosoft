@@ -23,9 +23,9 @@ return new class extends Migration
             $table->foreign('prod_id')
                 ->references('id')->on('products')->onDelete('cascade')->comment('prod_id');
             $table->string('product_code')->nullable()->comment('code prosoft');
-            $table->unsignedBigInteger('unite_id')->nullable()->comment('prod_only');
-            $table->foreign('unite_id')
-                ->references('id')->on('unites')->onDelete('cascade')->comment('unite_id');
+            // $table->unsignedBigInteger('unite_id')->nullable()->comment('prod_only');
+            // $table->foreign('unite_id')
+            //     ->references('id')->on('unites')->onDelete('cascade')->comment('unite_id');
             $table->decimal('quantity', 8, 2)->nullable()->comment('prod_only');
             $table->decimal('factor_unit', 8, 0)->nullable();
             $table->FLOAT('amount', 8, 2)->nullable()->comment('prod_only');
