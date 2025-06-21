@@ -18,6 +18,20 @@ Route::get('/', [AdminLoginController::class ,'showAdminLoginForm'])->name('admi
 Route::get('/clear_cache', function () {
     \Artisan::call('storage:link');
 });
+Route::get('/test-db', function() {
+    try {
+        DB::connection()->getPdo();
+        return response()->json([
+            'status' => 'success',
+            'database' => DB::connection()->getDatabaseName()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
 // Route::get('/',[AdminLoginController::class ,'index'])->name('index');
 // Route::get('/', [ClientLoginController::class ,'showClientLoginForm'])->name('client.login');
 // Route::get('/login', [ClientLoginController::class ,'showClientLoginForm'])->name('login');

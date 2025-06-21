@@ -95,6 +95,7 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/import','Product_impsController@import')->name('import');
             Route::get('/createimport','Product_impsController@createimport')->name('createimport');
             Route::get('/startSync', 'Product_impsController@startSync')->name('startSync');
+            Route::get('/newdb', 'Product_impsController@newdb')->name('newdb');
         });
 
         Route::name('unites.')->prefix('unites')->group(function(){

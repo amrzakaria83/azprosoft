@@ -33,8 +33,10 @@
 Thumbs.db
 
 # Composer
-composer.lock   # (Optional: Some teams commit this for consistency)
-composer.json   # (Optional: Some teams commit this for consistency)
+# (Optional: Some teams commit this for consistency)
+composer.lock   
+# (Optional: Some teams commit this for consistency)
+composer.json   
 
 # npm/yarn
 npm-debug.log

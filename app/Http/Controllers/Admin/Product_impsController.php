@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Auth;
+use App\Models\SqlServer\SqlServerModel;
+use App\Models\EmangerTable;
 
 class Product_impsController extends Controller
 {
@@ -394,5 +396,13 @@ class Product_impsController extends Controller
         // dd($new_impo);
 
         return Redirect::back()->with('success', 'Product synchronization from Pur_import has been initiated. It will run in the background.');
+    }
+    public function newdb()
+    {
+        // $datapro = EmangerTable::get();
+        // $datapro = EmangerTable::all();
+        $datapro = DB::connection('sqlsrv')->table('emp')->where('emp_id', 1004)->get();
+        dd($datapro);
+        return view('admin.product_imp.create');
     }
 }
