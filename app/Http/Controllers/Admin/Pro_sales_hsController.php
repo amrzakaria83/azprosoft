@@ -16,18 +16,75 @@ use Validator;
 use Auth;
 class Pro_sales_hsController extends Controller
 {
+//     public function index(Request $request)
+    // {
+    //     set_time_limit(3600);
+    //     ini_set('max_execution_time', 4800);
+    //     ini_set('memory_limit', '4096M');
+
+    //     if ($request->ajax()) {
+    //         $data = Pro_sales_h::query()
+    //             ->with(['getcust', 'getstore']); // Eager load relationships
+
+    //         return DataTables::eloquent($data)
+    //             ->orderColumn('sales_id', 'sales_id $1') // SQL Server specific syntax
+    //             ->addColumn('checkbox', function($row) {
+    //                 return '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
+    //                     <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
+    //                 </div>';
+    //             })
+    //             ->addColumn('name_ar', function($row) {
+    //                 return '<div class="d-flex flex-column">
+    //                     <a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->inv_no.'</a>
+    //                 </div>';
+    //             })
+    //             ->addColumn('inv_total', function($row) {
+    //                 return $row->inv_total;
+    //             })
+    //             ->addColumn('date', function($row) {
+    //                 return $row->date;
+    //             })
+    //             ->addColumn('cust_id', function($row) {
+    //                 return $row->getcust->cust_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
+    //             })
+    //             ->addColumn('store_id', function($row) {
+    //                 return $row->getstore->store_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
+    //             })
+    //             ->filter(function ($query) use ($request) {
+    //                 if (!empty($request->search['value'])) {
+    //                     $search = $request->search['value'];
+    //                     $query->where(function($q) use ($search) {
+    //                         $q->where('inv_no', 'LIKE', "%$search%")
+    //                           ->orWhere('inv_total', 'LIKE', "%$search%")
+    //                           ->orWhere('date', 'LIKE', "%$search%")
+    //                           ->orWhereHas('getcust', function($q) use ($search) {
+    //                               $q->where('cust_name', 'LIKE', "%$search%");
+    //                           })
+    //                           ->orWhereHas('getstore', function($q) use ($search) {
+    //                               $q->where('store_name', 'LIKE', "%$search%");
+    //                           });
+    //                     });
+    //                 }
+    //             })
+    //             ->rawColumns(['checkbox', 'name_ar', 'cust_id', 'store_id'])
+    //             ->toJson(); // Use either make(true) OR toJson(), not both
+    //     }
+
+    //     return view('admin.pro_sales_h.index');
+    // }
     public function index(Request $request)
     {
         set_time_limit(3600);
         ini_set('max_execution_time', 4800);
         ini_set('memory_limit', '4096M');
+        
         // $data = Pro_sales_h::take(100)->get();
         if ($request->ajax()) {
             $data = Pro_sales_h::query();
-            // $data = $data->orderBy('sales_id', 'DESC');
+            // $data = $data->sortby('sales_id', 'DESC');
             return Datatables::of($data)
-
-                ->addColumn('checkbox', function($row){
+            
+            ->addColumn('checkbox', function($row){
                     $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
                                     <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
                                 </div>';
@@ -38,6 +95,7 @@ class Pro_sales_hsController extends Controller
                     // $name_ar .= '<br><span>'.$row->product_name.'</span>';
                     return $name_ar;
                 })
+                
                 ->addColumn('inv_total', function($row){
                     $inv_total = $row->inv_total;
                     return $inv_total;

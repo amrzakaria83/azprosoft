@@ -199,13 +199,15 @@
             },
             columns: [
                 {data: 'checkbox', name: 'checkbox'},
-                {data: 'name_ar', name: 'name_ar'},
+                {data: 'name_ar', name: 'name_ar',orderable: true},
                 {data: 'inv_total', name: 'inv_total'},
                 {data: 'cust_id', name: 'cust_id'},
                 {data: 'store_id', name: 'store_id'},
                 {data: 'date', name: 'date'},
                 // {data: 'actions', name: 'actions'},
-            ]
+            ],
+            order: [[1, 'desc']] // Default ordering
+
         });
 
         table.buttons().container().appendTo($('.dbuttons'));
