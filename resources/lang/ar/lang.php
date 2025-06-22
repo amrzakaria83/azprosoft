@@ -130,6 +130,7 @@ return [
     "sales" => "مبيعات",
     "sell_price" => "سعر البيع",
     "employee" => "الموظف",
+    "employees" => "الموظفين",
     "quantity" => "الكمية",
     "share" => "نصيب",
     "valued_date" => "تاريخ العملية",
@@ -230,7 +231,7 @@ return [
     "Students" => "الطلاب",
     "Student" => "طالب",
     "accounts" => "حسابات الدخول",
-    "administrators" => "الموظفين",
+    "administrators" => "المستخدمين",
     "settings" => "الاعدادات العامة",
     "media" => "ميديا",
     "map" => "الخرائط",
@@ -271,6 +272,7 @@ return [
     "avilable" => "متوفر",
     "non_coded" => "غير مكود",
     "stores" => "المخازن",
+    "store" => "المخزن",
     "emp_id" => "كود الموظف",
     "not_found" => "لا يوجد",
     "in_attendance" => "تسجيل حضور",
@@ -312,6 +314,7 @@ return [
     "import" => "استيراد",
     "no_data_available" => "No Data Available",
     "role_id" => "الصلاحيات",
+    "without" => "بدون",
 
 
 ];

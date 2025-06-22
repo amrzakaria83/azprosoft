@@ -83,6 +83,26 @@
                 </ul>
               </li>
               @endcan
+              <li class="dropdown-submenu dropend">
+                <a class="dropdown-item dropdown-toggle py-3" href="#" id="administratorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+                  <span class="menu-icon me-3">
+                    <i class="fa-solid fa-sitemap"></i>
+                  </span>
+                  <span class="menu-title fs-3">{{trans('lang.employees')}}</span>
+                  <span class="menu-arrow"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="administratorDropdown">
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.emangeremps.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.all')}} {{trans('lang.employees')}}</span>
+                    </a>
+                  </li>
+                
+                </ul>
+              </li>
               
             </ul>
           </li>
@@ -97,15 +117,45 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-lg" aria-labelledby="salesDropdown">
             <li>
-                <a class="dropdown-item py-3" href="{{route('admin.product_imps.create')}}">
+                <a class="dropdown-item py-3" href="{{route('admin.pro_customers.index')}}">
                   <span class="menu-icon me-3">
                     <i class="fa-solid fa-file-import"></i>
                   </span>
-                  <span class="menu-title fs-3">{{trans('lang.sales')}}</span>
+                  <span class="menu-title fs-3">{{trans('lang.customers')}}</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-3" href="{{route('admin.pro_products.index')}}">
+                  <span class="menu-icon me-3">
+                    <i class="fa-solid fa-file-import"></i>
+                  </span>
+                  <span class="menu-title fs-3">{{trans('lang.products')}}</span>
                 </a>
               </li>
               <!-- Employees Section -->
               {{-- <li class="dropdown-header py-2 px-3 fs-4 text-muted">Employee Management</li> --}}
+              @can('bill_of_sale')
+              <!-- bill_of_sale Submenu -->
+              <li class="dropdown-submenu dropend">
+                <a class="dropdown-item dropdown-toggle py-3" href="#" id="bill_of_saleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+                  <span class="menu-icon me-3">
+                    <i class="fa-solid fa-sitemap"></i>
+                  </span>
+                  <span class="menu-title fs-3">{{trans('lang.reports')}} {{trans('lang.sales')}}</span>
+                  <span class="menu-arrow"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="bill_of_saleDropdown">
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_sales_hs.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.bill_of_sale')}}</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              @endcan
               @can('bill_of_sale')
               <!-- bill_of_sale Submenu -->
               <li class="dropdown-submenu dropend">

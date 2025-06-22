@@ -119,6 +119,56 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/edit/{id}', 'Bill_sale_headersController@edit')->name('edit');
             Route::post('/update', 'Bill_sale_headersController@update')->name('update');
         });
+        Route::name('emangeremps.')->prefix('emangeremps')->group(function(){
+            Route::get('/','EmangerempsController@index')->name('index');
+            Route::get('/show/{id}','EmangerempsController@show')->name('show');
+            Route::post('/delete', 'EmangerempsController@destroy')->name('delete');
+            Route::get('/create','EmangerempsController@create')->name('create');
+            Route::post('/store','EmangerempsController@store')->name('store');
+            Route::get('/edit/{id}', 'EmangerempsController@edit')->name('edit');
+            Route::post('/update', 'EmangerempsController@update')->name('update');
+            
+        });
+        Route::name('pro_products.')->prefix('pro_products')->group(function(){
+            Route::get('/','Pro_productsController@index')->name('index');
+            Route::get('/show/{id}','Pro_productsController@show')->name('show');
+            Route::post('/delete', 'Pro_productsController@destroy')->name('delete');
+            Route::get('/create','Pro_productsController@create')->name('create');
+            Route::post('/store','Pro_productsController@store')->name('store');
+            Route::get('/edit/{id}', 'Pro_productsController@edit')->name('edit');
+            Route::post('/update', 'Pro_productsController@update')->name('update');
+            
+        });
+        Route::name('pro_sales_hs.')->prefix('pro_sales_hs')->group(function(){
+            Route::get('/','Pro_sales_hsController@index')->name('index');
+            Route::get('/show/{id}','Pro_sales_hsController@show')->name('show');
+            Route::post('/delete', 'Pro_sales_hsController@destroy')->name('delete');
+            Route::get('/create','Pro_sales_hsController@create')->name('create');
+            Route::post('/store','Pro_sales_hsController@store')->name('store');
+            Route::get('/edit/{id}', 'Pro_sales_hsController@edit')->name('edit');
+            Route::post('/update', 'Pro_sales_hsController@update')->name('update');
+            
+        });
+        Route::name('pro_customers.')->prefix('pro_customers')->group(function(){
+            Route::get('/','Pro_customersController@index')->name('index');
+            Route::get('/show/{id}','Pro_customersController@show')->name('show');
+            Route::post('/delete', 'Pro_customersController@destroy')->name('delete');
+            Route::get('/create','Pro_customersController@create')->name('create');
+            Route::post('/store','Pro_customersController@store')->name('store');
+            Route::get('/edit/{id}', 'Pro_customersController@edit')->name('edit');
+            Route::post('/update', 'Pro_customersController@update')->name('update');
+            
+        });
+        Route::name('pro_sales_dets.')->prefix('pro_sales_dets')->group(function(){
+            Route::get('/','Pro_sales_detsController@index')->name('index');
+            Route::get('/show/{id}','Pro_sales_detsController@show')->name('show');
+            Route::post('/delete', 'Pro_sales_detsController@destroy')->name('delete');
+            Route::get('/create','Pro_sales_detsController@create')->name('create');
+            Route::post('/store','Pro_sales_detsController@store')->name('store');
+            Route::get('/edit/{id}', 'Pro_sales_detsController@edit')->name('edit');
+            Route::post('/update', 'Pro_sales_detsController@update')->name('update');
+            
+        });
 
         
     });

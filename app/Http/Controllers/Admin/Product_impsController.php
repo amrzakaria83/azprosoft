@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Auth;
 use App\Models\SqlServer\SqlServerModel;
-use App\Models\EmangerTable;
+use App\Models\Emangeremp;
 
 class Product_impsController extends Controller
 {
@@ -399,10 +399,31 @@ class Product_impsController extends Controller
     }
     public function newdb()
     {
-        // $datapro = EmangerTable::get();
-        // $datapro = EmangerTable::all();
-        $datapro = DB::connection('sqlsrv')->table('emp')->where('emp_id', 1004)->get();
+        // $datapro = Emangeremp::get();
+        // $datapro = Emangeremp::all();
+        $datapro = Emangeremp::where('emp_id', 1005)->get();
+        // $datapro = DB::connection('sqlsrv')->table('emp')->where('emp_id', 1004)->get();
+        return response(['status' => 200, 'msg' => trans('lang.successful'), 'data' => $datapro]);
         dd($datapro);
         return view('admin.product_imp.create');
     }
+    // public function getHomeNotification($employee_id)
+    // {
+    //     $token = request()->header('token');
+    //     $user = $this->check_api_token($token);
+    //     if (!$user) {
+    //         return response(['status' => 403, 'msg' => trans('auth.not_login'), 'data' => NULL]);
+    //     }
+
+    //     $data = Notification::where('employee_id', $employee_id)->orderBy('id', 'DESC')->take(5)->paginate(5);
+
+    //     $results = NotificationResource::collection($data)->response()->getData();
+
+    //     if(count($data) == 0) {
+    //         return response(['status' => 401, 'msg' => trans('lang.nodata'), 'data' => null]);
+    //     } else {
+    //         return response(['status' => 200, 'msg' => trans('lang.successful'), 'data' => $results]);
+    //     }
+        
+    // }
 }

@@ -134,6 +134,7 @@ return [
     "sales" => "Sales",
     "sell_price" => "Sell Price",
     "employee" => "Employee",
+    "employees" => "Employees",
     "quantity" => "Quantity",
     "share" => "Share",
     "valued_date" => "Valued Date",
@@ -274,6 +275,7 @@ return [
     "avilable" => "Avilable",
     "non_coded" => "Un Codedd",
     "stores" => "Stores",
+    "store" => "Store",
     "emp_id" => "ُEmployee ID",
     "not_found" => "ُNot Found",
     "in_attendance" => "ُIn Attendance",
@@ -315,6 +317,7 @@ return [
     "import" => "Import",
     "no_data_available" => "No Data Available",
     "role_id" => "Roles",
+    "without" => "Without",
 
 
 
