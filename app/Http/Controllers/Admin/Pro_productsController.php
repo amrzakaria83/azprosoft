@@ -42,7 +42,7 @@ class Pro_productsController extends Controller
                     return $sell_price;
                 })
                 ->addColumn('factory_id', function($row){
-                    $factory_id = $row->factory_id;
+                    $factory_id = $row->getfactory->factory_name;
                     return $factory_id;
                 })
                 
@@ -54,7 +54,6 @@ class Pro_productsController extends Controller
                 //                 <a href="'.route('admin.pro_products.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                 //                     <i class="bi bi-pencil-square fs-1x"></i>
                 //                 </a>
-                                
                 //             </div>';
                 //     return $actions;
                 // })
