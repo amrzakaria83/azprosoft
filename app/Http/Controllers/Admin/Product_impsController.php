@@ -15,6 +15,7 @@ use App\Models\Supplier;
 use App\Models\Product;
 use App\Models\Site;
 use App\Jobs\ProcessProductImportChunk; // Add this import
+use App\Jobs\ProcessProductImports; // Add this import
 use App\Jobs\InitiateProductImportBatchingJob; // Add this
 use Illuminate\Support\Facades\Bus; // Add this import
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Log;
 use Auth;
 use App\Models\SqlServer\SqlServerModel;
 use App\Models\Emangeremp;
+use App\Models\Pro_product;
 
 class Product_impsController extends Controller
 {
@@ -399,14 +401,138 @@ class Product_impsController extends Controller
     }
     public function newdb()
     {
-        // $datapro = Emangeremp::get();
-        // $datapro = Emangeremp::all();
-        $datapro = Emangeremp::where('emp_id', 1005)->get();
-        // $datapro = DB::connection('sqlsrv')->table('emp')->where('emp_id', 1004)->get();
-        return response(['status' => 200, 'msg' => trans('lang.successful'), 'data' => $datapro]);
-        dd($datapro);
-        return view('admin.product_imp.create');
+        try {
+            $totalProducts = Pro_product::count();
+            
+            // Calculate dynamic chunk size (50-200 range)
+            $chunkSize = $this->calculateOptimalChunkSize($totalProducts);
+            $batches = ceil($totalProducts / $chunkSize);
+            
+            // Create batch with monitoring
+            $batch = Bus::batch([])
+                ->name('product-import-'.now()->format('Ymd-His'))
+                ->allowFailures(5) // Allow up to 5 individual job failures
+                ->then(function (Batch $batch) {
+                    Log::info("Batch {$batch->id} completed successfully");
+                    // Optional: Send notification or update UI
+                })
+                ->catch(function (Batch $batch, Throwable $e) {
+                    Log::error("Batch {$batch->id} failed", [
+                        'error' => $e->getMessage(),
+                        'failed_jobs' => $batch->failedJobs
+                    ]);
+                    // Optional: Send failure notification
+                })
+                ->dispatch();
+
+            // Dispatch jobs with progressive delay to prevent resource spikes
+            for ($i = 0; $i < $batches; $i++) {
+                $batch->add(
+                    (new ProcessProductImports($chunkSize, $i * $chunkSize))
+                        ->delay(now()->addSeconds($i * 2)) // Stagger job starts
+                );
+            }
+
+            return redirect()->back()
+                ->with([
+                    'success' => "Started processing {$totalProducts} products in {$batches} batches",
+                    'batch_id' => $batch->id, // For tracking progress
+                    'total_products' => $totalProducts,
+                    'chunk_size' => $chunkSize
+                ]);
+
+        } catch (\Exception $e) {
+            Log::error("Failed to initiate product import", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->with('error', "Failed to start import: ".$e->getMessage());
+        }
     }
+
+    protected function calculateOptimalChunkSize($totalRecords)
+    {
+        // More sophisticated calculation considering memory limits
+        $memoryLimit = ini_get('memory_limit');
+        $memoryInBytes = $this->convertToBytes($memoryLimit);
+        $safeMemory = $memoryInBytes * 0.3; // Use 30% of available memory
+        
+        // Estimate 2KB per record (adjust based on your actual data size)
+        $perRecordMemory = 2048; 
+        $calculatedChunk = floor($safeMemory / $perRecordMemory);
+        
+        // Keep between 50-200 records per chunk
+        return min(max($calculatedChunk, 50), 200);
+    }
+
+    protected function convertToBytes($memoryLimit)
+    {
+        if (preg_match('/^(\d+)(.)$/', $memoryLimit, $matches)) {
+            switch (strtoupper($matches[2])) {
+                case 'G': return $matches[1] * 1024 * 1024 * 1024;
+                case 'M': return $matches[1] * 1024 * 1024;
+                case 'K': return $matches[1] * 1024;
+            }
+        }
+        return 128 * 1024 * 1024; // Default 128MB if can't parse
+    }
+
+    // protected function calculateOptimalChunkSize($totalRecords)
+    // {
+    //     $memoryLimit = ini_get('memory_limit');
+    //     $available = $this->convertToBytes($memoryLimit) * 0.3; // Use 30% of memory limit
+        
+    //     // Estimate 2KB per record (adjust based on your data)
+    //     $perRecord = 2048;
+    //     $calculated = floor($available / $perRecord);
+        
+    //     return min(max($calculated, 50), 200); // Keep between 50-200
+    // }
+
+    // protected function convertToBytes($memoryLimit)
+    // {
+    //     if (preg_match('/^(\d+)(.)$/', $memoryLimit, $matches)) {
+    //         switch (strtoupper($matches[2])) {
+    //             case 'G': return $matches[1] * 1024 * 1024 * 1024;
+    //             case 'M': return $matches[1] * 1024 * 1024;
+    //             case 'K': return $matches[1] * 1024;
+    //         }
+    //     }
+    //     return 128 * 1024 * 1024; // Default 128MB
+    // }
+    // public function newdb()
+    // {
+
+    //     $datapro = Pro_product::get();
+
+    //     $totalProducts = Pro_product::count();
+    //     $chunkSize = 200; // Adjust based on your server capacity
+    //     $batches = ceil($totalProducts / $chunkSize);
+        
+    //     $batch = \Bus::batch([])->dispatch();
+        
+    //     for ($i = 0; $i < $batches; $i++) {
+    //         $batch->add(new ProcessProductImports($chunkSize, $i * $chunkSize));
+    //         // In your job dispatch
+    //         ProcessProductImports::dispatch($chunkSize, $offset)->delay(now()->addSeconds(10));
+    //     }
+        
+    //     return redirect()->back()
+    //         ->with('success', "Started processing {$totalProducts} products in {$batches} batches"); 
+        
+    // }
+    // public function newdb()
+    // {
+    //     // $datapro = Emangeremp::get();
+    //     // $datapro = Emangeremp::all();
+    //     $datapro = Emangeremp::where('emp_id', 1005)->get();
+    //     // $datapro = DB::connection('sqlsrv')->table('emp')->where('emp_id', 1004)->get();
+    //     return response(['status' => 200, 'msg' => trans('lang.successful'), 'data' => $datapro]);
+    //     dd($datapro);
+    //     return view('admin.product_imp.create');
+    // }
     // public function getHomeNotification($employee_id)
     // {
     //     $token = request()->header('token');
