@@ -2,18 +2,18 @@
 
 namespace App\Jobs;
 
-use App\Models\Product;
-use App\Models\Product_imp;
-use App\Models\Pro_product;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use App\Models\Product;
+use App\Models\Product_imp;
+use App\Models\Pro_product;
 
 class ProcessProductImports implements ShouldQueue
 {
@@ -36,12 +36,12 @@ class ProcessProductImports implements ShouldQueue
         if ($this->batch() && $this->batch()->cancelled()) {
             return;
         }
-
+        
         DB::disableQueryLog();
         DB::connection()->unsetEventDispatcher();
 
         try {
-            Pro_product::orderBy('product_id')
+            Pro_product::orderBy('product_id', 'DESC')
                 ->skip($this->offset)
                 ->take($this->chunkSize)
                 ->select(['product_id', 'product_name', 'product_name_en', 'sell_price'])
@@ -49,7 +49,7 @@ class ProcessProductImports implements ShouldQueue
                 ->each(function ($prod) {
                     $this->updateOrCreateProduct($prod);
                 });
-
+                
         } catch (\Throwable $e) {
             Log::error("Product import failed", [
                 'offset' => $this->offset,

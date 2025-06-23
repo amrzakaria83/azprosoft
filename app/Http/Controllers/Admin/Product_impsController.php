@@ -400,57 +400,59 @@ class Product_impsController extends Controller
         return Redirect::back()->with('success', 'Product synchronization from Pur_import has been initiated. It will run in the background.');
     }
     public function newdb()
-    {
-        try {
-            $totalProducts = Pro_product::count();
-            
-            // Calculate dynamic chunk size (50-200 range)
-            $chunkSize = $this->calculateOptimalChunkSize($totalProducts);
-            $batches = ceil($totalProducts / $chunkSize);
-            
-            // Create batch with monitoring
-            $batch = Bus::batch([])
-                ->name('product-import-'.now()->format('Ymd-His'))
-                ->allowFailures(5) // Allow up to 5 individual job failures
-                ->then(function (Batch $batch) {
-                    Log::info("Batch {$batch->id} completed successfully");
-                    // Optional: Send notification or update UI
-                })
-                ->catch(function (Batch $batch, Throwable $e) {
-                    Log::error("Batch {$batch->id} failed", [
-                        'error' => $e->getMessage(),
-                        'failed_jobs' => $batch->failedJobs
-                    ]);
-                    // Optional: Send failure notification
-                })
-                ->dispatch();
+{
+    try {
+        // Clear system caches
+        Artisan::call('optimize:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
+        Artisan::call('queue:restart');
 
-            // Dispatch jobs with progressive delay to prevent resource spikes
-            for ($i = 0; $i < $batches; $i++) {
-                $batch->add(
-                    (new ProcessProductImports($chunkSize, $i * $chunkSize))
-                        ->delay(now()->addSeconds($i * 2)) // Stagger job starts
-                );
-            }
+        $totalProducts = Pro_product::count();
+        $chunkSize = $this->calculateOptimalChunkSize($totalProducts);
+        $batches = ceil($totalProducts / $chunkSize);
+        // Debug: Log before job creation
+        Log::info("Preparing to dispatch {$batches} jobs");
 
-            return redirect()->back()
-                ->with([
-                    'success' => "Started processing {$totalProducts} products in {$batches} batches",
-                    'batch_id' => $batch->id, // For tracking progress
-                    'total_products' => $totalProducts,
-                    'chunk_size' => $chunkSize
-                ]);
+        $jobs = [];
+        for ($i = 0; $i < $batches; $i++) {
+            $job = new ProcessProductImports($chunkSize, $i * $chunkSize);
+            $job->delay(now()->addSeconds($i * 2));
+            $jobs[] = $job;
+            
+            // Debug: Log each job
+            Log::debug("Created job", [
+                'offset' => $i * $chunkSize,
+                'chunk' => $chunkSize
+            ]);
+        }
+
+        $batch = Bus::batch($jobs)
+            ->name('product-import-'.now()->format('Ymd-His'))
+            ->allowFailures(5)
+            ->dispatch();
+
+        // Debug: Verify batch creation
+        Log::info("Batch created", [
+            'id' => $batch->id,
+            'total_jobs' => count($jobs)
+        ]);
+
+        // Verify jobs were queued
+        $queuedJobs = DB::table('jobs')->count();
+        Log::info("Total jobs in queue: {$queuedJobs}");
+
+        return redirect()->back()->with([
+            'success' => "Processing started",
+            'batch_id' => $batch->id,
+            'queued_jobs' => $queuedJobs // Add this to response
+        ]);
 
         } catch (\Exception $e) {
-            Log::error("Failed to initiate product import", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return redirect()->back()
-                ->with('error', "Failed to start import: ".$e->getMessage());
+        Log::error("Initiation failed", ['error' => $e->getMessage()]);
+        return redirect()->back()->with('error', $e->getMessage());
         }
-    }
+}
 
     protected function calculateOptimalChunkSize($totalRecords)
     {

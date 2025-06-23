@@ -24,7 +24,7 @@ class Pro_sales_detsController extends Controller
         // $data = Pro_sales_det::take(100)->get();
         if ($request->ajax()) {
             $data = Pro_sales_det::query();
-            // $data = $data->orderBy('sales_id', 'DESC');
+            // $data = $data->orderBy('sales_d_id', 'DESC');
             return Datatables::of($data)
 
                 ->addColumn('checkbox', function($row){
@@ -41,6 +41,10 @@ class Pro_sales_detsController extends Controller
                 ->addColumn('amount', function($row){
                     $amount = $row->amount;
                     return $amount;
+                })
+                ->addColumn('sales_d_id', function($row){
+                    $sales_d_id = $row->sales_d_id;
+                    return $sales_d_id;
                 })
                 ->addColumn('sales_id', function($row){
                     $sales_id = $row->sales_id;
@@ -85,7 +89,7 @@ class Pro_sales_detsController extends Controller
                         });
                     }
                 })
-                ->rawColumns(['name_ar','amount','sales_id','ins_date','price','total_item','checkbox','actions'])
+                ->rawColumns(['name_ar','amount','sales_id','sales_d_id','ins_date','price','total_item','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.pro_sales_det.index');

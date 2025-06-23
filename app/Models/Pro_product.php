@@ -29,6 +29,7 @@ class Pro_product extends SqlServerModel
      * @var bool
      */
     public $timestamps = false;  // Set to true if your table has created_at/updated_at
+    
     protected $fillable = [
         'product_id',
         'product_name_en',

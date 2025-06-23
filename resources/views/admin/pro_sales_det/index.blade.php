@@ -83,6 +83,7 @@
                                 <th class="min-w-125px text-center">{{trans('lang.product')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.quantity')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.sell_price')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.numb')}} {{trans('lang.item')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.numb')}} {{trans('lang.invoice')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.sell_price')}} {{trans('lang.unit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
@@ -166,6 +167,164 @@
 <script src="{{asset('dash/assets/plugins/custom/datatables/buttons.print.min.js')}}"></script>
 
 <script>
+$(function () {
+    var table = $('#kt_datatable_table').DataTable({
+        processing: true, // Enable processing indicator
+        serverSide: true,
+        searching: true, // Enable searching
+        autoWidth: false,
+        responsive: true,
+        pageLength: 10,
+        order: [[4, 'desc']], // Default sorting by sales_d_id descending
+        
+        // Optimized for server-side processing
+        ajax: {
+            url: "{{ route('admin.pro_sales_dets.index') }}",
+            type: 'GET', // Match your controller's expectation
+            data: function (d) {
+                // Transform DataTables parameters to match your controller
+                d.search = $('#search').val();
+                
+                // Map DataTables sorting to your controller's expectations
+                if (d.order && d.order.length > 0) {
+                    d.orderBy = d.columns[d.order[0].column].name;
+                    d.orderDirection = d.order[0].dir;
+                }
+            },
+            error: function(xhr, error, thrown) {
+                console.error('DataTables error:', error, thrown);
+            }
+        },
+        
+        // Column definitions matching your controller's output
+        columns: [
+            { 
+                data: 'checkbox', 
+                name: 'checkbox',
+                orderable: false,
+                searchable: false
+            },
+            { 
+                data: 'name_ar', 
+                name: 'name_ar',
+                orderable: false // Disable sorting as it's a computed column
+            },
+            { 
+                data: 'amount', 
+                name: 'amount',
+                orderable: true 
+            },
+            { 
+                data: 'total_item', 
+                name: 'total_item',
+                orderable: true 
+            },
+            { 
+                data: 'sales_d_id', 
+                name: 'sales_d_id',
+                orderable: true 
+            },
+            { 
+                data: 'sales_id', 
+                name: 'sales_id',
+                orderable: true 
+            },
+            { 
+                data: 'price', 
+                name: 'price',
+                orderable: true 
+            },
+            { 
+                data: 'ins_date', 
+                name: 'ins_date',
+                orderable: true,
+                render: function(data) {
+                    return data ? moment(data).format('YYYY-MM-DD HH:mm') : '';
+                }
+            }
+        ],
+        
+        // DOM layout and buttons
+        dom: '<"top"<"dbuttons"B>f<"clear">>rt<"bottom"lip<"clear">>',
+        buttons: [
+            {
+                extend: 'excel',
+                className: 'btn btn-sm btn-icon btn-success btn-active-dark me-3 p-3',
+                text: '<i class="bi bi-file-earmark-spreadsheet fs-1x"></i>',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            }
+        ],
+        
+        // Performance optimizations
+        deferRender: true,
+        scrollX: true,
+        stateSave: false
+    });
+
+    // Optimized search input handler with debounce
+    let searchTimer;
+    $('#search').on('keyup', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            table.search($('#search').val()).draw();
+        }, 500);
+    });
+
+    // Button and delete handlers (unchanged)
+    table.buttons().container().appendTo($('.dbuttons'));
+    
+    $("#btn_delete").click(function(event){
+        event.preventDefault();
+        var checkIDs = $("#kt_datatable_table input:checkbox:checked").map(function(){
+            return $(this).val();
+        }).get();
+        
+        if (checkIDs.length > 0) {
+            var token = $(this).data("token");
+            Swal.fire({
+                title: 'هل انت متأكد ؟',
+                text: "لا يمكن استرجاع البيانات المحذوفه",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonClass: 'btn btn-success',
+                cancelButtonClass: 'btn btn-danger m-l-10',
+                confirmButtonText: 'موافق',
+                cancelButtonText: 'لا'
+            }).then(function (isConfirm) {
+                if (isConfirm.value) {
+                    $.ajax({
+                        url: "{{route('admin.pro_sales_dets.delete')}}",
+                        type: 'post',
+                        dataType: "JSON",
+                        data: {
+                            "id": checkIDs,
+                            "_method": 'post',
+                            "_token": token,
+                        },
+                        success: function (data) {
+                            if(data.message == "success") {
+                                table.draw();
+                                toastr.success("", "تم الحذف بنجاح");
+                            } else {
+                                toastr.success("", "عفوا لم يتم الحذف");
+                            }
+                        },
+                        fail: function(xhr, errorThrown) {
+                            toastr.success("", "عفوا لم يتم الحذف");
+                        }
+                    });
+                }
+            });
+        } else {
+            toastr.error("", "حدد العناصر اولا");
+        }
+    });
+});
+</script>
+
+<!-- <script>
     $(function () {
 
         var table = $('#kt_datatable_table').DataTable({
@@ -175,7 +334,9 @@
             autoWidth: false,
             responsive: true,
             pageLength: 10,
-            sort: false,
+            sort: true,
+            order: [[4, 'desc']],
+            
             dom: 'Bfrtip',
             buttons: [
                 // {
@@ -203,10 +364,10 @@
                 {data: 'name_ar', name: 'name_ar'},
                 {data: 'amount', name: 'amount'},
                 {data: 'total_item', name: 'total_item'},
+                {data: 'sales_d_id', name: 'sales_d_id'},
                 {data: 'sales_id', name: 'sales_id'},
                 {data: 'price', name: 'price'},
                 {data: 'ins_date', name: 'ins_date'},
-                // {data: 'ins_date', name: 'ins_date'},
                 // {data: 'actions', name: 'actions'},
             ]
         });
@@ -260,5 +421,5 @@
 
             }});
     });
-</script>
+</script> -->
 @endsection
