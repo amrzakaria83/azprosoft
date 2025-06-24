@@ -94,6 +94,14 @@
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.balance')}}</th>
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th> -->
                                 <th class="min-w-125px text-center">Actions</th>
+                                @php
+                                $sites = \App\Models\Pro_store::get()
+                                
+                                @endphp
+                                @foreach ($sites as $site) 
+                                <th class="min-w-125px text-center" data-site-control="{{$site->store_id}}-b">{{trans('lang.balance')}} {{$site->store_name}}</th>
+                                <th class="min-w-125px text-center" data-site-control="{{$site->store_id}}-s">{{trans('lang.sales')}} {{$site->store_name}}</th>
+                                @endforeach
                             </tr>
                         </thead>
                         <tbody class="text-gray-600 fw-bold text-center"></tbody>
@@ -136,7 +144,86 @@
 
 <script>
 $(document).ready(function() {
-    // Initialize DataTable with proper configuration
+    // Get all sites from PHP
+    var sites = {!! \App\Models\Pro_store::get(['store_id', 'store_name'])->toJson() !!};
+    console.log('Sites data:', sites);
+
+    // First build the columns configuration
+    var columns = [
+        { 
+            data: 'product_name',
+            name: 'product_name',
+            render: function(data, type) {
+                return type === 'display' && data && data.length > 50 ? 
+                    data.substr(0, 50) + '...' : (data || 'N/A');
+            }
+        },
+        { 
+            data: 'sell_price',
+            name: 'sell_price',
+            render: function(data) {
+                return data ? '$' + parseFloat(data).toFixed(2) : '$0.00';
+            },
+            className: 'text-center'
+        },
+        { 
+            data: 'total_sales_amount',
+            name: 'total_sales_amount',
+            render: $.fn.dataTable.render.number(',', '.', 2),
+            defaultContent: '0.00',
+            className: 'text-center'
+        },
+        { 
+            data: 'total_prod_amount',
+            name: 'total_prod_amount',
+            render: $.fn.dataTable.render.number(',', '.', 2),
+            defaultContent: '0.00',
+            className: 'text-center'
+        },
+        {
+            data: null,
+            orderable: false,
+            render: function(data, type, row) {
+                if (!row.sites || row.sites.length === 0) {
+                    return '<span class="text-muted">No sites</span>';
+                }
+                return `<button class="btn btn-sm btn-info view-sites" 
+                        data-product="${row.product_name || 'Unknown'}" 
+                        data-sites='${JSON.stringify(row.sites || [])}'>
+                    <i class="fas fa-eye"></i> View
+                </button>`;
+            },
+            className: 'text-center'
+        }];
+
+    // Add dynamic site columns
+    sites.forEach(function(site) {
+        columns.push({
+            data: null,
+            name: 'site_' + site.store_id + '_balance',
+            defaultContent: '0.00',
+            className: 'text-center',
+            render: function(data, type, row) {
+                if (!row.sites) return '0.00';
+                var siteData = row.sites.find(s => s.site_id == site.store_id);
+                return siteData ? siteData.prod_amount.toFixed(2) : '0.00';
+            }
+        });
+        
+        columns.push({
+            data: null,
+            name: 'site_' + site.store_id + '_sales',
+            defaultContent: '0.00',
+            className: 'text-center',
+            render: function(data, type, row) {
+                if (!row.sites) return '0.00';
+                var siteData = row.sites.find(s => s.site_id == site.store_id);
+                return siteData ? siteData.sales_amount.toFixed(2) : '0.00';
+            }
+        });
+    });
+
+    // Initialize DataTable
     var table = $('#kt_datatable_table').DataTable({
         processing: true,
         serverSide: true,
@@ -149,7 +236,6 @@ $(document).ready(function() {
                     return [];
                 }
                 
-                // Update summary panel
                 if (json.summary) {
                     $('#totalProducts').text(json.summary.total_products || 0);
                     $('#totalRecords').text(json.summary.total_records || 0);
@@ -162,61 +248,7 @@ $(document).ready(function() {
                 return [];
             }
         },
-        columns: [
-            { 
-                data: 'product_name',
-                name: 'product_name',
-                render: function(data, type) {
-                    return type === 'display' && data && data.length > 50 ? 
-                        data.substr(0, 50) + '...' : (data || 'N/A');
-                }
-            },
-            { 
-                data: 'sell_price',
-                name: 'sell_price',
-                render: function(data) {
-                    return data ?  + parseFloat(data).toFixed(2) : '$0.00';
-                },
-                className: 'text-center'
-            },
-            { 
-                data: 'total_sales_amount',
-                name: 'total_sales_amount',
-                render: $.fn.dataTable.render.number(',', '.', 2),
-                defaultContent: '$0.00',
-                className: 'text-center'
-            },
-            { 
-                data: 'total_prod_amount',
-                name: 'total_prod_amount',
-                render: $.fn.dataTable.render.number(',', '.', 2),
-                defaultContent: '$0.00',
-                className: 'text-center'
-            },
-            // { 
-            //     data: 'ins_date',
-            //     name: 'ins_date',
-            //     render: function(data) {
-            //         return data ? new Date(data).toLocaleDateString() : 'N/A';
-            //     },
-            //     className: 'text-center'
-            // },
-            {
-                data: null,
-                orderable: false,
-                render: function(data, type, row) {
-                    if (!row.sites || row.sites.length === 0) {
-                        return '<span class="text-muted">No sites</span>';
-                    }
-                    return `<button class="btn btn-sm btn-info view-sites" 
-                            data-product="${row.product_name || 'Unknown'}" 
-                            data-sites='${JSON.stringify(row.sites || [])}'>
-                        <i class="fas fa-eye"></i> View
-                    </button>`;
-                },
-                className: 'text-center'
-            }
-        ],
+        columns: columns,
         dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
              "<'row'<'col-sm-12'tr>>" +
              "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
@@ -236,8 +268,28 @@ $(document).ready(function() {
             }
         },
         initComplete: function() {
-            // Recalculate column widths after initialization
-            this.api().columns.adjust();
+            console.log('DataTable initialized successfully');
+        },
+        createdRow: function(row, data, dataIndex) {
+            // Process site data for each row
+            if (data.sites) {
+                sites.forEach(function(site) {
+                    // Find site data for this row
+                    var siteData = data.sites.find(function(s) {
+                        return s.site_id == site.store_id;
+                    });
+                    
+                    // Set balance cell
+                    var balanceCell = $(row).find(`td:eq(${$(`th[data-site-control="${site.store_id}-b"]`).index()})`);
+                    balanceCell.text(siteData ? siteData.prod_amount.toFixed(2) : '0.00');
+                    balanceCell.addClass('text-center');
+                    
+                    // Set sales cell
+                    var salesCell = $(row).find(`td:eq(${$(`th[data-site-control="${site.store_id}-s"]`).index()})`);
+                    salesCell.text(siteData ? siteData.sales_amount.toFixed(2) : '0.00');
+                    salesCell.addClass('text-center');
+                });
+            }
         }
     });
 
