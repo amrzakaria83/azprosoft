@@ -318,6 +318,7 @@ return [
     "no_data_available" => "No Data Available",
     "role_id" => "Roles",
     "without" => "Without",
+    "summary" => "Summary",
 
 
 

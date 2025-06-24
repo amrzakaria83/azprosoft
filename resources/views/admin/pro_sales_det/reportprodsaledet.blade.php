@@ -133,112 +133,7 @@
                     </h1>
                     @endif
                     <!--begin::Table-->
-                    <table class="table align-middle table-rounded table-striped table-row-dashed fs-6" id="kt_datatable_table">
-                        <!--begin::Table head-->
-                        <thead class="bg-light-dark pe-3">
-                            <!--begin::Table row-->
-                            <tr class="text-start text-dark fw-bold fs-4 text-uppercase gs-0">
-                                <th class="w-10px p-3">
-                                    <div class="form-check form-check-sm form-check-custom form-check-solid ">
-                                        <input class="form-check-input" type="checkbox" data-kt-check="true" data-kt-check-target="#kt_datatable_table .form-check-input" value="1" />
-                                    </div>
-                                </th>
-                                <th class="min-w-125px text-center">{{trans('lang.name')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.counttotal')}}</th>
-                                <th class="min-w-125px text-center">AM-{{trans('lang.visit')}}</th>
-                                <th class="min-w-125px text-center">PM-{{trans('lang.visit')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.single')}} {{trans('lang.visit')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.double')}} {{trans('lang.visit')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.visit')}} {{trans('lang.uncompleted')}}</th>
-                                
-                            </tr>
-                            <!--end::Table row-->
-                        </thead>
-                        <!--end::Table head-->
-                        <!--begin::Table body-->
-                        <tbody class="text-gray-600 fw-bold">
-                            @if(isset($totalemp))
-                            <tr>
-                                <td class="text-center"></td>
-                                <td class="text-center text-info">{{trans('lang.total')}}</td>
-                                <td class="text-center"><span class="fs-3 text-info">
-                                    @php
-                                        $sum0 = 0;
-                                        $sum1 = 0;
-                                        $sum2 = 0;
-                                        $sum3 = 0;
-                                        $sum4 = 0;
-                                        $sum7 = 0;
-
-                                        foreach ($totalemp as $emp) {
-                                            $sum0 += $emp[0];
-                                            $sum1 += $emp[1];
-                                            $sum2 += $emp[2];
-                                            $sum3 += $emp[3];
-                                            $sum4 += $emp[4];
-                                            $sum7 += $emp[7];
-                                        }
-                                    @endphp
-                                    {{ $sum0 }}
-                                </span></td>
-                                <td class="text-center text-info">{{ $sum1 }}</td>
-                                <td class="text-center text-info">{{ $sum2 }}</td>
-                                <td class="text-center text-info">{{ $sum3 }}</td>
-                                <td class="text-center text-info">{{ $sum4 }}</td>
-                                <td class="text-center text-danger">{{ $sum7 }}</td>
-
-                            </tr>
-                                @foreach ( $totalemp as $emp)
-                                    <tr>
-                                        <td class="text-center"></td>
-                                        <td class="text-center">{{$emp[5]}}
-                                        </td>
-                                        <td class="text-center"><span class="fs-3 text-info">{{$emp[0]}}</span></td>
-                                        <td class="text-center">{{$emp[1]}}</td>
-                                        <td class="text-center">{{$emp[2]}}</td>
-                                        <td class="text-center">{{$emp[3]}}</td>
-                                        <td class="text-center">{{$emp[4]}}</td>
-                                        <td class="text-center text-danger">{{$emp[7]}}</td>
-
-                                    </tr>
-                                @endforeach
-                            @endif
-                            @if(isset($totalonlycenter))
-                            <tr><th colspan="3" class="fs-1 text-info">{{trans('lang.center')}} only</th>
-                            </tr>
-                                @foreach ( $totalonlycenter as $centeronly)
-                                    @if ($centeronly[0] > 0)
-                                        <tr>
-                                            <td class="text-center"></td>
-                                            <td class="text-center">{{$centeronly[2]->name_en}}</td>
-                                            <td class="text-center">{{$centeronly[0]}}</td>
-                                            <td class="text-center">{{$centeronly[1]->where('typevist_id' , 1)->count()}}</td>
-                                            <td class="text-center">{{$centeronly[1]->where('typevist_id' , 2)->count()}}</td>
-                                            <td class="text-center">{{$centeronly[1]->where('status_visit' , 0)->count()}}</td>
-                                            <td class="text-center">{{$centeronly[1]->where('status_visit' , 1)->count()}}</td>
-                                        </tr>
-                                    @endif
-                                @endforeach
-                            @endif
-                            @if(isset($totalcenter))
-                            <tr><th colspan="3" class="fs-1 text-info">{{trans('lang.center')}} & {{trans('lang.contact')}} ({{count($totalcenter)}})</th>
-                            </tr>
-                                @foreach ( $totalcenter as $center)
-                                    <tr>
-                                        <td class="text-center"></td>
-                                        <td class="text-center">{{$center[2]->name_en}}</td>
-                                        <td class="text-center">{{$center[0]}}</td>
-                                        <td class="text-center">{{$center[1]->where('typevist_id' , 1)->count()}}</td>
-                                        <td class="text-center">{{$center[1]->where('typevist_id' , 2)->count()}}</td>
-                                        <td class="text-center">{{$center[1]->where('status_visit' , 0)->count()}}</td>
-                                        <td class="text-center">{{$center[1]->where('status_visit' , 1)->count()}}</td>
-                                    </tr>
-                                @endforeach
-                            @endif
-                           
-                        </tbody>
-                        <!--end::Table body-->
-                    </table>
+                    
                     <!--end::Table-->
                 </div>
                 <!--end::Card body-->
@@ -334,9 +229,8 @@
     $('#searchbtn').click(function(){
             const from_time = $('#kt_datepicker_1').val();
             const to_date = $('#kt_datepicker_2').val();
-            const status_visit = $('#status_visit').val() || 'all';
 
-            window.location = '{{route("admin.pro_sales_dets.indexprodsaledet")}}' + '/' + from_time+ '/' + to_date + '/' + status_visit;
+            window.location = '{{route("admin.pro_sales_dets.indexprodsaledet")}}' + '/' + from_time+ '/' + to_date ;
             $('#searchbtn').prop('disabled', true);
         });
 

@@ -168,7 +168,7 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/edit/{id}', 'Pro_sales_detsController@edit')->name('edit');
             Route::post('/update', 'Pro_sales_detsController@update')->name('update');
             Route::get('/reportprodsaledet','Pro_sales_detsController@reportprodsaledet')->name('reportprodsaledet'); // add can
-            Route::get('/indexprodsaledet/{from_t?}/{to_d?}/{st?}','Pro_sales_detsController@indexprodsaledet')->name('indexprodsaledet');
+            Route::get('/indexprodsaledet/{from_t?}/{to_d?}','Pro_sales_detsController@indexprodsaledet')->name('indexprodsaledet');
             Route::get('/indexreportsale','Pro_sales_detsController@indexreportsale')->name('indexreportsale'); // add can
             Route::get('/getReportData','Pro_sales_detsController@getReportData')->name('getReportData');
             

@@ -195,7 +195,7 @@ class Pro_sales_detsController extends Controller
     {
         return view('admin.pro_sales_det.reportprodsaledet');
     }
-    public function indexprodsaledet($from_time, $to_date, $status_visit)
+    public function indexprodsaledet($from_time, $to_date)
 {
     // Set execution limits
     set_time_limit(0);
@@ -339,21 +339,24 @@ class Pro_sales_detsController extends Controller
     file_put_contents($filepath, json_encode([
         'products' => $formattedReport,
         'summary' => [
+            'start_from' => $from_time,
+            'end_to' => $to_date,
             'total_products' => count($formattedReport),
             'total_records' => $totalProcessed,
             'generated_at' => now()->toDateTimeString()
         ]
     ], JSON_PRETTY_PRINT));
-
-    return response()->json([
-        'success' => true,
-        'file_path' => $filepath,
-        'stats' => [
-            'unique_products' => count($formattedReport),
-            'total_records' => $totalProcessed,
-            'time_elapsed' => microtime(true) - LARAVEL_START . ' seconds'
-        ]
-    ]);
+    return redirect('admin/pro_sales_dets/indexreportsale')->with('message', 'تم الاضافة بنجاح')->with('status', 'success');
+    // return view('admin.pro_sales_det.indexreportsale');
+    // return response()->json([
+    //     'success' => true,
+    //     'file_path' => $filepath,
+    //     'stats' => [
+    //         'unique_products' => count($formattedReport),
+    //         'total_records' => $totalProcessed,
+    //         'time_elapsed' => microtime(true) - LARAVEL_START . ' seconds'
+    //     ]
+    // ]);
 }
 //     public function indexprodsaledet($from_time, $to_date, $status_visit)
 // {
@@ -840,6 +843,8 @@ class Pro_sales_detsController extends Controller
                 'recordsFiltered' => 0,
                 'data' => [],
                 'summary' => [
+                    'start_from' => 0,
+                    'end_to' => 0,
                     'total_products' => 0,
                     'total_records' => 0,
                     'generated_at' => now()->toDateTimeString()

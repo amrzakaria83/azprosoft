@@ -315,6 +315,7 @@ return [
     "no_data_available" => "No Data Available",
     "role_id" => "الصلاحيات",
     "without" => "بدون",
+    "summary" => "ملخص",
 
 
 ];

@@ -78,10 +78,12 @@
                 <!--begin::Card body-->
                 <div class="card-body py-4">
                     <!-- Summary Panel -->
-                    <div class="alert alert-info mb-4">
-                        <strong>Summary:</strong> 
-                        <span id="totalProducts">0</span> products, 
-                        <span id="totalRecords">0</span> records
+                    <div class="alert alert-info mb-4 text-center">
+                        <strong>{{trans('lang.summary')}}:</strong> 
+                        {{trans('lang.start_from')}} <span id="start_from">0</span> , 
+                        {{trans('lang.end_to')}} <span id="end_to">0</span> , 
+                        <span id="totalProducts">0</span> {{trans('lang.products')}}, 
+                        <span id="totalRecords">0</span> {{trans('lang.transactions')}}
                     </div>
                     <!-- Main Table -->
                 <div class="table-responsive">
@@ -122,10 +124,10 @@
                         <table class="table table-sm table-bordered" id="sitesTable">
                             <thead>
                                 <tr>
-                                    <th>Site ID</th>
-                                    <th>Sales Amount</th>
-                                    <th>Product Amount</th>
-                                    <th>Price</th>
+                                    <th>{{trans('lang.name')}}</th>
+                                    <th>{{trans('lang.sales')}}</th>
+                                    <th>{{trans('lang.balance')}}</th>
+                                    <!-- <th>Price</th> -->
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -162,7 +164,7 @@ $(document).ready(function() {
             data: 'sell_price',
             name: 'sell_price',
             render: function(data) {
-                return data ? '$' + parseFloat(data).toFixed(2) : '$0.00';
+                return data ?  + parseFloat(data).toFixed(2) : '$0.00';
             },
             className: 'text-center'
         },
@@ -239,6 +241,8 @@ $(document).ready(function() {
                 if (json.summary) {
                     $('#totalProducts').text(json.summary.total_products || 0);
                     $('#totalRecords').text(json.summary.total_records || 0);
+                    $('#start_from').text(json.summary.start_from || 0);
+                    $('#end_to').text(json.summary.end_to || 0);
                 }
                 
                 return json.data || [];
@@ -318,22 +322,16 @@ $(document).ready(function() {
                 { 
                     data: 'sales_amount',
                     render: $.fn.dataTable.render.number(',', '.', 2),
-                    className: 'text-end'
+                    className: 'text-center'
                 },
                 { 
                     data: 'prod_amount',
                     render: $.fn.dataTable.render.number(',', '.', 2),
-                    className: 'text-end'
-                },
-                { 
-                    data: null,
-                    render: function(data, type, row) {
-                        return row.sell_price ? '$' + parseFloat(row.sell_price).toFixed(2) : '$0.00';
-                    },
-                    className: 'text-end'
+                    className: 'text-center'
                 }
+                
             ],
-            pageLength: 10,
+            pageLength: 20,
             dom: 'tpi',
             language: {
                 emptyTable: "No site data available"
