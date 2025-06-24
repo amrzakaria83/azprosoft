@@ -161,6 +161,14 @@
                       <span class="menu-title fs-3">{{trans('lang.details')}} {{trans('lang.bills_of_sale')}}</span>
                     </a>
                   </li>
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_sales_dets.reportprodsaledet')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.report')}} {{trans('lang.sales')}} {{trans('lang.details')}}</span>
+                    </a>
+                  </li>
                 </ul>
               </li>
               @endcan

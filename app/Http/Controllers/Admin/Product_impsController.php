@@ -400,73 +400,134 @@ class Product_impsController extends Controller
         return Redirect::back()->with('success', 'Product synchronization from Pur_import has been initiated. It will run in the background.');
     }
     public function newdb()
-{
-    try {
-        // Clear system caches
-        Artisan::call('optimize:clear');
-        Artisan::call('cache:clear');
-        Artisan::call('view:clear');
-        Artisan::call('queue:restart');
-
-        $totalProducts = Pro_product::count();
-        $chunkSize = $this->calculateOptimalChunkSize($totalProducts);
-        $batches = ceil($totalProducts / $chunkSize);
-        // Debug: Log before job creation
-        Log::info("Preparing to dispatch {$batches} jobs");
-
-        $jobs = [];
-        for ($i = 0; $i < $batches; $i++) {
-            $job = new ProcessProductImports($chunkSize, $i * $chunkSize);
-            $job->delay(now()->addSeconds($i * 2));
-            $jobs[] = $job;
+    {
+        try {
+            // Clear system caches
+            $this->clearSystemCaches();
             
-            // Debug: Log each job
-            Log::debug("Created job", [
-                'offset' => $i * $chunkSize,
-                'chunk' => $chunkSize
-            ]);
-        }
+            $totalProducts = Pro_product::count();
+            
+            if ($totalProducts === 0) {
+                return redirect()->back()->with('warning', 'No products found to import');
+            }
 
-        $batch = Bus::batch($jobs)
-            ->name('product-import-'.now()->format('Ymd-His'))
-            ->allowFailures(5)
-            ->dispatch();
+            $chunkSize = $this->calculateOptimalChunkSize($totalProducts);
+            $processed = 0;
+            $errors = [];
 
-        // Debug: Verify batch creation
-        Log::info("Batch created", [
-            'id' => $batch->id,
-            'total_jobs' => count($jobs)
-        ]);
+            Log::info("Starting direct product import for {$totalProducts} products");
 
-        // Verify jobs were queued
-        $queuedJobs = DB::table('jobs')->count();
-        Log::info("Total jobs in queue: {$queuedJobs}");
+            Pro_product::orderBy('product_id')
+                ->chunk($chunkSize, function ($products) use (&$processed, &$errors, $chunkSize) {
+                    $result = $this->processChunk($products);
+                    $processed += $result['processed'];
+                    
+                    if (!empty($result['errors'])) {
+                        $errors = array_merge($errors, $result['errors']);
+                    }
+                    
+                    // Free memory
+                    unset($products);
+                    gc_collect_cycles();
+                    
+                    Log::debug("Processed chunk", [
+                        'processed' => $processed,
+                        'chunk_size' => $chunkSize,
+                        'memory_usage' => memory_get_usage(true) / 1024 / 1024 . 'MB'
+                    ]);
+                });
 
-        return redirect()->back()->with([
-            'success' => "Processing started",
-            'batch_id' => $batch->id,
-            'queued_jobs' => $queuedJobs // Add this to response
-        ]);
+            $message = "Completed importing {$processed} of {$totalProducts} products";
+            
+            if (!empty($errors)) {
+                Log::warning("Import completed with errors", [
+                    'total_errors' => count($errors),
+                    'sample_errors' => array_slice($errors, 0, 5)
+                ]);
+                $message .= ". " . count($errors) . " products failed to import";
+            }
+
+            return redirect()->back()->with(
+                empty($errors) ? 'success' : 'warning',
+                $message
+            );
 
         } catch (\Exception $e) {
-        Log::error("Initiation failed", ['error' => $e->getMessage()]);
-        return redirect()->back()->with('error', $e->getMessage());
+            Log::error("Import failed", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', "Import failed: " . $e->getMessage());
         }
-}
+    }
+
+    protected function clearSystemCaches()
+    {
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
+    }
+
+    protected function processChunk($products)
+    {
+        $processed = 0;
+        $errors = [];
+        
+        DB::beginTransaction();
+        
+        try {
+            foreach ($products as $prod) {
+                try {
+                    Product::updateOrCreate(
+                        ['product_code' => $prod->product_id],
+                        [
+                            'name_ar' => $prod->product_name ?? '',
+                            'name_en' => $prod->product_name_en ?? '',
+                            'sell_price_pub' => $prod->sell_price ?? 0,
+                            'last_imported_at' => now(),
+                        ]
+                    );
+                    $processed++;
+                } catch (\Exception $e) {
+                    $errors[] = [
+                        'product_id' => $prod->product_id,
+                        'error' => $e->getMessage()
+                    ];
+                    Log::error("Failed to process product", [
+                        'product_id' => $prod->product_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+            
+            DB::commit();
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Chunk processing failed", [
+                'error' => $e->getMessage(),
+                'chunk_size' => count($products)
+            ]);
+            throw $e;
+        }
+        
+        return [
+            'processed' => $processed,
+            'errors' => $errors
+        ];
+    }
 
     protected function calculateOptimalChunkSize($totalRecords)
     {
-        // More sophisticated calculation considering memory limits
         $memoryLimit = ini_get('memory_limit');
         $memoryInBytes = $this->convertToBytes($memoryLimit);
-        $safeMemory = $memoryInBytes * 0.3; // Use 30% of available memory
+        $safeMemory = $memoryInBytes * 0.2; // Use 20% of available memory
         
-        // Estimate 2KB per record (adjust based on your actual data size)
-        $perRecordMemory = 2048; 
+        // Estimate memory usage per record (adjust based on your actual data size)
+        $perRecordMemory = 4096; // 4KB per record (conservative estimate)
         $calculatedChunk = floor($safeMemory / $perRecordMemory);
         
-        // Keep between 50-200 records per chunk
-        return min(max($calculatedChunk, 50), 200);
+        // Keep between 50-300 records per chunk (adjust based on your DB performance)
+        return min(max($calculatedChunk, 50), 300);
     }
 
     protected function convertToBytes($memoryLimit)
@@ -480,7 +541,6 @@ class Product_impsController extends Controller
         }
         return 128 * 1024 * 1024; // Default 128MB if can't parse
     }
-
     // protected function calculateOptimalChunkSize($totalRecords)
     // {
     //     $memoryLimit = ini_get('memory_limit');

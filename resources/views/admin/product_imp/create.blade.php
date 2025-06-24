@@ -62,7 +62,7 @@
                 </form>
                 <!--end::Form-->
 
-                <div class="separator separator-content border-dark my-15">
+                <!-- <div class="separator separator-content border-dark my-15">
                     
                             <span class="w-250px fw-bold text-info fs-2">فاصل</span>
                                 
@@ -81,7 +81,7 @@
                         <a href="{{route('admin.product_imps.startSync')}}" class="btn  btn-primary me-3 p-3">
                                 <i class="bi bi-plus-square fs-1x"></i>تحديث
                             </a>
-            </div>
+                    </div> -->
             <div class="separator separator-content border-dark my-15">
                     
                             <span class="w-250px fw-bold text-info fs-2">فاصل</span>
@@ -89,7 +89,7 @@
                         </div>
                         <div class="row mb-8">
                             <div class="col-xl-2">
-                                <div class="fs-6 fw-semibold">تاريخ التحديث</div>
+                                <div class="fs-6 fw-semibold"></div>
                             </div>
                             <div class="col-lg-9">
 
@@ -99,7 +99,7 @@
                             </div>
                         </div>
                         <a href="{{route('admin.product_imps.newdb')}}" class="btn  btn-primary me-3 p-3">
-                                <i class="bi bi-plus-square fs-1x"></i>تحديث
+                                <i class="bi bi-plus-square fs-1x"></i>{{trans('lang.to_update')}} {{trans('lang.products')}}
                             </a>
             </div>
             <!--end::Content--> 

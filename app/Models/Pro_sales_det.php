@@ -64,6 +64,10 @@ class Pro_sales_det extends SqlServerModel
     {
         return $this->belongsTo(Pro_sales_h::class, 'sales_id');
     }
+    public function getsale_site()
+    {
+        return $this->belongsTo(Pro_sales_h::class, 'sales_id')->select('store_id');
+    }
     
     // Custom method to force index usage
     public function scopeWithIndex($query, $indexName)
