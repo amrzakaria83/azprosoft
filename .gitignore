@@ -33,10 +33,9 @@
 Thumbs.db
 
 # Composer
-# (Optional: Some teams commit this for consistency)
 composer.lock
-# (Optional: Some teams commit this for consistency)
 composer.json
+
 test_connection.php
 # npm/yarn
 npm-debug.log
