@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         if (!session()->get('locale')) {
-            session()->put('locale', 'en');
+            session()->put('locale', 'ar');
         }
 
         $lang = "";

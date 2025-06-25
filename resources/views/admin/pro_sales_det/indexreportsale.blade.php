@@ -3,6 +3,7 @@
 @section('css')
     <link href="{{asset('dash/assets/plugins/custom/datatables/datatables.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('dash/assets/plugins/custom/datatables/buttons.bootstrap4.min.css')}}" rel="stylesheet" type="text/css" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('style')
@@ -16,7 +17,22 @@
             margin-right: 0.5em;
             margin-left: 0;
         }
-    </style>@endsection
+        .export-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-size: 1.5rem;
+        }
+    </style>
+    @endsection
 
 @section('breadcrumb')
 <div class="d-flex align-items-center" id="kt_header_nav">
@@ -143,7 +159,7 @@
 <script src="{{asset('dash/assets/plugins/custom/datatables/datatables.bundle.js')}}"></script>
 <script src="{{asset('dash/assets/plugins/custom/datatables/dataTables.buttons.min.js')}}"></script>
 <script src="{{asset('dash/assets/plugins/custom/datatables/buttons.print.min.js')}}"></script>
-
+<!-- <script src="{{asset('dash/assets/js/scripts.bundle.js')}}"></script> -->
 <script>
 $(document).ready(function() {
     // Get all sites from PHP
@@ -164,7 +180,7 @@ $(document).ready(function() {
             data: 'sell_price',
             name: 'sell_price',
             render: function(data) {
-                return data ?  + parseFloat(data).toFixed(2) : '$0.00';
+                return data ? '$' + parseFloat(data).toFixed(2) : '$0.00';
             },
             className: 'text-center'
         },
@@ -208,7 +224,7 @@ $(document).ready(function() {
             render: function(data, type, row) {
                 if (!row.sites) return '0.00';
                 var siteData = row.sites.find(s => s.site_id == site.store_id);
-                return siteData ? siteData.prod_amount.toFixed(2) : '0.00';
+                return siteData ?  + siteData.prod_amount.toFixed(2) : '0.00';
             }
         });
         
@@ -220,7 +236,7 @@ $(document).ready(function() {
             render: function(data, type, row) {
                 if (!row.sites) return '0.00';
                 var siteData = row.sites.find(s => s.site_id == site.store_id);
-                return siteData ? siteData.sales_amount.toFixed(2) : '0.00';
+                return siteData ?  + siteData.sales_amount.toFixed(2) : '0.00';
             }
         });
     });
@@ -229,10 +245,20 @@ $(document).ready(function() {
     var table = $('#kt_datatable_table').DataTable({
         processing: true,
         serverSide: true,
+        
         ajax: {
             url: "{{ route('admin.pro_sales_dets.getReportData') }}",
             type: "GET",
             dataSrc: function(json) {
+                if (typeof json === 'string') {
+                    try {
+                        json = JSON.parse(json);
+                    } catch (e) {
+                        console.error('Failed to parse JSON:', e);
+                        return [];
+                    }
+                }
+                
                 if (!json) {
                     console.error('Empty response from server');
                     return [];
@@ -247,15 +273,50 @@ $(document).ready(function() {
                 
                 return json.data || [];
             },
-            error: function(xhr, error, thrown) {
-                console.error('AJAX error:', error);
+            error: function(xhr, textStatus, error) {
+                console.error('AJAX Error:', textStatus, error);
                 return [];
             }
         },
+        
         columns: columns,
-        dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+        dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'fB>>" +
              "<'row'<'col-sm-12'tr>>" +
              "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+             buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel"></i> Export All',
+                    className: 'btn btn-primary btn-sm',
+                    action: function(e, dt, button, config) {
+                        // Simple loading indicator (works without KTApp)
+                        var loading = $('<div class="export-loading">Preparing export...</div>');
+                        $('body').append(loading);
+                        
+                        // Create a temporary form
+                        var form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = "{{ route('admin.pro_sales_dets.exportReport') }}";
+                        form.target = '_blank';
+                        
+                        // Add CSRF token
+                        var token = document.createElement('input');
+                        token.type = 'hidden';
+                        token.name = '_token';
+                        token.value = "{{ csrf_token() }}";
+                        form.appendChild(token);
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+                        
+                        // Clean up after download starts
+                        setTimeout(function() {
+                            document.body.removeChild(form);
+                            loading.remove();
+                        }, 3000); // Adjust timeout as needed
+                    }
+                }
+            ],
         pageLength: 25,
         lengthMenu: [10, 25, 50, 100],
         order: [[0, 'asc']],
@@ -275,22 +336,18 @@ $(document).ready(function() {
             console.log('DataTable initialized successfully');
         },
         createdRow: function(row, data, dataIndex) {
-            // Process site data for each row
             if (data.sites) {
                 sites.forEach(function(site) {
-                    // Find site data for this row
                     var siteData = data.sites.find(function(s) {
                         return s.site_id == site.store_id;
                     });
                     
-                    // Set balance cell
                     var balanceCell = $(row).find(`td:eq(${$(`th[data-site-control="${site.store_id}-b"]`).index()})`);
-                    balanceCell.text(siteData ? siteData.prod_amount.toFixed(2) : '0.00');
+                    balanceCell.text(siteData ?  + siteData.prod_amount.toFixed(2) : '0.00');
                     balanceCell.addClass('text-center');
                     
-                    // Set sales cell
                     var salesCell = $(row).find(`td:eq(${$(`th[data-site-control="${site.store_id}-s"]`).index()})`);
-                    salesCell.text(siteData ? siteData.sales_amount.toFixed(2) : '0.00');
+                    salesCell.text(siteData ?  + siteData.sales_amount.toFixed(2) : '0.00');
                     salesCell.addClass('text-center');
                 });
             }
@@ -305,20 +362,37 @@ $(document).ready(function() {
     // Handle site details modal
     $('#kt_datatable_table').on('click', '.view-sites', function() {
         var productName = $(this).data('product');
-        var sites = $(this).data('sites') || [];
+        var sitesData = $(this).data('sites') || [];
         
         $('#sitesModal .modal-title').text('Site Details: ' + productName);
         
-        // Clear previous table if exists
         if ($.fn.DataTable.isDataTable('#sitesTable')) {
             $('#sitesTable').DataTable().destroy();
         }
         
-        // Initialize sites table
+        var siteNameMap = {};
+        sites.forEach(function(site) {
+            siteNameMap[site.store_id] = site.store_name;
+        });
+        
+        var processedData = sitesData.map(function(site) {
+            return {
+                store_name: siteNameMap[site.site_id] || 'Unknown Site',
+                sales_amount: site.sales_amount,
+                prod_amount: site.prod_amount
+            };
+        });
+        
         $('#sitesTable').DataTable({
-            data: sites,
+            data: processedData,
             columns: [
-                { data: 'site_id', className: 'text-center' },
+                { 
+                    data: 'store_name', 
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        return data || 'Unknown Site';
+                    }
+                },
                 { 
                     data: 'sales_amount',
                     render: $.fn.dataTable.render.number(',', '.', 2),
@@ -329,7 +403,6 @@ $(document).ready(function() {
                     render: $.fn.dataTable.render.number(',', '.', 2),
                     className: 'text-center'
                 }
-                
             ],
             pageLength: 20,
             dom: 'tpi',
@@ -347,6 +420,15 @@ $(document).ready(function() {
             $('#sitesTable').DataTable().destroy();
         }
         $('#sitesTable tbody').empty();
+    });
+
+    // Prevent form submission from reloading page
+    $(document).on('submit', 'form', function(e) {
+        if ($(this).attr('target') === '_blank') {
+            return true;
+        }
+        e.preventDefault();
+        return false;
     });
 });
 </script>

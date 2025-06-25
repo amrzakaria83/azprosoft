@@ -7,6 +7,7 @@ ini_set('memory_limit', '4096M');
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Models\Pro_store;
 use App\Models\Pro_sales_det;
 use App\Models\Pro_prod_amount;
 use \Yajra\Datatables\Datatables;
@@ -17,6 +18,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
+
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use App\Exports\CollectionExport;    // Assuming you'll create this export class
+use Maatwebsite\Excel\Facades\Excel; // Add this import
 
 use Validator;
 use Auth;
@@ -196,168 +203,210 @@ class Pro_sales_detsController extends Controller
         return view('admin.pro_sales_det.reportprodsaledet');
     }
     public function indexprodsaledet($from_time, $to_date)
-{
-    // Set execution limits
-    set_time_limit(0);
-    ini_set('memory_limit', '-1');
-    
-    // Define file path
-    $directory = storage_path('debugbar/');
-    $filename = 'temp.json';
-    $filepath = $directory . $filename;
-    
-    // Ensure directory exists
-    if (!file_exists($directory)) {
-        mkdir($directory, 0755, true);
-    }
+    {
+        // Set execution limits
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
+        
+        // Define file path
+        $directory = storage_path('app/');
+        $filename = 'temp.json';
+        $filepath = $directory . $filename;
+        
+        // Ensure directory exists
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
 
-    // Initialize data aggregators
-    $productReport = [];
-    $batchSize = 2000;
-    $totalProcessed = 0;
+        // Initialize data aggregators
+        $productReport = [];
+        $batchSize = 2000;
+        $totalProcessed = 0;
 
-    // 1. First process sales data
-    $salesMinMax = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
-        ->selectRaw('MIN(sales_d_id) as min_id, MAX(sales_d_id) as max_id')
-        ->first();
+        // 1. First process sales data
+        $salesMinMax = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
+            ->selectRaw('MIN(sales_d_id) as min_id, MAX(sales_d_id) as max_id')
+            ->first();
 
-    if ($salesMinMax) {
-        for ($id = $salesMinMax->min_id; $id <= $salesMinMax->max_id; $id += $batchSize) {
-            $batchEnd = $id + $batchSize - 1;
-            
-            $salesBatch = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
-                ->whereBetween('sales_d_id', [$id, $batchEnd])
-                ->with(['getsale_site:store_id,sales_id', 'getprod:product_id,product_name_en'])
-                ->select(['sales_d_id', 'amount', 'product_id', 'sales_id'])
-                ->cursor();
+        if ($salesMinMax) {
+            for ($id = $salesMinMax->min_id; $id <= $salesMinMax->max_id; $id += $batchSize) {
+                $batchEnd = $id + $batchSize - 1;
                 
-            foreach ($salesBatch as $sale) {
-                $productName = $sale->getprod->product_name_en ?? 'Unknown';
-                $siteId = $sale->getsale_site->store_id ?? 'Unknown';
-                $amount = (float)$sale->amount;
-                
-                // Initialize product entry if not exists
-                if (!isset($productReport[$productName])) {
-                    $productReport[$productName] = [
-                        'total_sales_amount' => 0,
-                        'total_prod_amount' => 0,
-                        'sites' => []
-                    ];
+                $salesBatch = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
+                    ->whereBetween('sales_d_id', [$id, $batchEnd])
+                    ->with(['getsale_site:store_id,sales_id', 'getprod:product_id,product_name_en'])
+                    ->select(['sales_d_id', 'amount', 'product_id', 'sales_id'])
+                    ->cursor();
+                    
+                foreach ($salesBatch as $sale) {
+                    $productName = $sale->getprod->product_name_en ?? 'Unknown';
+                    $siteId = $sale->getsale_site->store_id ?? 'Unknown';
+                    $amount = (float)$sale->amount;
+                    
+                    // Initialize product entry if not exists
+                    if (!isset($productReport[$productName])) {
+                        $productReport[$productName] = [
+                            'total_sales_amount' => 0,
+                            'total_prod_amount' => 0,
+                            'sites' => []
+                        ];
+                    }
+                    
+                    // Update sales totals
+                    $productReport[$productName]['total_sales_amount'] += $amount;
+                    
+                    // Initialize site entry if not exists
+                    if (!isset($productReport[$productName]['sites'][$siteId])) {
+                        $productReport[$productName]['sites'][$siteId] = [
+                            'sales_amount' => 0,
+                            'prod_amount' => 0
+                        ];
+                    }
+                    $productReport[$productName]['sites'][$siteId]['sales_amount'] += $amount;
+                    
+                    $totalProcessed++;
                 }
                 
-                // Update sales totals
-                $productReport[$productName]['total_sales_amount'] += $amount;
+                unset($salesBatch);
+                gc_collect_cycles();
+            }
+        }
+
+        // 2. Then process product amounts data
+        $amountsMinMax = Pro_prod_amount::whereBetween('ins_date', [$from_time, $to_date])
+            ->selectRaw('MIN(id) as min_id, MAX(id) as max_id')
+            ->first();
+
+        if ($amountsMinMax) {
+            for ($id = $amountsMinMax->min_id; $id <= $amountsMinMax->max_id; $id += $batchSize) {
+                $batchEnd = $id + $batchSize - 1;
                 
-                // Initialize site entry if not exists
-                if (!isset($productReport[$productName]['sites'][$siteId])) {
-                    $productReport[$productName]['sites'][$siteId] = [
-                        'sales_amount' => 0,
-                        'prod_amount' => 0
-                    ];
+                $amountsBatch = Pro_prod_amount::whereBetween('ins_date', [$from_time, $to_date])
+                    ->whereBetween('id', [$id, $batchEnd])
+                    ->with(['getprod:product_id,product_name_en,sell_price', 'getsite:store_id,store_name'])
+                    ->select(['id', 'prod_amount', 'product_id', 'store_id'])
+                    ->cursor();
+                    
+                foreach ($amountsBatch as $amount) {
+                    $productName = $amount->getprod->product_name_en ?? 'Unknown';
+                    $productsell_price = $amount->getprod->sell_price ?? 'Unknown';
+                    $siteId = $amount->getsite->store_id ?? 'Unknown';
+                    $prodAmount = (float)$amount->prod_amount;
+                    
+                    // Initialize product entry if not exists
+                    if (!isset($productReport[$productName])) {
+                        $productReport[$productName] = [
+                            'total_sales_amount' => 0,
+                            'total_prod_amount' => 0,
+                            'sites' => []
+                        ];
+                    }
+                    
+                    // Update product amount totals
+                    $productReport[$productName]['total_prod_amount'] += $prodAmount;
+                    
+                    // Initialize site entry if not exists
+                    if (!isset($productReport[$productName]['sites'][$siteId])) {
+                        $productReport[$productName]['sites'][$siteId] = [
+                            'sales_amount' => 0,
+                            'prod_amount' => 0
+                        ];
+                    }
+                    $productReport[$productName]['sites'][$siteId]['prod_amount'] += $prodAmount;
                 }
-                $productReport[$productName]['sites'][$siteId]['sales_amount'] += $amount;
                 
-                $totalProcessed++;
+                unset($amountsBatch);
+                gc_collect_cycles();
+            }
+        }
+
+        // Format the final output
+        $formattedReport = [];
+        foreach ($productReport as $productName => $data) {
+            // Format site data for this product
+            $siteData = [];
+            foreach ($data['sites'] as $siteId => $amounts) {
+                $siteData[] = [
+                    'site_id' => $siteId,
+                    'sales_amount' => $amounts['sales_amount'],
+                    'prod_amount' => $amounts['prod_amount']
+                ];
             }
             
-            unset($salesBatch);
-            gc_collect_cycles();
-        }
-    }
-
-    // 2. Then process product amounts data
-    $amountsMinMax = Pro_prod_amount::whereBetween('ins_date', [$from_time, $to_date])
-        ->selectRaw('MIN(id) as min_id, MAX(id) as max_id')
-        ->first();
-
-    if ($amountsMinMax) {
-        for ($id = $amountsMinMax->min_id; $id <= $amountsMinMax->max_id; $id += $batchSize) {
-            $batchEnd = $id + $batchSize - 1;
-            
-            $amountsBatch = Pro_prod_amount::whereBetween('ins_date', [$from_time, $to_date])
-                ->whereBetween('id', [$id, $batchEnd])
-                ->with(['getprod:product_id,product_name_en,sell_price', 'getsite:store_id,store_name'])
-                ->select(['id', 'prod_amount', 'product_id', 'store_id'])
-                ->cursor();
-                
-            foreach ($amountsBatch as $amount) {
-                $productName = $amount->getprod->product_name_en ?? 'Unknown';
-                $productsell_price = $amount->getprod->sell_price ?? 'Unknown';
-                $siteId = $amount->getsite->store_id ?? 'Unknown';
-                $prodAmount = (float)$amount->prod_amount;
-                
-                // Initialize product entry if not exists
-                if (!isset($productReport[$productName])) {
-                    $productReport[$productName] = [
-                        'total_sales_amount' => 0,
-                        'total_prod_amount' => 0,
-                        'sites' => []
-                    ];
-                }
-                
-                // Update product amount totals
-                $productReport[$productName]['total_prod_amount'] += $prodAmount;
-                
-                // Initialize site entry if not exists
-                if (!isset($productReport[$productName]['sites'][$siteId])) {
-                    $productReport[$productName]['sites'][$siteId] = [
-                        'sales_amount' => 0,
-                        'prod_amount' => 0
-                    ];
-                }
-                $productReport[$productName]['sites'][$siteId]['prod_amount'] += $prodAmount;
-            }
-            
-            unset($amountsBatch);
-            gc_collect_cycles();
-        }
-    }
-
-    // Format the final output
-    $formattedReport = [];
-    foreach ($productReport as $productName => $data) {
-        // Format site data for this product
-        $siteData = [];
-        foreach ($data['sites'] as $siteId => $amounts) {
-            $siteData[] = [
-                'site_id' => $siteId,
-                'sales_amount' => $amounts['sales_amount'],
-                'prod_amount' => $amounts['prod_amount']
+            $formattedReport[] = [
+                'product_name' => $productName,
+                'sell_price' => $productsell_price,
+                'total_sales_amount' => $data['total_sales_amount'],
+                'total_prod_amount' => $data['total_prod_amount'],
+                'sites' => $siteData
             ];
         }
-        
-        $formattedReport[] = [
-            'product_name' => $productName,
-            'sell_price' => $productsell_price,
-            'total_sales_amount' => $data['total_sales_amount'],
-            'total_prod_amount' => $data['total_prod_amount'],
-            'sites' => $siteData
-        ];
-    }
 
-    // Save to file
-    file_put_contents($filepath, json_encode([
-        'products' => $formattedReport,
-        'summary' => [
-            'start_from' => $from_time,
-            'end_to' => $to_date,
-            'total_products' => count($formattedReport),
-            'total_records' => $totalProcessed,
-            'generated_at' => now()->toDateTimeString()
-        ]
-    ], JSON_PRETTY_PRINT));
-    return redirect('admin/pro_sales_dets/indexreportsale')->with('message', 'تم الاضافة بنجاح')->with('status', 'success');
-    // return view('admin.pro_sales_det.indexreportsale');
-    // return response()->json([
-    //     'success' => true,
-    //     'file_path' => $filepath,
-    //     'stats' => [
-    //         'unique_products' => count($formattedReport),
-    //         'total_records' => $totalProcessed,
-    //         'time_elapsed' => microtime(true) - LARAVEL_START . ' seconds'
-    //     ]
-    // ]);
-}
+        // Save to file
+        file_put_contents($filepath, json_encode([
+            'products' => $formattedReport,
+            'summary' => [
+                'start_from' => $from_time,
+                'end_to' => $to_date,
+                'total_products' => count($formattedReport),
+                'total_records' => $totalProcessed,
+                'generated_at' => now()->toDateTimeString()
+            ]
+        ], JSON_PRETTY_PRINT));
+            return redirect('admin/pro_sales_dets/indexreportsale')->with('message', 'تم الاضافة بنجاح')->with('status', 'success');
+            // return view('admin.pro_sales_det.indexreportsale');
+            // return response()->json([
+            //     'success' => true,
+            //     'file_path' => $filepath,
+            //     'stats' => [
+            //         'unique_products' => count($formattedReport),
+            //         'total_records' => $totalProcessed,
+            //         'time_elapsed' => microtime(true) - LARAVEL_START . ' seconds'
+            //     ]
+            // ]);
+        }
+        public function export(Request $request)
+        {
+            $filePath = storage_path('app/temp.json');
+            
+            if (!file_exists($filePath)) {
+                return back()->with('error', 'Export data not found. Please generate the report first.');
+            }
+
+            $data = json_decode(file_get_contents($filePath), true);
+
+            $exportData = collect($data)->map(function($item) {
+                $row = [
+                    'Product Name' => $item['product_name'] ?? 'N/A',
+                    'Sell Price' => $item['sell_price'] ?? 0,
+                    'Total Sales Amount' => $item['total_sales_amount'] ?? 0,
+                    'Total Product Amount' => $item['total_prod_amount'] ?? 0,
+                ];
+
+                if (!empty($item['sites'])) {
+                    foreach ($item['sites'] as $site) {
+                        $storeName = $site['store_name'] ?? 'Unknown';
+                        $row["{$storeName} Balance"] = $site['prod_amount'] ?? 0;
+                        $row["{$storeName} Sales"] = $site['sales_amount'] ?? 0;
+                    }
+                }
+
+                return $row;
+            });
+
+            return Excel::download(new CollectionExport($exportData), 
+                'sales_report_' . now()->format('Y-m-d_H-i-s') . '.xlsx');
+        }
+
+        public function prepareExport(Request $request)
+        {
+            $data = $request->input('data');
+            $filePath = storage_path('app/temp.json');
+            
+            file_put_contents($filePath, $data);
+            
+            return response()->json(['success' => true]);
+        }
 //     public function indexprodsaledet($from_time, $to_date, $status_visit)
 // {
 //     // Set execution limits
@@ -365,7 +414,7 @@ class Pro_sales_detsController extends Controller
 //     ini_set('memory_limit', '-1');
     
 //     // Define file path
-//     $directory = storage_path('debugbar/');
+//     $directory = storage_path('app/');
 //     $filename = 'temp.json';
 //     $filepath = $directory . $filename;
     
@@ -472,7 +521,7 @@ class Pro_sales_detsController extends Controller
     //     ini_set('memory_limit', '-1');
         
     //     // Define file path
-    //     $directory = storage_path('debugbar/'); // Uses forward slash which works on both Windows and Linux
+    //     $directory = storage_path('app/'); // Uses forward slash which works on both Windows and Linux
     //     $filename = 'temp.json';
     //     $filepath = $directory . $filename;
         
@@ -812,31 +861,162 @@ class Pro_sales_detsController extends Controller
         return view('admin.pro_sales_det.indexreportsale');
     }
     private function streamJsonProducts($filePath)
-{
-    $stream = fopen($filePath, 'r');
-    $buffer = '';
-    
-    while (!feof($stream)) {
-        $buffer .= fread($stream, 8192);
+    {
+        $stream = fopen($filePath, 'r');
+        $buffer = '';
         
-        while (($newlinePos = strpos($buffer, "\n")) !== false) {
-            $line = substr($buffer, 0, $newlinePos);
-            $buffer = substr($buffer, $newlinePos + 1);
+        while (!feof($stream)) {
+            $buffer .= fread($stream, 8192);
             
-            $decoded = json_decode(trim($line), true);
-            if ($decoded && isset($decoded['products'])) {
-                yield from $decoded['products'];
+            while (($newlinePos = strpos($buffer, "\n")) !== false) {
+                $line = substr($buffer, 0, $newlinePos);
+                $buffer = substr($buffer, $newlinePos + 1);
+                
+                $decoded = json_decode(trim($line), true);
+                if ($decoded && isset($decoded['products'])) {
+                    yield from $decoded['products'];
+                }
             }
         }
+        
+        fclose($stream);
     }
+    // public function exportReport(Request $request)
+    // {
+    //     $filePath = storage_path('app/temp.json');
+        
+    //     if (!file_exists($filePath)) {
+    //         return response('No data available for export', 404)
+    //             ->header('Content-Type', 'text/plain');
+    //     }
     
-    fclose($stream);
-}
-    public function getReportData(Request $request)
+    //     try {
+    //         $fileContents = file_get_contents($filePath);
+    //         $data = json_decode($fileContents, true);
+            
+    //         if (json_last_error() !== JSON_ERROR_NONE) {
+    //             throw new \Exception("Invalid JSON format");
+    //         }
+            
+    //         $stores = Pro_store::get(['store_id', 'store_name'])
+    //             ->keyBy('store_id');
+
+    //         $exportData = collect($data['products'] ?? [])->map(function($item) use ($stores) {
+    //             $row = [
+    //                 'Product Name' => $item['product_name'] ?? 'N/A',
+    //                 'Sell Price' => isset($item['sell_price']) ?  number_format($item['sell_price'], 2) : '0.00',
+    //                 'Total Sales Amount' => isset($item['total_sales_amount']) ?  number_format($item['total_sales_amount'], 2) : '0.00',
+    //                 'Total Product Amount' => isset($item['total_prod_amount']) ?  number_format($item['total_prod_amount'], 2) : '0.00',
+    //             ];
+
+    //             if (!empty($item['sites'])) {
+    //                 foreach ($item['sites'] as $site) {
+    //                     $storeId = $site['site_id'];
+    //                     $storeName = $stores[$storeId]->store_name ?? 'Unknown Store ' . $storeId;
+    //                     $row[trans('lang.balance').' ' .$storeName ] = isset($site['prod_amount']) ? number_format($site['prod_amount'], 3) : '0.000';
+    //                     $row[trans('lang.sales').' ' .$storeName ] = isset($site['sales_amount']) ? number_format($site['sales_amount'], 3) : '0.000';
+                        
+    //                 }
+    //             }
+
+    //             return $row;
+    //         });
+    //         $filename = 'sales_report_' . now()->format('Y-m-d') . '.xlsx';
+            
+    //         return Excel::download(new CollectionExport($exportData), $filename);
+    
+    //     } catch (\Exception $e) {
+    //         return response('Export failed: ' . $e->getMessage(), 500)
+    //             ->header('Content-Type', 'text/plain');
+    //     }
+    // }
+    public function exportReport(Request $request)
     {
-        $filePath = storage_path('debugbar/temp.json');
+        $filePath = storage_path('app/temp.json');
         
         if (!file_exists($filePath)) {
+            return response('No data available for export', 404)
+                ->header('Content-Type', 'text/plain');
+        }
+    
+        try {
+            $fileContents = file_get_contents($filePath);
+            $data = json_decode($fileContents, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception("Invalid JSON format");
+            }
+            
+            $stores = Pro_store::get(['store_id', 'store_name'])
+                ->keyBy('store_id');
+
+            // First collect all unique store names to ensure consistent columns
+            $allStoreNames = collect();
+            foreach ($data['products'] ?? [] as $item) {
+                foreach ($item['sites'] ?? [] as $site) {
+                    $storeId = $site['site_id'];
+                    $storeName = $stores[$storeId]->store_name ?? 'Unknown Store ' . $storeId;
+                    $allStoreNames->put($storeId, $storeName);
+                }
+            }
+
+            $exportData = collect($data['products'] ?? [])->map(function($item) use ($stores, $allStoreNames) {
+                $row = [
+                    'Product Name' => $item['product_name'] ?? 'N/A',
+                    'Sell Price' => isset($item['sell_price']) ? number_format($item['sell_price'], 2) : '0.00',
+                    'Total Sales Amount' => isset($item['total_sales_amount']) ? number_format($item['total_sales_amount'], 2) : '0.00',
+                    'Total Product Amount' => isset($item['total_prod_amount']) ? number_format($item['total_prod_amount'], 2) : '0.00',
+                ];
+
+                // Initialize all store columns with default values
+                foreach ($allStoreNames as $storeName) {
+                    $row[trans('lang.balance').' '.$storeName] = '0.000';
+                    $row[trans('lang.sales').' '.$storeName] = '0.000';
+                }
+
+                // Fill actual values where data exists
+                foreach ($item['sites'] ?? [] as $site) {
+                    $storeId = $site['site_id'];
+                    $storeName = $stores[$storeId]->store_name ?? 'Unknown Store ' . $storeId;
+                    
+                    $row[trans('lang.balance').' '.$storeName] = isset($site['prod_amount']) ? number_format($site['prod_amount'], 3) : '0.000';
+                    $row[trans('lang.sales').' '.$storeName] = isset($site['sales_amount']) ? number_format($site['sales_amount'], 3) : '0.000';
+                }
+
+                return $row;
+            });
+
+            // Build headers in correct order
+            $headers = [
+                'Product Name',
+                'Sell Price',
+                'Total Sales Amount',
+                'Total Product Amount',
+            ];
+
+            foreach ($allStoreNames as $storeName) {
+                $headers[] = trans('lang.balance').' '.$storeName;
+                $headers[] = trans('lang.sales').' '.$storeName;
+            }
+
+            $filename = 'sales_report_' . now()->format('Y-m-d') . '.xlsx';
+            
+            return Excel::download(new CollectionExport($exportData, $headers), $filename);
+    
+        } catch (\Exception $e) {
+            return response('Export failed: ' . $e->getMessage(), 500)
+                ->header('Content-Type', 'text/plain');
+        }
+    }
+    public function getReportData(Request $request)
+    {
+        $filePath = storage_path('app/temp.json');
+        
+        if (!file_exists($filePath)) {
+            if ($request->export) {
+                return response('No data available for export', 404)
+                    ->header('Content-Type', 'text/plain');
+            }
             return response()->json([
                 'draw' => $request->input('draw', 0),
                 'recordsTotal' => 0,
@@ -860,7 +1040,74 @@ class Pro_sales_detsController extends Controller
                 throw new \Exception("Invalid JSON format");
             }
 
-            // Ensure summary data exists
+            // Handle export request
+            // if ($request->export) {
+            //     $exportData = collect($data['products'] ?? [])->map(function($item) {
+            //         $row = [
+            //             'Product Name' => $item['product_name'] ?? 'N/A',
+            //             'Sell Price' => $item['sell_price'] ?? 0,
+            //             'Total Sales Amount' => $item['total_sales_amount'] ?? 0,
+            //             'Total Product Amount' => $item['total_prod_amount'] ?? 0,
+            //         ];
+
+                    
+            //         if (!empty($item['sites'])) {
+            //             // Group sites by ID for easier lookup
+            //             $sitesGrouped = collect($item['sites'])->keyBy('site_id');
+                        
+            //             // Get all unique store names with their IDs
+            //             $stores = Pro_store::get(['store_id', 'store_name'])
+            //                 ->keyBy('store_id');
+                        
+            //             foreach ($stores as $storeId => $store) {
+            //                 $siteData = $sitesGrouped->get($storeId);
+            //                 $storeName = $store->store_name ?? 'Unknown';
+                            
+            //                 $row["{$storeName} Sales"] = isset($siteData['sales_amount']) 
+            //                     ?   number_format($siteData['sales_amount'], 2) 
+            //                     : 0;
+                                
+            //                 $row["{$storeName} Balance"] = isset($siteData['prod_amount']) 
+            //                     ?   number_format($siteData['prod_amount'], 2) 
+            //                     : 0;
+            //             }
+            //         }
+
+            //         return $row;
+            //     });
+            //     $filename = 'sales_report_' . now()->format('Y-m-d') . '.xlsx';
+            
+            //     // Create the Excel file first
+            //     $export = new CollectionExport($exportData);
+                
+            //     // Get the raw file content
+            //     $fileContent = Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+                
+            //     // Create response with proper headers
+            //     return response($fileContent, 200, [
+            //         'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            //         'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            //         'Cache-Control' => 'no-store, no-cache',
+            //         'Pragma' => 'no-cache'
+            //     ]);
+
+            //     $filename = 'sales_report_' . now()->format('Y-m-d') . '.xlsx';
+            //     // Return Excel download with proper headers
+            //     $response = Excel::download(
+            //         new CollectionExport($exportData), 
+            //         $filename,
+            //         \Maatwebsite\Excel\Excel::XLSX
+            //     );
+                
+            //     // Add headers to prevent caching
+            //     return $response->withHeaders([
+            //         'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            //         'Cache-Control' => 'no-store, no-cache',
+            //         'Content-Disposition' => 'attachment; filename="'.$filename.'"'
+            //     ]);
+            // }
+
+            // Normal datatable response
             $summary = $data['summary'] ?? [
                 'total_products' => count($data['products'] ?? []),
                 'total_records' => count($data['products'] ?? []),
@@ -900,6 +1147,10 @@ class Pro_sales_detsController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            if ($request->export) {
+                return response('Export failed: ' . $e->getMessage(), 500)
+                    ->header('Content-Type', 'text/plain');
+            }
             return response()->json([
                 'draw' => $request->input('draw', 0),
                 'recordsTotal' => 0,
@@ -914,10 +1165,92 @@ class Pro_sales_detsController extends Controller
             ]);
         }
     }
+    // public function getReportData(Request $request)
+    // {
+    //     $filePath = storage_path('app/temp.json');
+        
+    //     if (!file_exists($filePath)) {
+    //         return response()->json([
+    //             'draw' => $request->input('draw', 0),
+    //             'recordsTotal' => 0,
+    //             'recordsFiltered' => 0,
+    //             'data' => [],
+    //             'summary' => [
+    //                 'start_from' => 0,
+    //                 'end_to' => 0,
+    //                 'total_products' => 0,
+    //                 'total_records' => 0,
+    //                 'generated_at' => now()->toDateTimeString()
+    //             ]
+    //         ]);
+    //     }
+
+    //     try {
+    //         $fileContents = file_get_contents($filePath);
+    //         $data = json_decode($fileContents, true);
+            
+    //         if (json_last_error() !== JSON_ERROR_NONE) {
+    //             throw new \Exception("Invalid JSON format");
+    //         }
+
+    //         // Ensure summary data exists
+    //         $summary = $data['summary'] ?? [
+    //             'total_products' => count($data['products'] ?? []),
+    //             'total_records' => count($data['products'] ?? []),
+    //             'generated_at' => now()->toDateTimeString()
+    //         ];
+
+    //         $products = $data['products'] ?? [];
+    //         $search = $request->input('search.value');
+            
+    //         // Filter data if search is present
+    //         $filteredData = $products;
+    //         if (!empty($search)) {
+    //             $filteredData = array_filter($products, function($product) use ($search) {
+    //                 $match = stripos($product['product_name'] ?? '', $search) !== false;
+    //                 if (!$match && isset($product['sites'])) {
+    //                     foreach ($product['sites'] as $site) {
+    //                         if (stripos($site['site_id'] ?? '', $search) !== false) {
+    //                             return true;
+    //                         }
+    //                     }
+    //                 }
+    //                 return $match;
+    //             });
+    //         }
+
+    //         // Paginate the results
+    //         $start = (int)$request->input('start', 0);
+    //         $length = (int)$request->input('length', 25);
+    //         $paginatedData = array_slice($filteredData, $start, $length);
+
+    //         return response()->json([
+    //             'draw' => $request->input('draw', 0),
+    //             'recordsTotal' => count($products),
+    //             'recordsFiltered' => count($filteredData),
+    //             'data' => $paginatedData,
+    //             'summary' => $summary
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'draw' => $request->input('draw', 0),
+    //             'recordsTotal' => 0,
+    //             'recordsFiltered' => 0,
+    //             'data' => [],
+    //             'summary' => [
+    //                 'total_products' => 0,
+    //                 'total_records' => 0,
+    //                 'generated_at' => now()->toDateTimeString()
+    //             ],
+    //             'error' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
 
 // public function getReportData(Request $request)
 // {
-//     $filePath = storage_path('debugbar/temp.json');
+//     $filePath = storage_path('app/temp.json');
     
 //     if (!file_exists($filePath)) {
 //         return response()->json(['error' => 'Report not found'], 404);
@@ -976,7 +1309,7 @@ private function productMatchesSearch($product, $search)
 }
     // public function getReportData(Request $request)
     // {
-    //     $filePath = storage_path('debugbar/temp.json');
+    //     $filePath = storage_path('app/temp.json');
         
     //     if (!file_exists($filePath)) {
     //         return response()->json(['error' => 'Report not found'], 404);

@@ -171,6 +171,11 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/indexprodsaledet/{from_t?}/{to_d?}','Pro_sales_detsController@indexprodsaledet')->name('indexprodsaledet');
             Route::get('/indexreportsale','Pro_sales_detsController@indexreportsale')->name('indexreportsale'); // add can
             Route::get('/getReportData','Pro_sales_detsController@getReportData')->name('getReportData');
+            Route::post('/exportReport', 'Pro_sales_detsController@exportReport')->name('exportReport');
+
+            Route::get('/export','Pro_sales_detsController@export')->name('export');
+
+            Route::post('/prepareExport','Pro_sales_detsController@prepareExport')->name('prepareExport');
             
         });
 
