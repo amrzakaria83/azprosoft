@@ -287,7 +287,7 @@ $(document).ready(function() {
                 {
                     extend: 'excel',
                     text: '<i class="fas fa-file-excel"></i> Export All',
-                    className: 'btn btn-primary btn-sm',
+                    className: 'btn btn-success btn-sm',
                     action: function(e, dt, button, config) {
                         // Simple loading indicator (works without KTApp)
                         var loading = $('<div class="export-loading">Preparing export...</div>');
@@ -317,9 +317,9 @@ $(document).ready(function() {
                     }
                 }
             ],
-        pageLength: 25,
+        pageLength: 50,
         lengthMenu: [10, 25, 50, 100],
-        order: [[0, 'asc']],
+        order: [[3, 'asc']],
         language: {
             emptyTable: "No data available",
             info: "Showing _START_ to _END_ of _TOTAL_ entries",

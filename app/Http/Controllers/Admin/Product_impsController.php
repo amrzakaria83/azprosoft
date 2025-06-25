@@ -399,6 +399,159 @@ class Product_impsController extends Controller
 
         return Redirect::back()->with('success', 'Product synchronization from Pur_import has been initiated. It will run in the background.');
     }
+
+    // public function newdb()
+    // {
+    //     try {
+    //         $this->clearSystemCaches();
+            
+    //         $totalProducts = Pro_product::count();
+    //         if ($totalProducts === 0) {
+    //             return redirect()->back()->with('warning', 'No products found');
+    //         }
+
+    //         $chunkSize = $this->calculateOptimalChunkSize($totalProducts);
+    //         $processed = 0;
+    //         $errors = [];
+    //         $batchStart = microtime(true);
+
+    //         // Use cursor() for memory-efficient iteration
+    //         Pro_product::orderBy('product_id')->chunk($chunkSize, 
+    //             function ($products) use (&$processed, &$errors, $chunkSize, $batchStart) {
+    //                 $result = $this->processOptimizedChunk($products);
+    //                 $processed += $result['processed'];
+    //                 $errors = array_merge($errors, $result['errors']);
+                    
+    //                 // Progress logging
+    //                 $this->logProgress($processed, $totalProducts, $chunkSize, $batchStart);
+    //             });
+
+    //         return $this->finalizeImport($processed, $totalProducts, $errors);
+
+    //     } catch (\Exception $e) {
+    //         Log::error("Import failed", ['error' => $e->getMessage()]);
+    //         return redirect()->back()->with('error', "Import failed: " . $e->getMessage());
+    //     }
+    // }
+    // protected function processOptimizedChunk($products)
+    // {
+    //     $processed = 0;
+    //     $errors = [];
+    //     $batchData = [];
+        
+    //     // Prepare batch data
+    //     foreach ($products as $prod) {
+    //         try {
+    //             $batchData[] = [
+    //                 'product_code' => $prod->product_id,
+    //                 'name_ar' => $prod->product_name ?? '',
+    //                 'name_en' => $prod->product_name_en ?? '',
+    //                 'sell_price_pub' => $prod->sell_price ?? 0,
+    //                 'last_imported_at' => now(),
+    //             ];
+    //             $processed++;
+    //         } catch (\Exception $e) {
+    //             $errors[] = ['product_id' => $prod->product_id, 'error' => $e->getMessage()];
+    //         }
+    //     }
+        
+    //     // Bulk insert/update
+    //     if (!empty($batchData)) {
+    //         try {
+    //             DB::transaction(function () use ($batchData) {
+    //                 Product::upsert(
+    //                     $batchData,
+    //                     ['product_code'], // Unique key
+    //                     ['name_ar', 'name_en', 'sell_price_pub', 'last_imported_at'] // Update columns
+    //                 );
+    //             });
+    //         } catch (\Exception $e) {
+    //             Log::error("Batch upsert failed", ['error' => $e->getMessage()]);
+    //             throw $e;
+    //         }
+    //     }
+        
+    //     return compact('processed', 'errors');
+    // }
+    // protected function calculateOptimalChunkSize($totalRecords)
+    // {
+    //     // Dynamic calculation based on actual memory usage
+    //     static $optimalChunk = null;
+        
+    //     if ($optimalChunk === null) {
+    //         $memoryLimit = $this->convertToBytes(ini_get('memory_limit'));
+    //         $usedMemory = memory_get_usage(true);
+    //         $availableMemory = $memoryLimit - $usedMemory;
+            
+    //         // Conservative estimate: 2KB per record including overhead
+    //         $perRecordMemory = 2048; 
+    //         $optimalChunk = min(
+    //             max(floor($availableMemory / $perRecordMemory), 100), // Min 100
+    //             1000 // Max 1000 records per chunk
+    //         );
+    //     }
+        
+    //     return $optimalChunk;
+    // }
+
+    // protected function logProgress($processed, $total, $chunkSize, $startTime)
+    // {
+    //     if ($processed % ($chunkSize * 10) === 0 || $processed === $total) {
+    //         $percentage = round(($processed / $total) * 100, 2);
+    //         $elapsed = microtime(true) - $startTime;
+    //         $recordsPerSec = round($processed / max($elapsed, 1));
+    //         $memory = memory_get_usage(true) / 1024 / 1024;
+            
+    //         Log::info("Import progress", [
+    //             'processed' => "$processed/$total ($percentage%)",
+    //             'speed' => "$recordsPerSec records/sec",
+    //             'memory' => round($memory, 2) . "MB",
+    //             'chunk_size' => $chunkSize
+    //         ]);
+    //     }
+    // }
+    // protected function clearSystemCaches()
+    // {
+    //     // Parallel cache clearing
+    //     $commands = ['cache:clear', 'view:clear', 'config:clear'];
+    //     foreach ($commands as $cmd) {
+    //         shell_exec("php artisan $cmd > /dev/null 2>&1 &");
+    //     }
+        
+    //     // Optimize DB before import
+    //     if (DB::connection() instanceof \Illuminate\Database\MySqlConnection) {
+    //         DB::statement('SET FOREIGN_KEY_CHECKS=0');
+    //         DB::statement('SET UNIQUE_CHECKS=0');
+    //         DB::statement('SET AUTOCOMMIT=0');
+    //     }
+    // }
+
+    // // Add this at the end of your import
+    // protected function finalizeImport($processed, $total, $errors)
+    // {
+    //     // Re-enable DB optimizations
+    //     if (DB::connection() instanceof \Illuminate\Database\MySqlConnection) {
+    //         DB::statement('SET FOREIGN_KEY_CHECKS=1');
+    //         DB::statement('SET UNIQUE_CHECKS=1');
+    //         DB::statement('SET AUTOCOMMIT=1');
+    //     }
+        
+    //     // Additional cleanup
+    //     DB::connection()->unprepared('FLUSH TABLES');
+    //     DB::connection()->unprepared('RESET QUERY CACHE');
+        
+    //     $message = "Imported $processed/$total products";
+    //     if (!empty($errors)) {
+    //         $message .= ". Failed: " . count($errors);
+    //     }
+        
+    //     return redirect()->back()->with(
+    //         empty($errors) ? 'success' : 'warning',
+    //         $message
+    //     );
+    // }
+
+
     public function newdb()
     {
         try {
@@ -520,7 +673,7 @@ class Product_impsController extends Controller
     {
         $memoryLimit = ini_get('memory_limit');
         $memoryInBytes = $this->convertToBytes($memoryLimit);
-        $safeMemory = $memoryInBytes * 0.2; // Use 20% of available memory
+        $safeMemory = $memoryInBytes * 0.5; // Use 20% of available memory
         
         // Estimate memory usage per record (adjust based on your actual data size)
         $perRecordMemory = 4096; // 4KB per record (conservative estimate)
@@ -541,77 +694,5 @@ class Product_impsController extends Controller
         }
         return 128 * 1024 * 1024; // Default 128MB if can't parse
     }
-    // protected function calculateOptimalChunkSize($totalRecords)
-    // {
-    //     $memoryLimit = ini_get('memory_limit');
-    //     $available = $this->convertToBytes($memoryLimit) * 0.3; // Use 30% of memory limit
-        
-    //     // Estimate 2KB per record (adjust based on your data)
-    //     $perRecord = 2048;
-    //     $calculated = floor($available / $perRecord);
-        
-    //     return min(max($calculated, 50), 200); // Keep between 50-200
-    // }
-
-    // protected function convertToBytes($memoryLimit)
-    // {
-    //     if (preg_match('/^(\d+)(.)$/', $memoryLimit, $matches)) {
-    //         switch (strtoupper($matches[2])) {
-    //             case 'G': return $matches[1] * 1024 * 1024 * 1024;
-    //             case 'M': return $matches[1] * 1024 * 1024;
-    //             case 'K': return $matches[1] * 1024;
-    //         }
-    //     }
-    //     return 128 * 1024 * 1024; // Default 128MB
-    // }
-    // public function newdb()
-    // {
-
-    //     $datapro = Pro_product::get();
-
-    //     $totalProducts = Pro_product::count();
-    //     $chunkSize = 200; // Adjust based on your server capacity
-    //     $batches = ceil($totalProducts / $chunkSize);
-        
-    //     $batch = \Bus::batch([])->dispatch();
-        
-    //     for ($i = 0; $i < $batches; $i++) {
-    //         $batch->add(new ProcessProductImports($chunkSize, $i * $chunkSize));
-    //         // In your job dispatch
-    //         ProcessProductImports::dispatch($chunkSize, $offset)->delay(now()->addSeconds(10));
-    //     }
-        
-    //     return redirect()->back()
-    //         ->with('success', "Started processing {$totalProducts} products in {$batches} batches"); 
-        
-    // }
-    // public function newdb()
-    // {
-    //     // $datapro = Emangeremp::get();
-    //     // $datapro = Emangeremp::all();
-    //     $datapro = Emangeremp::where('emp_id', 1005)->get();
-    //     // $datapro = DB::connection('sqlsrv')->table('emp')->where('emp_id', 1004)->get();
-    //     return response(['status' => 200, 'msg' => trans('lang.successful'), 'data' => $datapro]);
-    //     dd($datapro);
-    //     return view('admin.product_imp.create');
-    // }
-    // public function getHomeNotification($employee_id)
-    // {
-    //     $token = request()->header('token');
-    //     $user = $this->check_api_token($token);
-    //     if (!$user) {
-    //         return response(['status' => 403, 'msg' => trans('auth.not_login'), 'data' => NULL]);
-    //     }
-
-    //     $data = Notification::where('employee_id', $employee_id)->orderBy('id', 'DESC')->take(5)->paginate(5);
-
-    //     $results = NotificationResource::collection($data)->response()->getData();
-
-    //     if(count($data) == 0) {
-    //         return response(['status' => 401, 'msg' => trans('lang.nodata'), 'data' => null]);
-    //     } else {
-    //         return response(['status' => 200, 'msg' => trans('lang.successful'), 'data' => $results]);
-    //     }
-        
-    // }
+    
 }
