@@ -180,7 +180,7 @@ $(document).ready(function() {
             data: 'sell_price',
             name: 'sell_price',
             render: function(data) {
-                return data ? '$' + parseFloat(data).toFixed(2) : '$0.00';
+                return data ? + parseFloat(data).toFixed(2) : 0;
             },
             className: 'text-center'
         },
@@ -188,14 +188,14 @@ $(document).ready(function() {
             data: 'total_sales_amount',
             name: 'total_sales_amount',
             render: $.fn.dataTable.render.number(',', '.', 2),
-            defaultContent: '0.00',
+            defaultContent: 0,
             className: 'text-center'
         },
         { 
             data: 'total_prod_amount',
             name: 'total_prod_amount',
             render: $.fn.dataTable.render.number(',', '.', 2),
-            defaultContent: '0.00',
+            defaultContent: 0,
             className: 'text-center'
         },
         {
@@ -219,24 +219,24 @@ $(document).ready(function() {
         columns.push({
             data: null,
             name: 'site_' + site.store_id + '_balance',
-            defaultContent: '0.00',
+            defaultContent: 0,
             className: 'text-center',
             render: function(data, type, row) {
-                if (!row.sites) return '0.00';
+                if (!row.sites) return 0;
                 var siteData = row.sites.find(s => s.site_id == site.store_id);
-                return siteData ?  + siteData.prod_amount.toFixed(2) : '0.00';
+                return siteData ?  + siteData.prod_amount.toFixed(2) : 0;
             }
         });
         
         columns.push({
             data: null,
             name: 'site_' + site.store_id + '_sales',
-            defaultContent: '0.00',
+            defaultContent: 0,
             className: 'text-center',
             render: function(data, type, row) {
-                if (!row.sites) return '0.00';
+                if (!row.sites) return 0;
                 var siteData = row.sites.find(s => s.site_id == site.store_id);
-                return siteData ?  + siteData.sales_amount.toFixed(2) : '0.00';
+                return siteData ?  + siteData.sales_amount.toFixed(2) : 0;
             }
         });
     });
@@ -343,11 +343,11 @@ $(document).ready(function() {
                     });
                     
                     var balanceCell = $(row).find(`td:eq(${$(`th[data-site-control="${site.store_id}-b"]`).index()})`);
-                    balanceCell.text(siteData ?  + siteData.prod_amount.toFixed(2) : '0.00');
+                    balanceCell.text(siteData ?  + siteData.prod_amount.toFixed(2) : 0);
                     balanceCell.addClass('text-center');
                     
                     var salesCell = $(row).find(`td:eq(${$(`th[data-site-control="${site.store_id}-s"]`).index()})`);
-                    salesCell.text(siteData ?  + siteData.sales_amount.toFixed(2) : '0.00');
+                    salesCell.text(siteData ?  + siteData.sales_amount.toFixed(2) : 0);
                     salesCell.addClass('text-center');
                 });
             }
