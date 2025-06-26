@@ -119,6 +119,17 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="row mb-6">
+                                        <label class="col-lg-2 col-form-label required fw-semibold fs-3 text-info">{{trans('lang.name_ar')}} </label>
+                                        <div class="col-lg-8 fv-row">
+                                            <select  data-control="select2" data-placeholder="Select an option" class=" input-text form-control  form-select  mb-3 mb-lg-0" id="emangeremp_id" name="emangeremp_id">
+                                            <option value="">Select {{trans('lang.name_ar')}}</option>
+                                                @foreach (App\Models\Emangeremp::get() as $item)
+                                                    <option value="{{$item->emp_id}}">{{$item->emp_name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                    
                                     <div class="row mb-6">
                                         <label class="col-lg-2 col-form-label  fw-semibold fs-6">{{trans('lang.note')}}</label>

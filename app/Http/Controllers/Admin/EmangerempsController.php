@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\Emangeremp;
+use App\Models\Employee;
 use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
@@ -48,6 +49,25 @@ class EmangerempsController extends Controller
                     $emp_id = $row->emp_id;
                     return $emp_id;
                 })
+                ->addColumn('emangeremp_id', function($row){
+                    $emangeremp_id = '<span>no emp_code add</span>';
+                    $emp_code = Employee::where('emangeremp_id',$row->emp_id)->first();
+
+                    if (!$emp_code) {
+                        $emangeremp_id = '<div class="ms-2">
+                                <a href="'.route('admin.employees.show', $row->emp_id).'" class="btn btn-lg btn-icon btn-success btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                    <i class="bi bi-plus-square fs-1x"></i> 
+                                </a>
+                                
+                            <br><span>'.trans('lang.addnew').' '.trans('lang.administrators').'</span>
+                            </div>';
+                    } else {
+                        $emangeremp_id .= $emp_code->emailaz;
+                    }
+
+                   
+                    return $emangeremp_id;
+                })
                 // ->addColumn('actions', function($row){
                 //     $actions = '<div class="ms-2">
                 //                 <a href="'.route('admin.emangeremps.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -75,7 +95,7 @@ class EmangerempsController extends Controller
                         });
                     }
                 })
-                ->rawColumns(['name','phone','emp_kind','emp_pass','emp_id','checkbox','actions'])
+                ->rawColumns(['name','phone','emp_kind','emp_pass','emp_id','emangeremp_id','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.emangeremp.index');

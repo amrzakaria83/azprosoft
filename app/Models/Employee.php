@@ -110,6 +110,7 @@ class Employee extends Authenticatable implements HasMedia
         'is_active',// 0 = not active, 1 = active, 2 = suspended , 3 = terminated
         'type', //0 = admin, 1 = no dash 3 = subadmin, 4 = superadmin
         'password',
+        'emangeremp_id',
     ];
 
 

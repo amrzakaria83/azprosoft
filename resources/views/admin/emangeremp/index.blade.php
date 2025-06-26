@@ -217,6 +217,7 @@
                 {data: 'emp_id', name: 'emp_id'},
                 // {data: 'emp_pass', name: 'emp_pass'},
                 {data: 'emp_kind', name: 'emp_kind'},
+                {data: 'emangeremp_id', name: 'emangeremp_id'},
                 // {data: 'emp_pass', name: 'emp_pass'},
             ]
         });

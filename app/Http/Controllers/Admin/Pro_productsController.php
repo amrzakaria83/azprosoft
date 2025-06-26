@@ -34,8 +34,12 @@ class Pro_productsController extends Controller
                 })
                 ->addColumn('name_ar', function($row){
                     $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->product_name_en.'</a></div>';
-                    $name_ar .= '<br><span>'.$row->product_name.'</span>';
+                    // $name_ar .= '<br><span>'.$row->product_name.'</span>';
                     return $name_ar;
+                })
+                ->addColumn('product_name', function($row){
+                    $product_name = $row->product_name;
+                    return $product_name;
                 })
                 ->addColumn('sell_price', function($row){
                     $sell_price = $row->sell_price;
@@ -44,6 +48,10 @@ class Pro_productsController extends Controller
                 ->addColumn('factory_id', function($row){
                     $factory_id = $row->getfactory->factory_name;
                     return $factory_id;
+                })
+                ->addColumn('unit_id', function($row){
+                    $unit_id = $row->getunit->unit_name;
+                    return $unit_id;
                 })
                 
                 // ->addColumn('actions', function($row){
@@ -72,7 +80,7 @@ class Pro_productsController extends Controller
                         });
                     }
                 })
-                ->rawColumns(['name_ar','sell_price','factory_id','checkbox','actions'])
+                ->rawColumns(['name_ar','sell_price','factory_id','unit_id','product_name','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.pro_product.index');

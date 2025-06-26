@@ -81,9 +81,10 @@
                                     </div>
                                 </th>
                                 <th class="min-w-125px text-start">{{trans('lang.product')}}</th>
+                                <th class="min-w-125px text-start">{{trans('lang.product')}}</th>
                                 <th class="min-w-125px text-start">{{trans('lang.sell_price')}}</th>
                                 <th class="min-w-125px text-start">{{trans('lang.factory')}}</th>
-                                <th class="min-w-125px text-start">الاجراء</th>
+                                <th class="min-w-125px text-start">{{trans('lang.unit')}}</th>
                             </tr>
                             <!--end::Table row-->
                         </thead>
@@ -199,8 +200,10 @@
             columns: [
                 {data: 'checkbox', name: 'checkbox'},
                 {data: 'name_ar', name: 'name_ar'},
+                {data: 'product_name', name: 'product_name'},
                 {data: 'sell_price', name: 'sell_price'},
                 {data: 'factory_id', name: 'factory_id'},
+                {data: 'unit_id', name: 'unit_id'},
                 // {data: 'actions', name: 'actions'},
             ]
         });

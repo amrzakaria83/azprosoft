@@ -29,5 +29,14 @@ class Emangeremp extends SqlServerModel
      * @var bool
      */
     public $timestamps = false;  // Set to true if your table has created_at/updated_at
+    
+     // Disable lazy loading to prevent N+1 issues
+     protected $with = [];
+
+     // Only include frequently used columns
+    //  protected $fillable = [
+    //      'product_id',
+
+    //  ];
 }
 
