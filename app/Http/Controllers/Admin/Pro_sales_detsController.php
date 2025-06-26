@@ -201,7 +201,6 @@ class Pro_sales_detsController extends Controller
     {
         return view('admin.pro_sales_det.reportprodsaledet');
     }
-
     public function indexprodsaledet($from_time, $to_date)
     {
         // Set execution limits
@@ -240,12 +239,15 @@ class Pro_sales_detsController extends Controller
                     
                 foreach ($salesBatch as $sale) {
                     $productName = $sale->getprod->product_name_en ?? 'Unknown';
+                    $productId = $sale->getprod->product_id ?? 0; // Fixed variable assignment
                     $siteId = $sale->getsale_site->store_id ?? 'Unknown';
                     $amount = (float)$sale->amount;
                     
                     // Initialize product entry if not exists
-                    if (!isset($productReport[$productName])) {
-                        $productReport[$productName] = [
+                    if (!isset($productReport[$productId])) {
+                        $productReport[$productId] = [
+                            'product_id' => $productId,
+                            'product_name' => $productName,
                             'sell_price' => $sale->getprod->sell_price ?? 0,
                             'total_sales_amount' => 0,
                             'total_prod_amount' => 0,
@@ -254,16 +256,16 @@ class Pro_sales_detsController extends Controller
                     }
                     
                     // Update sales totals
-                    $productReport[$productName]['total_sales_amount'] += $amount;
+                    $productReport[$productId]['total_sales_amount'] += $amount;
                     
                     // Initialize site entry if not exists
-                    if (!isset($productReport[$productName]['sites'][$siteId])) {
-                        $productReport[$productName]['sites'][$siteId] = [
+                    if (!isset($productReport[$productId]['sites'][$siteId])) {
+                        $productReport[$productId]['sites'][$siteId] = [
                             'sales_amount' => 0,
                             'prod_amount' => 0
                         ];
                     }
-                    $productReport[$productName]['sites'][$siteId]['sales_amount'] += $amount;
+                    $productReport[$productId]['sites'][$siteId]['sales_amount'] += $amount;
                     
                     $totalProcessed++;
                 }
@@ -289,13 +291,16 @@ class Pro_sales_detsController extends Controller
                     ->cursor();
                     
                 foreach ($amountsBatch as $amount) {
+                    $productId = $amount->product_id ?? 0;
                     $productName = $amount->getprod->product_name_en ?? 'Unknown';
                     $siteId = $amount->getsite->store_id ?? 'Unknown';
                     $prodAmount = (float)$amount->prod_amount;
                     
                     // Initialize product entry if not exists
-                    if (!isset($productReport[$productName])) {
-                        $productReport[$productName] = [
+                    if (!isset($productReport[$productId])) {
+                        $productReport[$productId] = [
+                            'product_id' => $productId,
+                            'product_name' => $productName,
                             'sell_price' => $amount->getprod->sell_price ?? 0,
                             'total_sales_amount' => 0,
                             'total_prod_amount' => 0,
@@ -304,16 +309,16 @@ class Pro_sales_detsController extends Controller
                     }
                     
                     // Update product amount totals
-                    $productReport[$productName]['total_prod_amount'] += $prodAmount;
+                    $productReport[$productId]['total_prod_amount'] += $prodAmount;
                     
                     // Initialize site entry if not exists
-                    if (!isset($productReport[$productName]['sites'][$siteId])) {
-                        $productReport[$productName]['sites'][$siteId] = [
+                    if (!isset($productReport[$productId]['sites'][$siteId])) {
+                        $productReport[$productId]['sites'][$siteId] = [
                             'sales_amount' => 0,
                             'prod_amount' => 0
                         ];
                     }
-                    $productReport[$productName]['sites'][$siteId]['prod_amount'] += $prodAmount;
+                    $productReport[$productId]['sites'][$siteId]['prod_amount'] += $prodAmount;
                 }
                 
                 unset($amountsBatch);
@@ -323,7 +328,7 @@ class Pro_sales_detsController extends Controller
 
         // Format the final output
         $formattedReport = [];
-        foreach ($productReport as $productName => $data) {
+        foreach ($productReport as $productId => $data) {
             // Format site data for this product
             $siteData = [];
             foreach ($data['sites'] as $siteId => $amounts) {
@@ -335,7 +340,8 @@ class Pro_sales_detsController extends Controller
             }
             
             $formattedReport[] = [
-                'product_name' => $productName,
+                'product_id' => $productId,
+                'product_name' => $data['product_name'],
                 'sell_price' => $data['sell_price'],
                 'total_sales_amount' => $data['total_sales_amount'],
                 'total_prod_amount' => $data['total_prod_amount'],
@@ -359,6 +365,164 @@ class Pro_sales_detsController extends Controller
             ->with('message', 'تم الاضافة بنجاح')
             ->with('status', 'success');
     }
+
+    // public function indexprodsaledet($from_time, $to_date)
+    // {
+    //     // Set execution limits
+    //     set_time_limit(0);
+    //     ini_set('memory_limit', '-1');
+        
+    //     // Define file path
+    //     $directory = storage_path('app/');
+    //     $filename = 'temp.json';
+    //     $filepath = $directory . $filename;
+        
+    //     // Ensure directory exists
+    //     if (!file_exists($directory)) {
+    //         mkdir($directory, 0755, true);
+    //     }
+
+    //     // Initialize data aggregators
+    //     $productReport = [];
+    //     $batchSize = 2000;
+    //     $totalProcessed = 0;
+
+    //     // 1. First process sales data
+    //     $salesMinMax = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
+    //         ->selectRaw('MIN(sales_d_id) as min_id, MAX(sales_d_id) as max_id')
+    //         ->first();
+
+    //     if ($salesMinMax) {
+    //         for ($id = $salesMinMax->min_id; $id <= $salesMinMax->max_id; $id += $batchSize) {
+    //             $batchEnd = $id + $batchSize - 1;
+                
+    //             $salesBatch = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
+    //                 ->whereBetween('sales_d_id', [$id, $batchEnd])
+    //                 ->with(['getsale_site:store_id,sales_id', 'getprod:product_id,product_name_en,sell_price'])
+    //                 ->select(['sales_d_id', 'amount', 'product_id', 'sales_id'])
+    //                 ->cursor();
+                    
+    //             foreach ($salesBatch as $sale) {
+    //                 $productName = $sale->getprod->product_name_en ?? 'Unknown';
+    //                 $siteId = $sale->getsale_site->store_id ?? 'Unknown';
+    //                 $amount = (float)$sale->amount;
+                    
+    //                 // Initialize product entry if not exists
+    //                 if (!isset($productReport[$productName])) {
+    //                     $productReport[$productName] = [
+    //                         'sell_price' => $sale->getprod->sell_price ?? 0,
+    //                         'total_sales_amount' => 0,
+    //                         'total_prod_amount' => 0,
+    //                         'sites' => []
+    //                     ];
+    //                 }
+                    
+    //                 // Update sales totals
+    //                 $productReport[$productName]['total_sales_amount'] += $amount;
+                    
+    //                 // Initialize site entry if not exists
+    //                 if (!isset($productReport[$productName]['sites'][$siteId])) {
+    //                     $productReport[$productName]['sites'][$siteId] = [
+    //                         'sales_amount' => 0,
+    //                         'prod_amount' => 0
+    //                     ];
+    //                 }
+    //                 $productReport[$productName]['sites'][$siteId]['sales_amount'] += $amount;
+                    
+    //                 $totalProcessed++;
+    //             }
+                
+    //             unset($salesBatch);
+    //             gc_collect_cycles();
+    //         }
+    //     }
+
+    //     // 2. Then process product amounts data
+    //     $amountsMinMax = Pro_prod_amount::whereBetween('ins_date', [$from_time, $to_date])
+    //         ->selectRaw('MIN(id) as min_id, MAX(id) as max_id')
+    //         ->first();
+
+    //     if ($amountsMinMax) {
+    //         for ($id = $amountsMinMax->min_id; $id <= $amountsMinMax->max_id; $id += $batchSize) {
+    //             $batchEnd = $id + $batchSize - 1;
+                
+    //             $amountsBatch = Pro_prod_amount::whereBetween('ins_date', [$from_time, $to_date])
+    //                 ->whereBetween('id', [$id, $batchEnd])
+    //                 ->with(['getprod:product_id,product_name_en,sell_price', 'getsite:store_id,store_name'])
+    //                 ->select(['id', 'prod_amount', 'product_id', 'store_id'])
+    //                 ->cursor();
+                    
+    //             foreach ($amountsBatch as $amount) {
+    //                 $productName = $amount->getprod->product_name_en ?? 'Unknown';
+    //                 $siteId = $amount->getsite->store_id ?? 'Unknown';
+    //                 $prodAmount = (float)$amount->prod_amount;
+                    
+    //                 // Initialize product entry if not exists
+    //                 if (!isset($productReport[$productName])) {
+    //                     $productReport[$productName] = [
+    //                         'sell_price' => $amount->getprod->sell_price ?? 0,
+    //                         'total_sales_amount' => 0,
+    //                         'total_prod_amount' => 0,
+    //                         'sites' => []
+    //                     ];
+    //                 }
+                    
+    //                 // Update product amount totals
+    //                 $productReport[$productName]['total_prod_amount'] += $prodAmount;
+                    
+    //                 // Initialize site entry if not exists
+    //                 if (!isset($productReport[$productName]['sites'][$siteId])) {
+    //                     $productReport[$productName]['sites'][$siteId] = [
+    //                         'sales_amount' => 0,
+    //                         'prod_amount' => 0
+    //                     ];
+    //                 }
+    //                 $productReport[$productName]['sites'][$siteId]['prod_amount'] += $prodAmount;
+    //             }
+                
+    //             unset($amountsBatch);
+    //             gc_collect_cycles();
+    //         }
+    //     }
+
+    //     // Format the final output
+    //     $formattedReport = [];
+    //     foreach ($productReport as $productName => $data) {
+    //         // Format site data for this product
+    //         $siteData = [];
+    //         foreach ($data['sites'] as $siteId => $amounts) {
+    //             $siteData[] = [
+    //                 'site_id' => $siteId,
+    //                 'sales_amount' => $amounts['sales_amount'],
+    //                 'prod_amount' => $amounts['prod_amount']
+    //             ];
+    //         }
+            
+    //         $formattedReport[] = [
+    //             'product_name' => $productName,
+    //             'sell_price' => $data['sell_price'],
+    //             'total_sales_amount' => $data['total_sales_amount'],
+    //             'total_prod_amount' => $data['total_prod_amount'],
+    //             'sites' => $siteData
+    //         ];
+    //     }
+
+    //     // Save to file
+    //     file_put_contents($filepath, json_encode([
+    //         'products' => $formattedReport,
+    //         'summary' => [
+    //             'start_from' => $from_time,
+    //             'end_to' => $to_date,
+    //             'total_products' => count($formattedReport),
+    //             'total_records' => $totalProcessed,
+    //             'generated_at' => now()->toDateTimeString()
+    //         ]
+    //     ], JSON_PRETTY_PRINT));
+
+    //     return redirect('admin/pro_sales_dets/indexreportsale')
+    //         ->with('message', 'تم الاضافة بنجاح')
+    //         ->with('status', 'success');
+    // }
     
     public function export(Request $request)
     {
@@ -372,6 +536,7 @@ class Pro_sales_detsController extends Controller
 
             $exportData = collect($data)->map(function($item) {
                 $row = [
+                    'product_id' => $item['product_id'] ?? 'N/A',
                     'Product Name' => $item['product_name'] ?? 'N/A',
                     'Sell Price' => $item['sell_price'] ?? 0,
                     'Total Sales Amount' => $item['total_sales_amount'] ?? 0,
@@ -461,6 +626,7 @@ class Pro_sales_detsController extends Controller
 
             $exportData = collect($data['products'] ?? [])->map(function($item) use ($stores, $allStoreNames) {
                 $row = [
+                    'product_id' => $item['product_id'] ?? 'N/A',
                     'Product Name' => $item['product_name'] ?? 'N/A',
                     'Total Sales Amount' => isset($item['total_sales_amount']) ? number_format($item['total_sales_amount'], 2) : 0,
                     'Total Product Amount' => isset($item['total_prod_amount']) ? number_format($item['total_prod_amount'], 2) : 0,
@@ -487,6 +653,7 @@ class Pro_sales_detsController extends Controller
 
             // Build headers in correct order
             $headers = [
+                'product_id',
                 'Product Name',
                 'Total Sales Amount',
                 'Total Product Amount',

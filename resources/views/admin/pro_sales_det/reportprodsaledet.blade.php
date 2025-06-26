@@ -103,21 +103,23 @@
                                 <input class="form-control form-control-solid ps-12" name="to_date" placeholder="{{trans('lang.end_to')}}" id="kt_datepicker_2" />
                             </div>
                         </div>
-                        <div class="col-sm-4">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2"></label>
+                        <!-- <div class="col-sm-4">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.type_type')}}</label>
                             <div class="col-sm-8 d-flex align-items-center">
-                                <button type="button" class="btn btn-success btn-lg " id="searchbtn" >
-                                    Search
-                                </button> 
+                                <select  class="form-select form-select-lg form-select-solid text-center" id="drug"  name="drug" value="" >
+                                        <option value="">all</option>
+                                        <option value="0">Cosmotics</option>
+                                        <option value="1">Drugs</option>
+                                    </select>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col-sm-2">
                             <label class="col-sm-8 fw-semibold fs-6 mb-2"></label>
                                 <div class="col-sm-8 d-flex align-items-center">
-                                    <a href="{{route('admin.pro_sales_dets.reportprodsaledet')}}" class="btn btn-primary btn-lg " id="searchbtn" >
-                                        refresh
-                                    </a> 
-                                </div> 
+                                    <button type="button" class="btn btn-success btn-lg " id="searchbtn" >
+                                        Search
+                                    </button> 
+                                </div>
                         </div>
 
                     </div>

@@ -106,6 +106,7 @@
                     <table class="table align-middle table-rounded table-striped table-row-dashed fs-6" id="kt_datatable_table">
                         <thead class="bg-light-dark pe-3">
                             <tr class="text-center text-dark fw-bold fs-4 text-uppercase gs-0">
+                                <th class="min-w-125px text-center">code</th>
                                 <th class="min-w-125px text-center">{{trans('lang.product')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.sell_price')}} {{trans('lang.unit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.sales')}}</th>
@@ -168,6 +169,14 @@ $(document).ready(function() {
 
     // First build the columns configuration
     var columns = [
+        { 
+            data: 'product_id',
+            name: 'product_id',
+            render: function(data, type) {
+                return type === 'display' && data && data.length > 50 ? 
+                    data.substr(0, 50) + '...' : (data || 'N/A');
+            }
+        },
         { 
             data: 'product_name',
             name: 'product_name',

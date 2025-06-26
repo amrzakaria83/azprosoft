@@ -47,6 +47,7 @@ ssh -R 63306:localhost:1433 az3331515.com@ssh.us.stackcp.com
 
 
 
+
 C:\>ssh-keygen -t ed25519
 Generating public/private ed25519 key pair.
 Enter file in which to save the key (C:\Users\AMR/.ssh/id_ed25519):
@@ -91,3 +92,90 @@ azproaz-353039342873
 a2wo4h13ye
 
 
+SQLSTATE[IMSSP]: This extension requires the Microsoft ODBC Driver for SQL Server to communicate with SQL Server. Access the following URL to download the ODBC Driver for SQL Server for x64: https://go.microsoft.com/fwlink/?LinkId=163712
+
+
+ssh
+ssh-keygen -t rsa -b 4096
+The key fingerprint is:
+SHA256:Q6N1Ys0gTkZAGezTI2ws/jKMRoKp2F2ffohbr/vonsY AMR@DESKTOP-PMNDNNT
+The key's randomart image is:
++---[RSA 4096]----+
+|   o+== .        |
+|    o+ . +       |
+|   + .. * +      |
+|  . B o= +       |
+|.o o o..S        |
+|+..   .  .       |
+|=+ o . +.o       |
+|+.= o ..E+.      |
+|.  o  .*O=o      |
++----[SHA256]-----+
+ssh-keygen -t rsa -b 4096 -C "az3331515.com@ssh.us.stackcp.com" -f ~/.ssh/azpro.pub
+AMR@DESKTOP-PMNDNNT MINGW64 /c/xampp/htdocs/azprosoft (master)
+$ ssh-keygen -t rsa -b 4096 -C "az3331515.com@ssh.us.stackcp.com" -f ~/.ssh/azpro.pub
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /c/Users/AMR/.ssh/azpro.pub
+Your public key has been saved in /c/Users/AMR/.ssh/azpro.pub.pub
+The key fingerprint is:
+SHA256:NoEzevifL1umOLuDsp2amWLET9eytVoMmiw6rREkwsY az3331515.com@ssh.us.stackcp.com
+The key's randomart image is:
++---[RSA 4096]----+
+|                 |
+|o      .         |
+|oE    + .        |
+|=    o o .       |
+|o   o.o S        |
+| +..o=o+ .       |
+|ooo+..=o. o      |
+|+o+*.o++.=       |
+|++*+o.===+.      |
++----[SHA256]-----+
+
+AMR@DESKTOP-PMNDNNT MINGW64 /c/xampp/htdocs/azprosoft (master)
+$
+
+ssh-keygen -t rsa -b 4096
+chmod 600 azpro      # Private key (read/write only by owner)
+chmod 644 azpro.pub  # Public key
+
+eval "$(ssh-agent -s)"
+ssh-add azpro
+
+$ eval "$(ssh-agent -s)"
+Agent pid 1389
+
+$ ssh-add azpro
+Identity added: azpro (AMR@DESKTOP-PMNDNNT)
+
+autossh -M 0 -f -N -i azpro -L 63306:AMR@DESKTOP-PMNDNNT:1433 az3331515.com@ssh.us.stackcp.com
+ssh -M 0 -f -N -i azpro -L 63306:AMR@DESKTOP-PMNDNNT:1433 az3331515.com@ssh.us.stackcp.com
+
+autossh -M 0 -f -N -i azpro -L 63307:DESKTOP-PMNDNNT:1433 az3331515.com@ssh.us.stackcp.com
+
+
+
+ssh -i azpro -N -L 63307:DESKTOP-PMNDNNT:1433 az3331515.com@ssh.us.stackcp.com
+ssh -i azpro -N -L 63306:DESKTOP-PMNDNNT:1433 az3331515.com@ssh.us.stackcp.com
+
+ssh -i azpro -N -L 63306:localhost:1433 az3331515.com@ssh.us.stackcp.com
+
+$ cat azpro.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDcdQEaEMiskbLSoet4+1FAjBfV+aJiZTRKFx+ElQDx0OzbCGuDdk/ntWQa99ok0Xfxxdvr092+zW5xQBAPSgd5fuZ9JYKnJ20djEVa/Qzmh0om70R6+J8ClFSCHzds2dMoCmN92ZW2Eu+zF9BIN+nq18XUWjzMHiM7kMm06PcM/Fjp+5LSM95a+d4vn/FZybxxh9jyWynEtvEcVr93ma3UJ4dRPtjR8KHL4/z9Y2Gvb72n8fnYzc2/tz9sVRwgNdetnFO32YkykvPI8jj+b6goXvrFR6JakfwVij55cQMNxahX7z9KcJzmUI9TUs9uL13wSM9xdQRX/OX6aejw+dCFLCMtajALRHNhppho/vF75/dYKGAHachZkF9TMWYF+rI/shYJOBIfrBKWbkDDrS7P9b4j3S8ciTZrO4atWVT5QmFF+oo5M2NHyI2DbRVZYfFxC24MQiXVDgEF0OMKvC92vXEFK7vqinqid2lun97hrD+V0Zcxw/bWVwepLO6TodbhMvXIuCkOvjn85ULXL7+/P8PdDEJQILJWG+TUfYCL9YhbmEESWsoT+cezVtwPYrky31hgL0nU6zZui7dbZBXCgmF0z64k6Id93y7mJGcX8xPl+c6DqriyCtIeCitEw0+xhQYE1aUftn4wZ/yfF34YpiqTRY40PInTf2d/yxC1hw== AMR@DESKTOP-PMNDNNT
+
+
+
+mkdir -p ~/.ssh
+echo "PASTE_YOUR_PUBLIC_KEY_HERE" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+
+
+Host sql-tunnel
+    HostName ssh.us.stackcp.com
+    User az3331515.com
+    IdentityFile ~/.ssh/azpro
+    LocalForward 63306 localhost:1433
+    ServerAliveInterval 60
+    ExitOnForwardFailure yes
