@@ -12,6 +12,7 @@ use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
 
+
 use Validator;
 use Auth;
 class Pro_customersController extends Controller

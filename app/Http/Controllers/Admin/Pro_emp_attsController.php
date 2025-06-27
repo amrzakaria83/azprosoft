@@ -12,71 +12,181 @@ use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
 
+use Illuminate\Support\Carbon;
+
 use Validator;
 use Auth;
+
 class Pro_emp_attsController extends Controller
 {
+    // public function index(Request $request)
+    // {
+    //     set_time_limit(3600);
+    //     ini_set('max_execution_time', 4800);
+    //     ini_set('memory_limit', '4096M');
+    //     // $data = Pro_emp_att::take(100)->get();
+    //     if ($request->ajax()) {
+    //         $data = Pro_emp_att::query();
+
+            
+            
+
+    //         return Datatables::of($data)
+
+    //             ->addColumn('checkbox', function($row){
+    //                 $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
+    //                                 <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
+    //                             </div>';
+    //                 return $checkbox;
+    //             })
+    //             ->addColumn('name_ar', function($row){
+    //                 $name_ar = $row->getemangeremp->emp_name ?? ($row->getemangeremp->emp_name_en ?? '<span class="text-info">'.trans('lang.without').'</span>');
+    //                 // $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">' . ($row->getemangeremp->emp_name_en ? $row->getemangeremp->emp_name_en : 0) . '</a></div>';
+    //                 // $name_ar .= '<br><span>'.$row->product_name.'</span>';
+    //                 return $name_ar;
+    //             })
+    //             ->addColumn('date', function($row){
+    //                 $date = $row->date ?? '';
+    //                 return $date;
+    //             })
+    //             ->addColumn('type', function($row) {
+    //                 $type = $row->type ?? '';
+                    
+    //                 if ($type == 'out') {
+    //                     // Find the previous 'in' record for the same employee
+    //                     $previousIn = Pro_emp_att::where('emp_id', $row->emp_id)
+    //                         ->where('type', 'in')
+    //                         ->where('date', '<=', $row->date)
+    //                         ->orderBy('date', 'desc')
+    //                         ->first();
+                            
+    //                     if ($previousIn) {
+    //                         $inTime = Carbon::parse($previousIn->date);
+    //                         $outTime = Carbon::parse($row->date);
+    //                         $duration = $outTime->diff($inTime);
+                            
+    //                         return sprintf(
+    //                             "%s (%dh %02dm)", 
+    //                             $type, 
+    //                             $duration->h, 
+    //                             $duration->i
+    //                         );
+    //                     }
+    //                 }
+                    
+    //                 return $type;
+    //             })
+    //             // ->addColumn('type', function($row){
+    //             //     $type = $row->type ?? ''; // text is in & out
+    //             //     return $type;
+    //             // })
+    //             ->addColumn('insert_emp_id', function($row){
+    //                 $insert_emp_id = $row->getempadd->emp_name ?? $row->getempadd->emp_name_en ?? '<span class="text-info">'.trans('lang.without').'</span>';
+    //                 return $insert_emp_id;
+    //             })
+    //             ->addColumn('store_id', function($row){
+    //                 $store_id = $row->getstore->store_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
+    //                 return $store_id;
+    //             })
+                
+                
+    //             ->filter(function ($instance) use ($request) {
+    //                 if (!empty($request->get('from_time') || $request->get('to_date'))) {
+    //                     $instance->whereDate('date', '>=', $request->get('from_time'));
+    //                     $instance->whereDate('date', '<=', $request->get('to_date'));
+    //                 }
+                    
+    //                 if (!empty($request->get('search'))) {
+    //                     $instance->where(function($query) use($request) {
+    //                         $search = $request->get('search');
+    //                         $query->whereHas('getemangeremp', function($q) use($search) {
+    //                             $q->where('emp_name', 'LIKE', "%$search%")
+    //                             ->orWhere('emp_name_en', 'LIKE', "%$search%");
+    //                         });
+    //                     });
+    //                 }
+    //             })
+    //             ->rawColumns(['name_ar','date','type','insert_emp_id','store_id','checkbox'])
+    //             ->make(true);
+    //     }
+    //     return view('admin.pro_emp_att.index');
+    // }
     public function index(Request $request)
     {
         set_time_limit(3600);
         ini_set('max_execution_time', 4800);
         ini_set('memory_limit', '4096M');
-        // $data = Pro_emp_att::take(100)->get();
+    
         if ($request->ajax()) {
-            $data = Pro_emp_att::query();
-            // $data = $data->orderBy('sales_id', 'DESC');
-            return Datatables::of($data)
+            $data = Pro_emp_att::with(['getemangeremp', 'getempadd', 'getstore']);
 
+            return Datatables::of($data)
+                ->order(function ($query) {
+                    $query->orderBy('id', 'DESC');
+                })
                 ->addColumn('checkbox', function($row){
-                    $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
-                                    <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
-                                </div>';
-                    return $checkbox;
+                    return '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
+                                <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
+                            </div>';
                 })
                 ->addColumn('name_ar', function($row){
-                    $name_ar = $row->getemangeremp->emp_name ?? ($row->getemangeremp->emp_name_en ?? '<span class="text-info">'.trans('lang.without').'</span>');
-                    // $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">' . ($row->getemangeremp->emp_name_en ? $row->getemangeremp->emp_name_en : 0) . '</a></div>';
-                    // $name_ar .= '<br><span>'.$row->product_name.'</span>';
-                    return $name_ar;
+                    return $row->getemangeremp->emp_name ?? ($row->getemangeremp->emp_name_en ?? '<span class="text-info">'.trans('lang.without').'</span>');
                 })
                 ->addColumn('date', function($row){
-                    $date = $row->date ?? '';
-                    return $date;
+                    return $row->date ?? '';
                 })
-                ->addColumn('type', function($row){
-                    $type = $row->type ?? ''; // text is in & out
+                ->addColumn('type', function($row) {
+                    $type = $row->type ?? '';
+                    
+                    if ($type == 'out') {
+                        // Find the previous 'in' record for the same employee
+                        $previousIn = Pro_emp_att::where('emp_id', $row->emp_id)
+                            ->where('type', 'in')
+                            ->where('date', '<=', $row->date)
+                            ->orderBy('date', 'desc')
+                            ->first();
+                            
+                        if ($previousIn) {
+                            $inTime = Carbon::parse($previousIn->date);
+                            $outTime = Carbon::parse($row->date);
+                            $duration = $outTime->diff($inTime);
+                            
+                            return sprintf(
+                                "%s (%dh %02dm)", 
+                                $type, 
+                                $duration->h, 
+                                $duration->i
+                            );
+                        }
+                    }
+                    
                     return $type;
                 })
                 ->addColumn('insert_emp_id', function($row){
-                    $insert_emp_id = $row->getempadd->emp_name ?? $row->getempadd->emp_name_en ?? '<span class="text-info">'.trans('lang.without').'</span>';
-                    return $insert_emp_id;
+                    return $row->getempadd->emp_name ?? $row->getempadd->emp_name_en ?? '<span class="text-info">'.trans('lang.without').'</span>';
                 })
                 ->addColumn('store_id', function($row){
-                    $store_id = $row->getstore->store_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
-                    return $store_id;
+                    return $row->getstore->store_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
                 })
-                
-                // ->filter(function ($instance) use ($request) {
-                //     if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
-                //         $instance->where('is_active', $request->get('is_active'));
-                //     }
+                ->filter(function ($instance) use ($request) {
+                    if (!empty($request->get('from_time') || $request->get('to_date'))) {
+                        $instance->whereDate('date', '>=', $request->get('from_time'))
+                                 ->whereDate('date', '<=', $request->get('to_date'));
+                    }
                     
-
-                //     if (!empty($request->get('search'))) {
-                //             $instance->where(function($w) use($request){
-                //             $search = $request->get('search');
-                //             $w->orWhere('cust_name', 'LIKE', "%$search%")
-                //             ->orWhere('cust_tel1', 'LIKE', "%$search%")
-                //             ->orWhere('cust_tel2', 'LIKE', "%$search%");
-                //         });
-                //     }
-                // })
+                    if (!empty($request->get('search'))) {
+                        $instance->whereHas('getemangeremp', function($q) use($request) {
+                            $search = $request->get('search');
+                            $q->where('emp_name', 'LIKE', "%$search%")
+                              ->orWhere('emp_name_en', 'LIKE', "%$search%");
+                        });
+                    }
+                })
                 ->rawColumns(['name_ar','date','type','insert_emp_id','store_id','checkbox'])
                 ->make(true);
         }
         return view('admin.pro_emp_att.index');
     }
-
     public function create()
     {
         return view('admin.pro_emp_att.create');

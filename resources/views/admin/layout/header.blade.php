@@ -100,6 +100,14 @@
                       <span class="menu-title fs-3">{{trans('lang.all')}} {{trans('lang.employees')}}</span>
                     </a>
                   </li>
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_emp_atts.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.attendance')}}</span>
+                    </a>
+                  </li>
                 
                 </ul>
               </li>
