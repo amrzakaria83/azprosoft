@@ -319,7 +319,10 @@ return [
     "role_id" => "Roles",
     "without" => "Without",
     "summary" => "Summary",
-
+    "cash" => "Cash",
+    "delayed" => "Delayed",
+    "delivry" => "Delivry",
+    "visa" => "Visa",
 
 
 

@@ -33,12 +33,13 @@ class Pro_productsController extends Controller
                     return $checkbox;
                 })
                 ->addColumn('name_ar', function($row){
-                    $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->product_name_en.'</a></div>';
+                    $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'
+                    .$row->product_name_en ?? trans('lang.without').'</a></div>';
                     // $name_ar .= '<br><span>'.$row->product_name.'</span>';
                     return $name_ar;
                 })
                 ->addColumn('product_name', function($row){
-                    $product_name = $row->product_name;
+                    $product_name = $row->product_name ?? trans('lang.without');
                     return $product_name;
                 })
                 ->addColumn('sell_price', function($row){

@@ -39,6 +39,7 @@ class Pro_sales_h extends SqlServerModel
         'inv_no',
         'cust_id',
         'store_id',
+        'kind', // 1 = cash - 2 = delayed - 3 = delivery - 4 = visa 
     ];
     public function getcust()
     {

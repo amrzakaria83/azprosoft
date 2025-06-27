@@ -316,6 +316,10 @@ return [
     "role_id" => "الصلاحيات",
     "without" => "بدون",
     "summary" => "ملخص",
+    "cash" => "نقدى",
+    "delayed" => "آجل",
+    "delivry" => "توصيل",
+    "visa" => "فيزا",
 
 
 ];

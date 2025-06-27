@@ -80,10 +80,13 @@ class Pro_sales_hsController extends Controller
         
         // $data = Pro_sales_h::take(100)->get();
         if ($request->ajax()) {
-            $data = Pro_sales_h::query();
+            $data = Pro_sales_h::with(['getcust']);
+
             // $data = $data->sortby('sales_id', 'DESC');
             return Datatables::of($data)
-            
+            ->order(function ($query) {
+                    $query->orderBy('inv_no', 'DESC');
+                })
             ->addColumn('checkbox', function($row){
                     $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
                                     <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
@@ -112,6 +115,22 @@ class Pro_sales_hsController extends Controller
                     $store_id = $row->getstore->store_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
                     return $store_id;
                 })
+                
+                ->addColumn('kind', function($row){// 1 = cash - 2 = delayed - 3 = delivery - 4 = visa 
+                    $kind_t = $row->kind;
+                    if ($kind_t == 1) {
+                        $kind = '<span class="text-success">'.trans('lang.cash').'</span>';
+                    } elseif ($kind_t == 2) {
+                        $kind = '<span class="text-danger">'.trans('lang.delayed').'</span>';
+                    } elseif ($kind_t == 3) {
+                        $kind = '<span class="text-info">'.trans('lang.delivry').'</span>';
+                    } elseif ($kind_t == 4) {
+                        $kind = '<span class="text-dark">'.trans('lang.visa').'</span>';
+                    } else {
+                        $kind = '<span class="text-info">'.trans('lang.without').'</span>';
+                    }
+                    return $kind;
+                })
                 // ->addColumn('actions', function($row){
                 //     $actions = '<div class="ms-2">
                 //                 <a href="'.route('admin.pro_sales_hs.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -120,7 +139,6 @@ class Pro_sales_hsController extends Controller
                 //                 <a href="'.route('admin.pro_sales_hs.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                 //                     <i class="bi bi-pencil-square fs-1x"></i>
                 //                 </a>
-                                
                 //             </div>';
                 //     return $actions;
                 // })
@@ -139,7 +157,7 @@ class Pro_sales_hsController extends Controller
                         });
                     }
                 })
-                ->rawColumns(['name_ar','inv_total','cust_id','date','store_id','checkbox','actions'])
+                ->rawColumns(['name_ar','inv_total','cust_id','date','kind','store_id','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.pro_sales_h.index');

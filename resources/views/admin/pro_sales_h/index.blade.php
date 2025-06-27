@@ -83,6 +83,7 @@
                                 <th class="min-w-125px text-center">{{trans('lang.numb')}} {{trans('lang.invoice')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.value')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.customer')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.type_type')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.store')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
                             </tr>
@@ -202,6 +203,7 @@
                 {data: 'name_ar', name: 'name_ar',orderable: true},
                 {data: 'inv_total', name: 'inv_total'},
                 {data: 'cust_id', name: 'cust_id'},
+                {data: 'kind', name: 'kind'},
                 {data: 'store_id', name: 'store_id'},
                 {data: 'date', name: 'date'},
                 // {data: 'actions', name: 'actions'},

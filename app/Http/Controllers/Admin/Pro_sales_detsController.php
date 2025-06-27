@@ -35,10 +35,12 @@ class Pro_sales_detsController extends Controller
         ini_set('memory_limit', '4096M');
         // $data = Pro_sales_det::take(100)->get();
         if ($request->ajax()) {
-            $data = Pro_sales_det::query();
+            $data = Pro_sales_det::with(['getprod','getsale_h']);
             // $data = $data->orderBy('sales_d_id', 'DESC');
             return Datatables::of($data)
-
+                ->order(function ($query) {
+                    $query->orderBy('sales_id', 'DESC');
+                })
                 ->addColumn('checkbox', function($row){
                     $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
                                     <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
