@@ -21,7 +21,7 @@ class Emangeremp extends SqlServerModel
      *
      * @var string
      */
-    protected $primaryKey = 'id';  // Replace with your primary key if different
+    protected $primaryKey = 'emp_id';  // Replace with your primary key if different
     
     /**
      * Indicates if the model should be timestamped.
@@ -34,9 +34,11 @@ class Emangeremp extends SqlServerModel
      protected $with = [];
 
      // Only include frequently used columns
-    //  protected $fillable = [
-    //      'product_id',
+     protected $fillable = [
+         'emp_id',
+         'emp_name',
+         'emp_name_en',
 
-    //  ];
+     ];
 }
 

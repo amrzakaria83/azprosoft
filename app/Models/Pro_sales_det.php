@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SqlServer\SqlServerModel;
+use Illuminate\Support\Facades\DB;
 
 class Pro_sales_det extends SqlServerModel
 {
@@ -49,7 +50,7 @@ class Pro_sales_det extends SqlServerModel
         'select' => [
             'idx_sales_det_sales_id', // For queries filtering by sales_id
             'idx_sales_det_composite' // For queries using both sales_id and sales_d_id
-           ],
+            ],
         'join' => [
             'idx_sales_det_product_id' // For joins on product_id
         ]

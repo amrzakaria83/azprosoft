@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SqlServer\SqlServerModel;
 
-class Pro_prod_amount extends SqlServerModel
+class Pro_emp_att extends SqlServerModel
 {
     use HasFactory;
     /**
@@ -14,7 +14,7 @@ class Pro_prod_amount extends SqlServerModel
      *
      * @var string
      */
-    protected $table = 'prod_amount';  // Replace with your actual table name
+    protected $table = 'emp_att';  // Replace with your actual table name
     
     /**
      * The primary key for the model.
@@ -36,22 +36,23 @@ class Pro_prod_amount extends SqlServerModel
     // Only include frequently used columns
     protected $fillable = [
         'id',
-        'product_id',
-        'prod_amount',
+        'emp_id',
+        'date',
+        'type', // text is in & out
+        'insert_emp_id',
         'store_id',
-        'ins_date',
-
     ];
-
-    public function getprod()
-    {
-        return $this->belongsTo(Pro_product::class, 'product_id');
-    }
-
-    public function getsite()
+    public function getstore()
     {
         return $this->belongsTo(Pro_store::class, 'store_id');
     }
-
+        public function getemangeremp()
+    {
+        return $this->belongsTo(Emangeremp::class, 'emp_id');
+    }
+    public function getempadd()
+    {
+        return $this->belongsTo(Emangeremp::class, 'insert_emp_id');
+    }
 }
 

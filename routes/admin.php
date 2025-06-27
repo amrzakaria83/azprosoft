@@ -179,6 +179,17 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             
         });
 
+        Route::name('pro_emp_atts.')->prefix('pro_emp_atts')->group(function(){
+            Route::get('/','Pro_emp_attsController@index')->name('index');
+            Route::get('/show/{id}','Pro_emp_attsController@show')->name('show');
+            Route::post('/delete', 'Pro_emp_attsController@destroy')->name('delete');
+            Route::get('/create','Pro_emp_attsController@create')->name('create');
+            Route::post('/store','Pro_emp_attsController@store')->name('store');
+            Route::get('/edit/{id}', 'Pro_emp_attsController@edit')->name('edit');
+            Route::post('/update', 'Pro_emp_attsController@update')->name('update');
+            
+        });
+
         
     });
 
