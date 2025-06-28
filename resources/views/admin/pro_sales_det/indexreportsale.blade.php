@@ -263,27 +263,45 @@ $(document).ready(function() {
                 return content;
             }
         },
-        { 
+        {
             data: 'sell_price',
             name: 'sell_price',
             render: function(data) {
-                return data ? + parseFloat(data).toFixed(2) : 0;
+                return data ? parseFloat(data).toFixed(2) : 0;
             },
-            className: 'text-center'
+            className: 'text-center',
+            createdCell: function (td, cellData, rowData, row, col) {
+                if (cellData > 250) {
+                    $(td).addClass('text-info');
+                }
+            }
         },
+        // { 
+        //     data: 'sell_price',
+        //     name: 'sell_price',
+        //     render: function(data) {
+        //         return data ? + parseFloat(data).toFixed(2) : 0;
+        //     },
+        //     className: 'text-center'
+        // },
         { 
             data: 'total_sales_amount',
             name: 'total_sales_amount',
             render: $.fn.dataTable.render.number(',', '.', 2),
             defaultContent: 0,
-            className: 'text-center'
+            className: 'text-center',
         },
         { 
             data: 'total_prod_amount',
             name: 'total_prod_amount',
             render: $.fn.dataTable.render.number(',', '.', 2),
             defaultContent: 0,
-            className: 'text-center'
+            className: 'text-center',
+            createdCell: function (td, cellData, rowData, row, col) {
+                if (cellData < 3) {
+                    $(td).addClass('text-info');
+                }
+            }
         }
         ];
 
