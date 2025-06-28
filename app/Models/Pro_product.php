@@ -43,7 +43,7 @@ class Pro_product extends SqlServerModel
         'unit3_factor',
         'unit2_price',
         'unit3_price',
-        'drug', //  1 drug or 0 = non drug
+        'drug', //  1 =  drug or 0 = non drug
         // Add other frequently used columns
     ];
         public function getfactory()

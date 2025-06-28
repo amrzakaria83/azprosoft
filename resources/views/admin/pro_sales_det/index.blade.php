@@ -83,10 +83,10 @@
                                 <th class="min-w-125px text-center">{{trans('lang.product')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.quantity')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.sell_price')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.numb')}} {{trans('lang.item')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.numb')}} {{trans('lang.invoice')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.sell_price')}} {{trans('lang.unit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.numb')}} {{trans('lang.item')}}</th>
                             </tr>
                             <!--end::Table row-->
                         </thead>
@@ -219,11 +219,7 @@ $(function () {
                 name: 'total_item',
                 orderable: true 
             },
-            { 
-                data: 'sales_d_id', 
-                name: 'sales_d_id',
-                orderable: true 
-            },
+            
             { 
                 data: 'sales_id', 
                 name: 'sales_id',
@@ -241,6 +237,11 @@ $(function () {
                 render: function(data) {
                     return data ? moment(data).format('YYYY-MM-DD HH:mm') : '';
                 }
+            },
+            { 
+                data: 'sales_d_id', 
+                name: 'sales_d_id',
+                orderable: true 
             }
         ],
         

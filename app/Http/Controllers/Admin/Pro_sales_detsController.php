@@ -235,13 +235,14 @@ class Pro_sales_detsController extends Controller
                 
                 $salesBatch = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
                     ->whereBetween('sales_d_id', [$id, $batchEnd])
-                    ->with(['getsale_site:store_id,sales_id', 'getprod:product_id,product_name_en,sell_price'])
+                    ->with(['getsale_site:store_id,sales_id', 'getprod:product_id,product_name_en,sell_price,drug'])
                     ->select(['sales_d_id', 'amount', 'product_id', 'sales_id'])
                     ->cursor();
                     
                 foreach ($salesBatch as $sale) {
                     $productName = $sale->getprod->product_name_en ?? 'Unknown';
                     $productId = $sale->getprod->product_id ?? 0; // Fixed variable assignment
+                    $productdrug = $sale->getprod->drug ?? 0; //  1 drug or 0 = non drug
                     $siteId = $sale->getsale_site->store_id ?? 'Unknown';
                     $amount = (float)$sale->amount;
                     
@@ -250,6 +251,7 @@ class Pro_sales_detsController extends Controller
                         $productReport[$productId] = [
                             'product_id' => $productId,
                             'product_name' => $productName,
+                            'drug' => $productdrug,//  1 drug or 0 = non drug
                             'sell_price' => $sale->getprod->sell_price ?? 0,
                             'total_sales_amount' => 0,
                             'total_prod_amount' => 0,
@@ -295,6 +297,7 @@ class Pro_sales_detsController extends Controller
                 foreach ($amountsBatch as $amount) {
                     $productId = $amount->product_id ?? 0;
                     $productName = $amount->getprod->product_name_en ?? 'Unknown';
+                    $productdrug = $amount->getprod->drug ?? 0; //  1 drug or 0 = non drug
                     $siteId = $amount->getsite->store_id ?? 'Unknown';
                     $prodAmount = (float)$amount->prod_amount;
                     
@@ -303,6 +306,7 @@ class Pro_sales_detsController extends Controller
                         $productReport[$productId] = [
                             'product_id' => $productId,
                             'product_name' => $productName,
+                            'drug' => $productdrug,//  1 drug or 0 = non drug
                             'sell_price' => $amount->getprod->sell_price ?? 0,
                             'total_sales_amount' => 0,
                             'total_prod_amount' => 0,
@@ -344,6 +348,7 @@ class Pro_sales_detsController extends Controller
             $formattedReport[] = [
                 'product_id' => $productId,
                 'product_name' => $data['product_name'],
+                'drug' => $data['drug'],
                 'sell_price' => $data['sell_price'],
                 'total_sales_amount' => $data['total_sales_amount'],
                 'total_prod_amount' => $data['total_prod_amount'],
@@ -368,163 +373,6 @@ class Pro_sales_detsController extends Controller
             ->with('status', 'success');
     }
 
-    // public function indexprodsaledet($from_time, $to_date)
-    // {
-    //     // Set execution limits
-    //     set_time_limit(0);
-    //     ini_set('memory_limit', '-1');
-        
-    //     // Define file path
-    //     $directory = storage_path('app/');
-    //     $filename = 'temp.json';
-    //     $filepath = $directory . $filename;
-        
-    //     // Ensure directory exists
-    //     if (!file_exists($directory)) {
-    //         mkdir($directory, 0755, true);
-    //     }
-
-    //     // Initialize data aggregators
-    //     $productReport = [];
-    //     $batchSize = 2000;
-    //     $totalProcessed = 0;
-
-    //     // 1. First process sales data
-    //     $salesMinMax = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
-    //         ->selectRaw('MIN(sales_d_id) as min_id, MAX(sales_d_id) as max_id')
-    //         ->first();
-
-    //     if ($salesMinMax) {
-    //         for ($id = $salesMinMax->min_id; $id <= $salesMinMax->max_id; $id += $batchSize) {
-    //             $batchEnd = $id + $batchSize - 1;
-                
-    //             $salesBatch = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
-    //                 ->whereBetween('sales_d_id', [$id, $batchEnd])
-    //                 ->with(['getsale_site:store_id,sales_id', 'getprod:product_id,product_name_en,sell_price'])
-    //                 ->select(['sales_d_id', 'amount', 'product_id', 'sales_id'])
-    //                 ->cursor();
-                    
-    //             foreach ($salesBatch as $sale) {
-    //                 $productName = $sale->getprod->product_name_en ?? 'Unknown';
-    //                 $siteId = $sale->getsale_site->store_id ?? 'Unknown';
-    //                 $amount = (float)$sale->amount;
-                    
-    //                 // Initialize product entry if not exists
-    //                 if (!isset($productReport[$productName])) {
-    //                     $productReport[$productName] = [
-    //                         'sell_price' => $sale->getprod->sell_price ?? 0,
-    //                         'total_sales_amount' => 0,
-    //                         'total_prod_amount' => 0,
-    //                         'sites' => []
-    //                     ];
-    //                 }
-                    
-    //                 // Update sales totals
-    //                 $productReport[$productName]['total_sales_amount'] += $amount;
-                    
-    //                 // Initialize site entry if not exists
-    //                 if (!isset($productReport[$productName]['sites'][$siteId])) {
-    //                     $productReport[$productName]['sites'][$siteId] = [
-    //                         'sales_amount' => 0,
-    //                         'prod_amount' => 0
-    //                     ];
-    //                 }
-    //                 $productReport[$productName]['sites'][$siteId]['sales_amount'] += $amount;
-                    
-    //                 $totalProcessed++;
-    //             }
-                
-    //             unset($salesBatch);
-    //             gc_collect_cycles();
-    //         }
-    //     }
-
-    //     // 2. Then process product amounts data
-    //     $amountsMinMax = Pro_prod_amount::whereBetween('ins_date', [$from_time, $to_date])
-    //         ->selectRaw('MIN(id) as min_id, MAX(id) as max_id')
-    //         ->first();
-
-    //     if ($amountsMinMax) {
-    //         for ($id = $amountsMinMax->min_id; $id <= $amountsMinMax->max_id; $id += $batchSize) {
-    //             $batchEnd = $id + $batchSize - 1;
-                
-    //             $amountsBatch = Pro_prod_amount::whereBetween('ins_date', [$from_time, $to_date])
-    //                 ->whereBetween('id', [$id, $batchEnd])
-    //                 ->with(['getprod:product_id,product_name_en,sell_price', 'getsite:store_id,store_name'])
-    //                 ->select(['id', 'prod_amount', 'product_id', 'store_id'])
-    //                 ->cursor();
-                    
-    //             foreach ($amountsBatch as $amount) {
-    //                 $productName = $amount->getprod->product_name_en ?? 'Unknown';
-    //                 $siteId = $amount->getsite->store_id ?? 'Unknown';
-    //                 $prodAmount = (float)$amount->prod_amount;
-                    
-    //                 // Initialize product entry if not exists
-    //                 if (!isset($productReport[$productName])) {
-    //                     $productReport[$productName] = [
-    //                         'sell_price' => $amount->getprod->sell_price ?? 0,
-    //                         'total_sales_amount' => 0,
-    //                         'total_prod_amount' => 0,
-    //                         'sites' => []
-    //                     ];
-    //                 }
-                    
-    //                 // Update product amount totals
-    //                 $productReport[$productName]['total_prod_amount'] += $prodAmount;
-                    
-    //                 // Initialize site entry if not exists
-    //                 if (!isset($productReport[$productName]['sites'][$siteId])) {
-    //                     $productReport[$productName]['sites'][$siteId] = [
-    //                         'sales_amount' => 0,
-    //                         'prod_amount' => 0
-    //                     ];
-    //                 }
-    //                 $productReport[$productName]['sites'][$siteId]['prod_amount'] += $prodAmount;
-    //             }
-                
-    //             unset($amountsBatch);
-    //             gc_collect_cycles();
-    //         }
-    //     }
-
-    //     // Format the final output
-    //     $formattedReport = [];
-    //     foreach ($productReport as $productName => $data) {
-    //         // Format site data for this product
-    //         $siteData = [];
-    //         foreach ($data['sites'] as $siteId => $amounts) {
-    //             $siteData[] = [
-    //                 'site_id' => $siteId,
-    //                 'sales_amount' => $amounts['sales_amount'],
-    //                 'prod_amount' => $amounts['prod_amount']
-    //             ];
-    //         }
-            
-    //         $formattedReport[] = [
-    //             'product_name' => $productName,
-    //             'sell_price' => $data['sell_price'],
-    //             'total_sales_amount' => $data['total_sales_amount'],
-    //             'total_prod_amount' => $data['total_prod_amount'],
-    //             'sites' => $siteData
-    //         ];
-    //     }
-
-    //     // Save to file
-    //     file_put_contents($filepath, json_encode([
-    //         'products' => $formattedReport,
-    //         'summary' => [
-    //             'start_from' => $from_time,
-    //             'end_to' => $to_date,
-    //             'total_products' => count($formattedReport),
-    //             'total_records' => $totalProcessed,
-    //             'generated_at' => now()->toDateTimeString()
-    //         ]
-    //     ], JSON_PRETTY_PRINT));
-
-    //     return redirect('admin/pro_sales_dets/indexreportsale')
-    //         ->with('message', 'تم الاضافة بنجاح')
-    //         ->with('status', 'success');
-    // }
     
     public function export(Request $request)
     {
@@ -595,7 +443,6 @@ class Pro_sales_detsController extends Controller
         
         fclose($stream);
     }
-   
     public function exportReport(Request $request)
     {
         $filePath = storage_path('app/temp.json');
@@ -615,33 +462,42 @@ class Pro_sales_detsController extends Controller
             
             $stores = Pro_store::get(['store_id', 'store_name'])
                 ->keyBy('store_id');
-
-            // First collect all unique store names to ensure consistent columns
+    
+            // Apply drug filter if specified
+            $products = collect($data['products'] ?? []);
+            if ($request->has('drug_filter') && $request->drug_filter !== '') {
+                $products = $products->filter(function($item) use ($request) {
+                    return isset($item['drug']) && $item['drug'] == $request->drug_filter;
+                });
+            }
+    
+            // Collect all unique store names
             $allStoreNames = collect();
-            foreach ($data['products'] ?? [] as $item) {
+            foreach ($products as $item) {
                 foreach ($item['sites'] ?? [] as $site) {
                     $storeId = $site['site_id'];
                     $storeName = $stores[$storeId]->store_name ?? 'Unknown Store ' . $storeId;
                     $allStoreNames->put($storeId, $storeName);
                 }
             }
-
-            $exportData = collect($data['products'] ?? [])->map(function($item) use ($stores, $allStoreNames) {
+    
+            $exportData = $products->map(function($item) use ($stores, $allStoreNames) {
                 $row = [
                     'product_id' => $item['product_id'] ?? 'N/A',
                     'Product Name' => $item['product_name'] ?? 'N/A',
+                    'Drug Type' => isset($item['drug']) ? ($item['drug'] == 1 ? trans('lang.drug') : trans('lang.non_drug')) : 'N/A',
                     'Total Sales Amount' => isset($item['total_sales_amount']) ? number_format($item['total_sales_amount'], 2) : 0,
                     'Total Product Amount' => isset($item['total_prod_amount']) ? number_format($item['total_prod_amount'], 2) : 0,
                     'Sell Price' => isset($item['sell_price']) ? number_format($item['sell_price'], 2) : 0,
                 ];
-
-                // Initialize all store columns with default values
+    
+                // Initialize all store columns
                 foreach ($allStoreNames as $storeName) {
                     $row[trans('lang.balance').' '.$storeName] = 0;
                     $row[trans('lang.sales').' '.$storeName] = 0;
                 }
-
-                // Fill actual values where data exists
+    
+                // Fill actual values
                 foreach ($item['sites'] ?? [] as $site) {
                     $storeId = $site['site_id'];
                     $storeName = $stores[$storeId]->store_name ?? 'Unknown Store ' . $storeId;
@@ -649,24 +505,25 @@ class Pro_sales_detsController extends Controller
                     $row[trans('lang.balance').' '.$storeName] = isset($site['prod_amount']) ? number_format($site['prod_amount'], 3) : 0;
                     $row[trans('lang.sales').' '.$storeName] = isset($site['sales_amount']) ? number_format($site['sales_amount'], 3) : 0;
                 }
-
+    
                 return $row;
             });
-
-            // Build headers in correct order
+    
+            // Build headers
             $headers = [
                 'product_id',
                 'Product Name',
+                'Drug Type',  // Added drug type column
                 'Total Sales Amount',
                 'Total Product Amount',
                 'Sell Price',
             ];
-
+    
             foreach ($allStoreNames as $storeName) {
                 $headers[] = trans('lang.balance').' '.$storeName;
                 $headers[] = trans('lang.sales').' '.$storeName;
             }
-
+    
             $filename = 'sales_report_' . now()->format('Y-m-d') . '.xlsx';
             
             return Excel::download(new CollectionExport($exportData, $headers), $filename);
@@ -676,6 +533,7 @@ class Pro_sales_detsController extends Controller
                 ->header('Content-Type', 'text/plain');
         }
     }
+
     public function getReportData(Request $request)
     {
         $filePath = storage_path('app/temp.json');
@@ -708,36 +566,54 @@ class Pro_sales_detsController extends Controller
                 throw new \Exception("Invalid JSON format");
             }
 
-            // Normal datatable response
-            $summary = $data['summary'] ?? [
-                'total_products' => count($data['products'] ?? []),
-                'total_records' => count($data['products'] ?? []),
-                'generated_at' => now()->toDateTimeString()
-            ];
-
             $products = $data['products'] ?? [];
             $search = $request->input('search.value');
+            $drugFilter = $request->input('drug_filter'); // Get drug filter from request
             
-            // Filter data if search is present
-            $filteredData = $products;
-            if (!empty($search)) {
-                $filteredData = array_filter($products, function($product) use ($search) {
-                    $match = stripos($product['product_name'] ?? '', $search) !== false;
-                    if (!$match && isset($product['sites'])) {
+            // Filter data based on search and drug filter
+            $filteredData = array_filter($products, function($product) use ($search, $drugFilter) {
+                // Apply drug filter if specified
+                if ($drugFilter !== null && $drugFilter !== '') {
+                    if ($product['drug'] != $drugFilter) {
+                        return false;
+                    }
+                }
+                
+                // Apply search filter if specified
+                if (!empty($search)) {
+                    $nameMatch = stripos($product['product_name'] ?? '', $search) !== false;
+                    $siteMatch = false;
+                    
+                    if (!$nameMatch && isset($product['sites'])) {
                         foreach ($product['sites'] as $site) {
                             if (stripos($site['site_id'] ?? '', $search) !== false) {
-                                return true;
+                                $siteMatch = true;
+                                break;
                             }
                         }
                     }
-                    return $match;
-                });
-            }
+                    
+                    return $nameMatch || $siteMatch;
+                }
+                
+                return true;
+            });
 
             // Paginate the results
             $start = (int)$request->input('start', 0);
             $length = (int)$request->input('length', 25);
             $paginatedData = array_slice($filteredData, $start, $length);
+
+            // Prepare summary
+            $summary = $data['summary'] ?? [
+                'total_products' => count($products),
+                'total_records' => count($products),
+                'generated_at' => now()->toDateTimeString()
+            ];
+            
+            // Update summary counts with filtered data
+            $summary['total_products'] = count($filteredData);
+            $summary['total_records'] = count($filteredData);
 
             return response()->json([
                 'draw' => $request->input('draw', 0),
@@ -765,6 +641,58 @@ class Pro_sales_detsController extends Controller
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    public function getfile(Request $request)
+    {
+        $filePath = storage_path('app/temp.json');
+        
+        if (!file_exists($filePath)) {
+            if ($request->export) {
+                return response('No data available for export', 404)
+                    ->header('Content-Type', 'text/plain');
+            }
+            return response()->json([
+                'draw' => $request->input('draw', 0),
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => [],
+                'summary' => [
+                    'start_from' => 0,
+                    'end_to' => 0,
+                    'total_products' => 0,
+                    'total_records' => 0,
+                    'generated_at' => now()->toDateTimeString()
+                ]
+            ]);
+        }
+
+            $fileContents = file_get_contents($filePath);
+            $data = json_decode($fileContents, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception("Invalid JSON format");
+            }
+            $products = $data['products'] ?? [];
+            // dd($products);
+            foreach ($products as $product) {
+                // Check if this product has sites
+                if (isset($product['sites']) && is_array($product['sites'])) {
+                    foreach ($product['sites'] as $site) {
+                        // Here you can work with each site for the current product
+                        // $product['product_id'] will give you the product ID
+                        // $site contains the site-specific data
+                        dd($site);
+                        // Example usage:
+                        echo "Product ID: " . $product['product_id'] . "\n";
+                        echo "Product Name: " . $product['product_name'] . "\n";
+                        print_r($site); // Display site data
+                        
+                        // Your processing logic here...
+                    }
+                }
+            }
+        return view('admin.pro_sales_det.reportprodsaledet');
     }
     
 

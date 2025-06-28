@@ -320,6 +320,10 @@ return [
     "delayed" => "آجل",
     "delivry" => "توصيل",
     "visa" => "فيزا",
+    "balance_acc" => "رصيد",
+    "sale_acc" => "بيع",
+    "drug" => "دواء",
+    "non_drug" => "غير دواء",
 
 
 ];

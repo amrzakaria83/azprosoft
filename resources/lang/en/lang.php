@@ -323,7 +323,9 @@ return [
     "delayed" => "Delayed",
     "delivry" => "Delivry",
     "visa" => "Visa",
-
-
+    "balance_acc" => "balance_acc",
+    "sale_acc" => "sale_acc",
+    "drug" => "Drug",
+    "non_drug" => "Undrug",
 
 ];
