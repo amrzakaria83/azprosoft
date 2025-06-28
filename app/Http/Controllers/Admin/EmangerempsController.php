@@ -49,6 +49,14 @@ class EmangerempsController extends Controller
                     $emp_id = $row->emp_id;
                     return $emp_id;
                 })
+                ->addColumn('cust_c_m', function($row){
+                    $cust_c_m = '';
+                    $cust = $row->cust_id;
+                    if($cust){
+                        $cust_c_m .= '<span>'.$cust->getcust->cust_current_money.'</span>';
+                    }
+                    return $cust_c_m;
+                })
                 ->addColumn('emangeremp_id', function($row){
                     $emangeremp_id = '<span>no emp_code add</span>';
                     $emp_code = Employee::where('emangeremp_id',$row->emp_id)->first();
@@ -95,7 +103,7 @@ class EmangerempsController extends Controller
                         });
                     }
                 })
-                ->rawColumns(['name','phone','emp_kind','emp_pass','emp_id','emangeremp_id','checkbox','actions'])
+                ->rawColumns(['name','phone','emp_kind','emp_pass','emp_id','cust_c_m','emangeremp_id','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.emangeremp.index');

@@ -38,7 +38,13 @@ class Emangeremp extends SqlServerModel
          'emp_id',
          'emp_name',
          'emp_name_en',
+         'cust_id',
+         'bank_id',
 
      ];
+     public function getcust()
+    {
+        return $this->belongsTo(Pro_customer::class, 'cust_id');
+    }
 }
 

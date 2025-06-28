@@ -38,6 +38,7 @@ class Pro_customer extends SqlServerModel
     protected $fillable = [
         'cust_id',
         'cust_name',
+        'cust_current_money',
         // Add other frequently used columns
     ];
 
