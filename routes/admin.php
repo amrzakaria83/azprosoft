@@ -191,6 +191,117 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             
         });
 
+        Route::name('vacationemps.')->prefix('vacationemps')->group(function(){
+            Route::get('/','Vacation_empsController@index')->name('index');
+            Route::get('/indexall','Vacation_empsController@indexall')->name('indexall');
+            Route::get('/show/{id}','Vacation_empsController@show')->name('show');
+            Route::post('/delete', 'Vacation_empsController@destroy')->name('delete');
+            Route::get('/create','Vacation_empsController@create')->name('create');
+            Route::post('/store','Vacation_empsController@store')->name('store');
+            Route::get('/edit/{id}', 'Vacation_empsController@edit')->name('edit');
+            Route::post('/update', 'Vacation_empsController@update')->name('update');
+            
+        });
+        Route::name('vacation_causes.')->prefix('vacation_causes')->group(function(){
+            Route::get('/','Vacation_causesController@index')->name('index');
+            Route::get('/show/{id}','Vacation_causesController@show')->name('show');
+            Route::post('/delete', 'Vacation_causesController@destroy')->name('delete');
+            Route::get('/create','Vacation_causesController@create')->name('create');
+            Route::post('/store','Vacation_causesController@store')->name('store');
+            Route::post('/storemodel','Vacation_causesController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Vacation_causesController@edit')->name('edit');
+            Route::post('/update', 'Vacation_causesController@update')->name('update');
+            
+        });
+        Route::name('emp_plan_atts.')->prefix('emp_plan_atts')->group(function(){
+            Route::get('/','Emp_plan_attsController@index')->name('index');
+            Route::get('/show/{id}','Emp_plan_attsController@show')->name('show');
+            Route::post('/delete', 'Emp_plan_attsController@destroy')->name('delete');
+            Route::get('/create','Emp_plan_attsController@create')->name('create');
+            Route::post('/store','Emp_plan_attsController@store')->name('store');
+            Route::post('/storemodel','Emp_plan_attsController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Emp_plan_attsController@edit')->name('edit');
+            Route::post('/update', 'Emp_plan_attsController@update')->name('update');
+            
+        });
+        Route::name('work_locations.')->prefix('work_locations')->group(function(){
+            Route::get('/','Work_locationsController@index')->name('index');
+            Route::get('/show/{id}','Work_locationsController@show')->name('show');
+            Route::post('/delete', 'Work_locationsController@destroy')->name('delete');
+            Route::get('/create','Work_locationsController@create')->name('create');
+            Route::post('/store','Work_locationsController@store')->name('store');
+            Route::post('/storemodel','Work_locationsController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Work_locationsController@edit')->name('edit');
+            Route::post('/update', 'Work_locationsController@update')->name('update');
+            
+        });
+        Route::name('emp_att_permissions.')->prefix('emp_att_permissions')->group(function(){
+            Route::get('/','Emp_att_permissionsController@index')->name('index');
+            Route::get('/show/{id}','Emp_att_permissionsController@show')->name('show');
+            Route::post('/delete', 'Emp_att_permissionsController@destroy')->name('delete');
+            Route::get('/create','Emp_att_permissionsController@create')->name('create');
+            Route::post('/store','Emp_att_permissionsController@store')->name('store');
+            Route::post('/storemodel','Emp_att_permissionsController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Emp_att_permissionsController@edit')->name('edit');
+            Route::post('/update', 'Emp_att_permissionsController@update')->name('update');
+            Route::get('/indexall','Emp_att_permissionsController@indexall')->name('indexall');
+            
+        });
+        Route::name('emp_att_overtimes.')->prefix('emp_att_overtimes')->group(function(){
+            Route::get('/','Emp_att_overtimesController@index')->name('index');
+            Route::get('/show/{id}','Emp_att_overtimesController@show')->name('show');
+            Route::post('/delete', 'Emp_att_overtimesController@destroy')->name('delete');
+            Route::get('/create','Emp_att_overtimesController@create')->name('create');
+            Route::post('/store','Emp_att_overtimesController@store')->name('store');
+            Route::post('/storemodel','Emp_att_overtimesController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Emp_att_overtimesController@edit')->name('edit');
+            Route::post('/update', 'Emp_att_overtimesController@update')->name('update');
+            Route::get('/create_bymanger','Emp_att_overtimesController@create_bymanger')->name('create_bymanger');
+            Route::post('/storemanger','Emp_att_overtimesController@storemanger')->name('storemanger');
+            
+        });
+        Route::name('emp_salarys.')->prefix('emp_salarys')->group(function(){
+            Route::get('/','Emp_salarysController@index')->name('index');
+            Route::get('/show/{id}','Emp_salarysController@show')->name('show');
+            Route::post('/delete', 'Emp_salarysController@destroy')->name('delete');
+            Route::get('/create','Emp_salarysController@create')->name('create');
+            Route::post('/store','Emp_salarysController@store')->name('store');
+            Route::post('/storemodel','Emp_salarysController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Emp_salarysController@edit')->name('edit');
+            Route::post('/update', 'Emp_salarysController@update')->name('update');
+            Route::get('/create_bymanger','Emp_salarysController@create_bymanger')->name('create_bymanger');
+            Route::post('/storemanger','Emp_salarysController@storemanger')->name('storemanger');
+            
+        });
+        Route::name('emp_monthly_salarys.')->prefix('emp_monthly_salarys')->group(function(){
+            Route::get('/','Emp_monthly_salarysController@index')->name('index');
+            Route::get('/show/{id}','Emp_monthly_salarysController@show')->name('show');
+            Route::post('/delete', 'Emp_monthly_salarysController@destroy')->name('delete');
+            Route::get('/create','Emp_monthly_salarysController@create')->name('create');
+            Route::post('/store','Emp_monthly_salarysController@store')->name('store');
+            Route::post('/storemodel','Emp_monthly_salarysController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Emp_monthly_salarysController@edit')->name('edit');
+            Route::post('/update', 'Emp_monthly_salarysController@update')->name('update');
+            Route::get('/create_bymanger','Emp_monthly_salarysController@create_bymanger')->name('create_bymanger');
+            Route::post('/storemanger','Emp_monthly_salarysController@storemanger')->name('storemanger');
+            Route::get('/create_m_sa','Emp_monthly_salarysController@create_m_sa')->name('create_m_sa');
+            Route::get('/index_m_sa/{from_time?}/{to_time?}/{work_days?}','Emp_monthly_salarysController@index_m_sa')->name('index_m_sa');
+            
+        });
+        Route::name('emp_actions.')->prefix('emp_actions')->group(function(){
+            Route::get('/','Emp_actionsController@index')->name('index');
+            Route::get('/show/{id}','Emp_actionsController@show')->name('show');
+            Route::post('/delete', 'Emp_actionsController@destroy')->name('delete');
+            Route::get('/create','Emp_actionsController@create')->name('create');
+            Route::post('/store','Emp_actionsController@store')->name('store');
+            Route::post('/storemodel','Emp_actionsController@storemodel')->name('storemodel');
+            Route::get('/edit/{id}', 'Emp_actionsController@edit')->name('edit');
+            Route::post('/update', 'Emp_actionsController@update')->name('update');
+            Route::get('/create_bymanger','Emp_actionsController@create_bymanger')->name('create_bymanger');
+            Route::post('/storemanger','Emp_actionsController@storemanger')->name('storemanger');
+            
+        });
+
         
     });
 

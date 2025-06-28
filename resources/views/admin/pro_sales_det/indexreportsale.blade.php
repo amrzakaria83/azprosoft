@@ -31,6 +31,12 @@
             z-index: 9999;
             font-size: 1.5rem;
         }
+        .sticky-left {
+            position: sticky;
+            left: 0;
+            background-color: white; /* or your table's background color */
+            z-index: 1;
+        }
     </style>
     @endsection
 
@@ -135,7 +141,7 @@
                     </div>
                     <!-- Main Table -->
                 <div class="table-responsive">
-                    <table class="table align-middle table-rounded table-striped table-row-dashed fs-6" id="kt_datatable_table">
+                    <table class="table align-middle table-rounded table-striped table-row-dashed fs-6 w-100 sticky-left" id="kt_datatable_table">
                         <thead class="bg-light-dark pe-3">
                             <tr class="text-center text-dark fw-bold fs-4 text-uppercase gs-0">
                                 <th class="min-w-125px text-center">Actions</th>
@@ -405,7 +411,7 @@ $(document).ready(function() {
                     }
                 }
             ],
-        pageLength: 50,
+        pageLength: 10,
         lengthMenu: [10, 25, 50, 100],
         order: [[3, 'asc']],
         language: {

@@ -105,7 +105,7 @@
                       <span class="menu-icon me-3">
                       <i class="fa-solid fa-users"></i>
                       </span>
-                      <span class="menu-title fs-3">{{trans('lang.attendance')}}</span>
+                      <span class="menu-title fs-3">{{trans('lang.report')}} {{trans('lang.attendance')}}</span>
                     </a>
                   </li>
                 
