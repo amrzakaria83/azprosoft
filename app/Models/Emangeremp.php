@@ -40,6 +40,7 @@ class Emangeremp extends SqlServerModel
          'emp_name_en',
          'cust_id',
          'bank_id',
+         'emp_kind', // 0 = active - 1 = trainer - 2 = deactivated
 
      ];
      public function getcust()

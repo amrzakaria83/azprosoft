@@ -86,24 +86,25 @@
                         <!--begin::Table head-->
                         <thead class="bg-light-dark pe-3">
                             <!--begin::Table row-->
-                            <tr class="text-start text-dark fw-bold fs-4 text-uppercase gs-0">
+                            <tr class="text-center text-dark fw-bold fs-4 text-uppercase gs-0">
                                 <th class="w-10px p-3">
                                     <div class="form-check form-check-sm form-check-custom form-check-solid ">
                                         <input class="form-check-input" type="checkbox" data-kt-check="true" data-kt-check-target="#kt_datatable_table .form-check-input" value="1" />
                                     </div>
                                 </th>
-                                <th class="min-w-125px text-start">{{trans('lang.employee')}}</th>
-                                <th class="min-w-125px text-start">{{trans('lang.phone')}}</th>
-                                <th class="min-w-125px text-start">{{trans('lang.emp_id')}}</th>
-                                <!-- <th class="min-w-125px text-start">{{trans('auth.password')}}</th> -->
-                                <th class="min-w-125px text-start">الحالة</th>
-                                <th class="min-w-125px text-start">الاجراء</th>
+                                <th class="min-w-125px text-center">{{trans('lang.employee')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.phone')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.emp_id')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.balance')}}</th>
+                                <!-- <th class="min-w-125px text-center">{{trans('auth.password')}}</th> -->
+                                <th class="min-w-125px text-center">الحالة</th>
+                                <th class="min-w-125px text-center">الاجراء</th>
                             </tr>
                             <!--end::Table row-->
                         </thead>
                         <!--end::Table head-->
                         <!--begin::Table body-->
-                        <tbody class="text-gray-600 fw-bold">
+                        <tbody class="text-gray-600 fw-bold text-center">
                         </tbody>
                         <!--end::Table body-->
                     </table>
@@ -215,6 +216,7 @@
                 {data: 'name', name: 'name'},
                 {data: 'phone', name: 'phone'},
                 {data: 'emp_id', name: 'emp_id'},
+                {data: 'cust_c_m', name: 'cust_c_m'},
                 // {data: 'emp_pass', name: 'emp_pass'},
                 {data: 'emp_kind', name: 'emp_kind'},
                 {data: 'emangeremp_id', name: 'emangeremp_id'},

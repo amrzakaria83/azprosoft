@@ -37,10 +37,7 @@ class EmangerempsController extends Controller
                     $phone = $row->emp_tell;
                     return $phone;
                 })
-                ->addColumn('emp_kind', function($row){
-                    $emp_kind = $row->emp_kind;
-                    return $emp_kind;
-                })
+                
                 ->addColumn('emp_pass', function($row){
                     $emp_pass = $row->emp_pass;
                     return $emp_pass;
@@ -49,14 +46,29 @@ class EmangerempsController extends Controller
                     $emp_id = $row->emp_id;
                     return $emp_id;
                 })
-                ->addColumn('cust_c_m', function($row){
-                    $cust_c_m = '';
-                    $cust = $row->cust_id;
-                    if($cust){
-                        $cust_c_m .= '<span>'.$cust->getcust->cust_current_money.'</span>';
+                ->addColumn('emp_kind', function($row){
+                    switch($row->emp_kind) {
+                        case 0: return '<span class="badge badge-success">'.trans('lang.active').'</span>';
+                        case 1: return '<span class="badge badge-primary">Trainer</span>';
+                        case 2: return '<span class="badge badge-secondary">'.trans('lang.inactive').'</span>';
+                        default: return '<span class="badge badge-warning">Unknown</span>';
                     }
-                    return $cust_c_m;
+                    return $emp_kind;
                 })
+                ->addColumn('cust_c_m', function($row) {
+                    if ($row->cust_id && $row->getcust) {
+                        return '<span>'.number_format($row->getcust->cust_current_money, 2).'</span>';
+                    }
+                    return '<span class="text-muted">N/A</span>';
+                })
+                // ->addColumn('cust_c_m', function($row){
+                //     $cust_c_m = '';
+                //     $cust = $row->cust_id;
+                //     if($cust){
+                //         $cust_c_m .= '<span>'.number($row->getcust->cust_current_money).'</span>';
+                //     }
+                //     return $cust_c_m;
+                // })
                 ->addColumn('emangeremp_id', function($row){
                     $emangeremp_id = '<span>no emp_code add</span>';
                     $emp_code = Employee::where('emangeremp_id',$row->emp_id)->first();
