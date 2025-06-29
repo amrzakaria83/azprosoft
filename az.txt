@@ -45,7 +45,7 @@ DB_SQLSRV_PASSWORD=
 
 ssh -R 63306:localhost:1433 az3331515.com@ssh.us.stackcp.com
 
-
+autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -R 3307:localhost:3306 mydomain@ssh.us.stackcp.com -N
 
 
 C:\>ssh-keygen -t ed25519
@@ -138,8 +138,12 @@ AMR@DESKTOP-PMNDNNT MINGW64 /c/xampp/htdocs/azprosoft (master)
 $
 
 ssh-keygen -t rsa -b 4096
-chmod 600 azpro      # Private key (read/write only by owner)
-chmod 644 azpro.pub  # Public key
+chmod 600 azprolab      # Private key (read/write only by owner)
+chmod 644 azprolab.pub  # Public key
+
+ssh-keygen -t rsa -b 4096
+chmod 600 azprolab
+chmod 644 azprolab.pub
 
 eval "$(ssh-agent -s)"
 ssh-add azpro
