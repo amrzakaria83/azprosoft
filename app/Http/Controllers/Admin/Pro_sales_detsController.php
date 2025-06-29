@@ -717,132 +717,301 @@ class Pro_sales_detsController extends Controller
         return view('admin.pro_sales_det.indextranssite');
     }
 
-    public function transReport(Request $request)
-    {
-        $filePath = storage_path('app/temp.json');
+    // public function transReport(Request $request)
+    // {
+    //     $filePath = storage_path('app/temp.json');
         
-        if (!file_exists($filePath)) {
-            if ($request->export) {
-                return response('No data available for export', 404)
-                    ->header('Content-Type', 'text/plain');
-            }
-            return response()->json([
-                'draw' => $request->input('draw', 0),
-                'recordsTotal' => 0,
-                'recordsFiltered' => 0,
-                'data' => [],
-                'summary' => [
-                    'start_from' => 0,
-                    'end_to' => 0,
-                    'total_products' => 0,
-                    'total_records' => 0,
-                    'generated_at' => now()->toDateTimeString()
-                ]
-            ]);
-        }
+    //     if (!file_exists($filePath)) {
+    //         if ($request->export) {
+    //             return response('No data available for export', 404)
+    //                 ->header('Content-Type', 'text/plain');
+    //         }
+    //         return response()->json([
+    //             'draw' => $request->input('draw', 0),
+    //             'recordsTotal' => 0,
+    //             'recordsFiltered' => 0,
+    //             'data' => [],
+    //             'summary' => [
+    //                 'start_from' => 0,
+    //                 'end_to' => 0,
+    //                 'total_products' => 0,
+    //                 'total_records' => 0,
+    //                 'generated_at' => now()->toDateTimeString()
+    //             ]
+    //         ]);
+    //     }
 
-        try {
-            $fileContents = file_get_contents($filePath);
-            $data = json_decode($fileContents, true);
+    //     try {
+    //         $fileContents = file_get_contents($filePath);
+    //         $data = json_decode($fileContents, true);
             
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception("Invalid JSON format");
-            }
+    //         if (json_last_error() !== JSON_ERROR_NONE) {
+    //             throw new \Exception("Invalid JSON format");
+    //         }
 
-            $products = $data['products'] ?? [];
-            $search = $request->input('search.value');
-            $drugFilter = $request->input('drug_filter'); // Get drug filter from request
+    //         $products = $data['products'] ?? [];
+    //         $search = $request->input('search.value');
+    //         $drugFilter = $request->input('drug_filter'); // Get drug filter from request
+    //         $storeFilter = $request->input('store_filter');
+    //         $selectedStores = $request->input('selected_stores', []);
+    //          // Apply store name filter
+    //         if ($request->has('store_filter') && !empty($request->store_filter)) {
+    //             $query->whereHas('stores', function($q) use ($request) {
+    //                 $q->where('store_name', 'like', '%'.$request->store_filter.'%');
+    //             });
+    //         }
             
-            // Filter data based on search and drug filter
-            $filteredData = array_filter($products, function($product) use ($search, $drugFilter) {
-                // Apply drug filter if specified
-                if ($drugFilter !== null && $drugFilter !== '') {
-                    if ($product['drug'] != $drugFilter) {
-                        return false;
-                    }
-                }
+    //         // Apply drug filter
+    //         if ($request->has('drug_filter') && !empty($request->drug_filter)) {
+    //             $query->whereHas('drugs', function($q) use ($request) {
+    //                 $q->where('drug_name', 'like', '%'.$request->drug_filter.'%');
+    //             });
+    //         }
+            
+    //         // Filter by selected stores (if any are selected)
+    //         if ($request->has('selected_stores') && !empty($request->selected_stores)) {
+    //             $query->whereIn('store_id', $request->selected_stores);
+    //         }
+    //         // Filter data based on search and drug filter
+    //         $filteredData = array_filter($products, function($product) use ($search, $drugFilter) {
+    //             // Apply drug filter if specified
+    //             if ($drugFilter !== null && $drugFilter !== '') {
+    //                 if ($product['drug'] != $drugFilter) {
+    //                     return false;
+    //                 }
+    //             }
                 
-                // Apply search filter if specified
-                if (!empty($search)) {
-                    $nameMatch = stripos($product['product_name'] ?? '', $search) !== false;
-                    $siteMatch = false;
+    //             // Apply search filter if specified
+    //             if (!empty($search)) {
+    //                 $nameMatch = stripos($product['product_name'] ?? '', $search) !== false;
+    //                 $siteMatch = false;
                     
-                    if (!$nameMatch && isset($product['sites'])) {
-                        foreach ($product['sites'] as $site) {
-                            if (stripos($site['site_id'] ?? '', $search) !== false) {
-                                $siteMatch = true;
-                                break;
-                            }
-                        }
-                    }
+    //                 if (!$nameMatch && isset($product['sites'])) {
+    //                     foreach ($product['sites'] as $site) {
+    //                         if (stripos($site['site_id'] ?? '', $search) !== false) {
+    //                             $siteMatch = true;
+    //                             break;
+    //                         }
+    //                     }
+    //                 }
                     
-                    return $nameMatch || $siteMatch;
-                }
+    //                 return $nameMatch || $siteMatch;
+    //             }
                 
-                return true;
-            });
+    //             return true;
+    //         });
 
             
                      
-            // Paginate the results
-            $start = (int)$request->input('start', 0);
-            $length = (int)$request->input('length', 25);
-            $paginatedData = array_slice($filteredData, $start, $length);
+    //         // Paginate the results
+    //         $start = (int)$request->input('start', 0);
+    //         $length = (int)$request->input('length', 25);
+    //         $paginatedData = array_slice($filteredData, $start, $length);
 
-            // Prepare summary
-            $summary = $data['summary'] ?? [
-                'total_products' => count($products),
-                'total_records' => count($products),
-                'generated_at' => now()->toDateTimeString(),
-                'days_diff' =>  0,
-            ];
+    //         // Prepare summary
+    //         $summary = $data['summary'] ?? [
+    //             'total_products' => count($products),
+    //             'total_records' => count($products),
+    //             'generated_at' => now()->toDateTimeString(),
+    //             'days_diff' =>  0,
+    //         ];
             
-            // Calculate date difference if both dates exist
-            if (!empty($summary['start_from']) && !empty($summary['end_to'])) {
-                $startDate = Carbon::parse($summary['start_from']);
-                $endDate = Carbon::parse($summary['end_to']);
+    //         // Calculate date difference if both dates exist
+    //         if (!empty($summary['start_from']) && !empty($summary['end_to'])) {
+    //             $startDate = Carbon::parse($summary['start_from']);
+    //             $endDate = Carbon::parse($summary['end_to']);
                 
-                $summary['days_diff'] = $endDate->diffInDays($startDate);
-                $summary['months_diff'] = $endDate->diffInMonths($startDate);
-                $summary['years_diff'] = $endDate->diffInYears($startDate);
-            } else {
-                $summary['days_diff'] = 0;
-                $summary['months_diff'] = 0;
-                $summary['years_diff'] = 0;
-            }
-            // dd($summary);  
+    //             $summary['days_diff'] = $endDate->diffInDays($startDate);
+    //             $summary['months_diff'] = $endDate->diffInMonths($startDate);
+    //             $summary['years_diff'] = $endDate->diffInYears($startDate);
+    //         } else {
+    //             $summary['days_diff'] = 0;
+    //             $summary['months_diff'] = 0;
+    //             $summary['years_diff'] = 0;
+    //         }
+    //         // dd($summary);  
 
-            // Update summary counts with filtered data
-            $summary['total_products'] = count($filteredData);
-            $summary['total_records'] = count($filteredData);
+    //         // Update summary counts with filtered data
+    //         $summary['total_products'] = count($filteredData);
+    //         $summary['total_records'] = count($filteredData);
 
-            return response()->json([
-                'draw' => $request->input('draw', 0),
-                'recordsTotal' => count($products),
-                'recordsFiltered' => count($filteredData),
-                'data' => $paginatedData,
-                'summary' => $summary
-            ]);
+    //         return response()->json([
+    //             'draw' => $request->input('draw', 0),
+    //             'recordsTotal' => count($products),
+    //             'recordsFiltered' => count($filteredData),
+    //             'data' => $paginatedData,
+    //             'summary' => $summary
+    //         ]);
 
 
-        } catch (\Exception $e) {
-            if ($request->export) {
-                return response('Export failed: ' . $e->getMessage(), 500)
-                    ->header('Content-Type', 'text/plain');
-            }
-            return response()->json([
-                'draw' => $request->input('draw', 0),
-                'recordsTotal' => 0,
-                'recordsFiltered' => 0,
-                'data' => [],
-                'summary' => [
-                    'total_products' => 0,
-                    'total_records' => 0,
-                    'generated_at' => now()->toDateTimeString()
-                ],
-                'error' => $e->getMessage()
-            ]);
+    //     } catch (\Exception $e) {
+    //         if ($request->export) {
+    //             return response('Export failed: ' . $e->getMessage(), 500)
+    //                 ->header('Content-Type', 'text/plain');
+    //         }
+    //         return response()->json([
+    //             'draw' => $request->input('draw', 0),
+    //             'recordsTotal' => 0,
+    //             'recordsFiltered' => 0,
+    //             'data' => [],
+    //             'summary' => [
+    //                 'total_products' => 0,
+    //                 'total_records' => 0,
+    //                 'generated_at' => now()->toDateTimeString()
+    //             ],
+    //             'error' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
+    public function transReport(Request $request)
+{
+    $filePath = storage_path('app/temp.json');
+    
+    if (!file_exists($filePath)) {
+        if ($request->export) {
+            return response('No data available for export', 404)
+                ->header('Content-Type', 'text/plain');
         }
+        return response()->json([
+            'draw' => $request->input('draw', 0),
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => [],
+            'summary' => [
+                'start_from' => 0,
+                'end_to' => 0,
+                'total_products' => 0,
+                'total_records' => 0,
+                'generated_at' => now()->toDateTimeString()
+            ]
+        ]);
     }
+
+    try {
+        $fileContents = file_get_contents($filePath);
+        $data = json_decode($fileContents, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception("Invalid JSON format");
+        }
+
+        $products = $data['products'] ?? [];
+        $search = $request->input('search.value');
+        $drugFilter = $request->input('drug_filter');
+        $storeFilter = $request->input('store_filter');
+        $selectedStores = $request->input('selected_stores', []);
+
+        // Filter data based on all conditions
+        $filteredData = array_filter($products, function($product) use ($search, $drugFilter, $storeFilter, $selectedStores) {
+            // Apply drug filter if specified
+            if (!empty($drugFilter)) {
+                if (!isset($product['drug']) || stripos($product['drug'], $drugFilter) === false) {
+                    return false;
+                }
+            }
+            
+            // Apply store filter if specified
+            if (!empty($storeFilter)) {
+                $storeMatch = false;
+                if (isset($product['stores'])) {
+                    foreach ($product['stores'] as $store) {
+                        if (stripos($store['store_name'] ?? '', $storeFilter) !== false) {
+                            $storeMatch = true;
+                            break;
+                        }
+                    }
+                }
+                if (!$storeMatch) return false;
+            }
+            
+            // Filter by selected stores if specified
+            if (!empty($selectedStores) && isset($product['store_id'])) {
+                if (!in_array($product['store_id'], $selectedStores)) {
+                    return false;
+                }
+            }
+            
+            // Apply search filter if specified
+            if (!empty($search)) {
+                $nameMatch = isset($product['product_name']) && 
+                            stripos($product['product_name'], $search) !== false;
+                
+                $siteMatch = false;
+                if (isset($product['sites'])) {
+                    foreach ($product['sites'] as $site) {
+                        if (stripos($site['site_id'] ?? '', $search) !== false) {
+                            $siteMatch = true;
+                            break;
+                        }
+                    }
+                }
+                
+                return $nameMatch || $siteMatch;
+            }
+            
+            return true;
+        });
+
+        // Reset array keys
+        $filteredData = array_values($filteredData);
+        
+        // Paginate the results
+        $start = (int)$request->input('start', 0);
+        $length = (int)$request->input('length', 25);
+        $paginatedData = array_slice($filteredData, $start, $length);
+
+        // Prepare summary
+        $summary = $data['summary'] ?? [
+            'total_products' => count($products),
+            'total_records' => count($products),
+            'generated_at' => now()->toDateTimeString(),
+            'days_diff' => 0,
+        ];
+        
+        // Calculate date differences if dates exist
+        if (!empty($summary['start_from']) && !empty($summary['end_to'])) {
+            $startDate = Carbon::parse($summary['start_from']);
+            $endDate = Carbon::parse($summary['end_to']);
+            
+            $summary['days_diff'] = $endDate->diffInDays($startDate);
+            $summary['months_diff'] = $endDate->diffInMonths($startDate);
+            $summary['years_diff'] = $endDate->diffInYears($startDate);
+        } else {
+            $summary['days_diff'] = 0;
+            $summary['months_diff'] = 0;
+            $summary['years_diff'] = 0;
+        }
+
+        // Update summary counts with filtered data
+        $summary['total_products'] = count($filteredData);
+        $summary['total_records'] = count($filteredData);
+
+        return response()->json([
+            'draw' => $request->input('draw', 0),
+            'recordsTotal' => count($products),
+            'recordsFiltered' => count($filteredData),
+            'data' => $paginatedData,
+            'summary' => $summary
+        ]);
+
+    } catch (\Exception $e) {
+        if ($request->export) {
+            return response('Export failed: ' . $e->getMessage(), 500)
+                ->header('Content-Type', 'text/plain');
+        }
+        return response()->json([
+            'draw' => $request->input('draw', 0),
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => [],
+            'summary' => [
+                'total_products' => 0,
+                'total_records' => 0,
+                'generated_at' => now()->toDateTimeString()
+            ],
+            'error' => $e->getMessage()
+        ]);
+    }
+}
     
 }

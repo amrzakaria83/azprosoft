@@ -122,9 +122,9 @@
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.name')}}-{{trans('lang.product')}}</label>
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.stores')}}</label>
                             <div class="col-sm-12 fv-row">
-                                <select  data-placeholder="Select an option" class=" input-text form-control  form-select  mb-3 mb-lg-0 text-center" multiple="multiple" name="store_id[]" id="store_id" data-allow-clear="true" data-control="select2" >
+                                <select  data-placeholder="Select an option" class=" input-text form-control form-select  mb-3 mb-lg-0 text-center" multiple="multiple" name="store_id[]" id="store_id" data-allow-clear="true" data-control="select2" >
                                     <option  disabled selected></option>
                                         @foreach (\App\Models\Pro_store::get() as $az)
                                             <option value="{{$az->store_id}}">{{$az->store_name}}</option>
@@ -343,6 +343,26 @@ $(document).ready(function() {
         });
     });
 
+        $('#store_id').select2({
+        placeholder: "Select one or more stores",
+        allowClear: true,
+        width: '100%',
+        closeOnSelect: false // Keep dropdown open for multiple selections
+    });
+
+    // Client-side filtering for multiple select
+    $('#storeFilter').on('input', function() {
+        var searchTerm = $(this).val().toLowerCase();
+        
+        $('#store_id option').each(function() {
+            var optionText = $(this).text().toLowerCase();
+            $(this).toggle(optionText.includes(searchTerm));
+        });
+        
+        // Reopen dropdown to show filtered results
+        $('#store_id').select2('open');
+    });
+
     // Initialize DataTable
     var table = $('#kt_datatable_table').DataTable({
         processing: true,
@@ -352,6 +372,10 @@ $(document).ready(function() {
             url: "{{ route('admin.pro_sales_dets.transReport') }}",
             type: "GET",
             data: function(d) {
+                // Get all selected store IDs as array
+                d.selected_stores = $('#store_id').val() || [];
+                // Pass filter values
+                d.store_filter = $('#storeFilter').val();
                     d.drug_filter = $('#drugFilter').val(); // Pass filter value to server
                 },
             dataSrc: function(json) {
@@ -487,7 +511,7 @@ $(document).ready(function() {
         table.search($(this).val()).draw();
     });
 
-    $('#drugFilter').on('change', function() {
+    $('#drugFilter,#store_id').on('change', function() {
         table.ajax.reload(); // This will resend the request with the new filter
     });
     // Handle site details modal
