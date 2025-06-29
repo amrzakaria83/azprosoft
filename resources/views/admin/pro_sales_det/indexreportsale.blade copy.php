@@ -3,6 +3,7 @@
 @section('css')
     <link href="{{asset('dash/assets/plugins/custom/datatables/datatables.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('dash/assets/plugins/custom/datatables/buttons.bootstrap4.min.css')}}" rel="stylesheet" type="text/css" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('style')
@@ -16,7 +17,28 @@
             margin-right: 0.5em;
             margin-left: 0;
         }
-    </style>@endsection
+        .export-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-size: 1.5rem;
+        }
+        .sticky-left {
+            position: sticky;
+            left: 0;
+            background-color: white; /* or your table's background color */
+            z-index: 1;
+        }
+    </style>
+    @endsection
 
 @section('breadcrumb')
 <div class="d-flex align-items-center" id="kt_header_nav">
@@ -77,23 +99,68 @@
                 <!--end::Card header-->
                 <!--begin::Card body-->
                 <div class="card-body py-4">
+                
                     <!-- Summary Panel -->
-                    <div class="alert alert-info mb-4">
-                        <strong>Summary:</strong> 
-                        <span id="totalProducts">0</span> products, 
-                        <span id="totalRecords">0</span> records
+                    <div class="alert alert-info mb-4 text-center">
+                        <strong>{{trans('lang.summary')}}:</strong> 
+                        {{trans('lang.start_from')}} <span id="start_from">0</span> , 
+                        {{trans('lang.end_to')}} <span id="end_to">0</span> , 
+                        {{trans('lang.duration')}} <span id="totalDays" class="text-danger">0</span> {{trans('lang.days')}},
+                        <span id="totalProducts">0</span> {{trans('lang.products')}}, 
+                        <span id="totalRecords">0</span> {{trans('lang.transactions')}}
+                    </div>
+                    <div class="row mb-6">
+                        <!-- <label class="col-sm-2 col-form-label fw-semibold fs-6">{{trans('lang.name')}}-{{trans('lang.employee')}}</label> -->
+                        <div class="col-sm-4">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.type_type')}} {{trans('lang.product')}}</label>
+                            <div class="col-sm-12 fv-row">
+                                <select id="drugFilter" class="form-control">
+                                    <option value="">All Products</option>
+                                    <option value="1">{{trans('lang.drug')}}</option>
+                                    <option value="0">{{trans('lang.non_drug')}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.name')}}-{{trans('lang.product')}}</label>
+                            <div class="col-sm-12 fv-row">
+                                <select  data-placeholder="Select an option" class=" input-text form-control  form-select  mb-3 mb-lg-0 text-center" id="contact_id" name="contact_id" data-control="select2" >
+                                    <option  disabled selected>Select an option</option>
+                                        @foreach (\App\Models\Pro_store::get() as $az)
+                                            <option value="{{$az->store_id}}">{{$az->store_name}}</option>
+                                            @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.nutrilist')}} {{trans('lang.visit')}}</label>
+                            <div class="col-sm-12 fv-row">
+                            <button type="button" class="btn btn-success btn-lg " id="searchbtn" >
+                                    Search
+                                </button> 
+                            </div>
+                        </div>
                     </div>
                     <!-- Main Table -->
                 <div class="table-responsive">
-                    <table class="table align-middle table-rounded table-striped table-row-dashed fs-6" id="kt_datatable_table">
+                    <table class="table align-middle table-rounded table-striped table-row-dashed fs-6 w-100 sticky-left" id="kt_datatable_table">
                         <thead class="bg-light-dark pe-3">
                             <tr class="text-center text-dark fw-bold fs-4 text-uppercase gs-0">
+                                <th class="min-w-125px text-center">Actions</th>
+                                <th class="min-w-125px text-center">code</th>
+                                <!-- <th class="min-w-125px text-center">code</th> -->
                                 <th class="min-w-125px text-center">{{trans('lang.product')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.sell_price')}} {{trans('lang.unit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.sales')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.balance')}}</th>
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th> -->
-                                <th class="min-w-125px text-center">Actions</th>
+                                @php
+                                $sites = \App\Models\Pro_store::get()
+                                @endphp
+                                @foreach ($sites as $site) 
+                                <th class="min-w-125px text-center" data-site-control="{{$site->store_id}}-b">{{trans('lang.balance_acc')}} {{$site->store_name}}</th>
+                                <th class="min-w-125px text-center" data-site-control="{{$site->store_id}}-s">{{trans('lang.sale_acc')}} {{$site->store_name}}</th>
+                                @endforeach
                             </tr>
                         </thead>
                         <tbody class="text-gray-600 fw-bold text-center"></tbody>
@@ -114,10 +181,10 @@
                         <table class="table table-sm table-bordered" id="sitesTable">
                             <thead>
                                 <tr>
-                                    <th>Site ID</th>
-                                    <th>Sales Amount</th>
-                                    <th>Product Amount</th>
-                                    <th>Price</th>
+                                    <th>{{trans('lang.name')}}</th>
+                                    <th>{{trans('lang.sales')}}</th>
+                                    <th>{{trans('lang.balance')}}</th>
+                                    <!-- <th>Price</th> -->
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -133,96 +200,240 @@
 <script src="{{asset('dash/assets/plugins/custom/datatables/datatables.bundle.js')}}"></script>
 <script src="{{asset('dash/assets/plugins/custom/datatables/dataTables.buttons.min.js')}}"></script>
 <script src="{{asset('dash/assets/plugins/custom/datatables/buttons.print.min.js')}}"></script>
-
+<!-- <script src="{{asset('dash/assets/js/scripts.bundle.js')}}"></script> -->
 <script>
 $(document).ready(function() {
-    // Initialize DataTable with proper configuration
+    // Get all sites from PHP
+    var sites = {!! \App\Models\Pro_store::get(['store_id', 'store_name'])->toJson() !!};
+    console.log('Sites data:', sites);
+
+    // First build the columns configuration
+    var columns = [
+        {
+            data: null,
+            orderable: false,
+            render: function(data, type, row) {
+                if (!row.sites || row.sites.length === 0) {
+                    return '<span class="text-muted">No sites</span>';
+                }
+                return `<button class="btn btn-sm btn-info view-sites" 
+                        data-product="${row.product_name || 'Unknown'}" 
+                        data-sites='${JSON.stringify(row.sites || [])}'>
+                    <i class="fas fa-eye"></i> View
+                </button>`;
+            },
+            className: 'text-center'
+        },
+        { 
+            data: 'product_id',
+            name: 'product_id',
+            render: function(data, type) {
+                return type === 'display' && data && data.length > 50 ? 
+                    data.substr(0, 50) + '...' : (data || 'N/A');
+            }
+        },
+        // {
+        //     data: 'drug',
+        //     name: 'drug',
+        //     render: function(data, type, row, meta) {
+        //         if (type === 'display') {
+        //             // Handle null/undefined cases first
+        //             if (data == null) return 'N/A';
+                    
+        //             // Convert to string for loose comparison
+        //             const strData = String(data).trim();
+                    
+        //             if (strData === '1') return '@json(trans("lang.drug"))';
+        //             if (strData === '0') return '@json(trans("lang.non_drug"))';
+                    
+        //             return 'N/A';
+        //         }
+        //         return data;
+        //     }
+        // },
+        {
+            data: 'product_name',
+            name: 'product_name',
+            render: function(data, type, row) {
+                var content = type === 'display' && data && data.length > 50 ? 
+                    data.substr(0, 50) + '...' : (data || 'N/A');
+                
+                if (type === 'display') {
+                    var drugClass = row.drug == 1 ? 'text-info' : 'text-danger';
+                    return '<span class="' + drugClass + '">' + content + '</span>';
+                }
+                return content;
+            }
+        },
+        {
+            data: 'sell_price',
+            name: 'sell_price',
+            render: function(data) {
+                return data ? parseFloat(data).toFixed(2) : 0;
+            },
+            className: 'text-center',
+            createdCell: function (td, cellData, rowData, row, col) {
+                if (cellData > 250) {
+                    $(td).addClass('text-info');
+                }
+            }
+        },
+        // { 
+        //     data: 'sell_price',
+        //     name: 'sell_price',
+        //     render: function(data) {
+        //         return data ? + parseFloat(data).toFixed(2) : 0;
+        //     },
+        //     className: 'text-center'
+        // },
+        { 
+            data: 'total_sales_amount',
+            name: 'total_sales_amount',
+            render: $.fn.dataTable.render.number(',', '.', 2),
+            defaultContent: 0,
+            className: 'text-center',
+        },
+        { 
+            data: 'total_prod_amount',
+            name: 'total_prod_amount',
+            render: $.fn.dataTable.render.number(',', '.', 2),
+            defaultContent: 0,
+            className: 'text-center',
+            createdCell: function (td, cellData, rowData, row, col) {
+                if (cellData < 3) {
+                    $(td).addClass('text-info');
+                }
+            }
+        }
+        ];
+
+    // Add dynamic site columns
+    sites.forEach(function(site) {
+        columns.push({
+            data: null,
+            name: 'site_' + site.store_id + '_balance',
+            defaultContent: 0,
+            className: 'text-center',
+            render: function(data, type, row) {
+                if (!row.sites) return 0;
+                var siteData = row.sites.find(s => s.site_id == site.store_id);
+                return siteData ?  + siteData.prod_amount.toFixed(2) : 0;
+            }
+        });
+        
+        columns.push({
+            data: null,
+            name: 'site_' + site.store_id + '_sales',
+            defaultContent: 0,
+            className: 'text-center',
+            render: function(data, type, row) {
+                if (!row.sites) return 0;
+                var siteData = row.sites.find(s => s.site_id == site.store_id);
+                return siteData ?  + siteData.sales_amount.toFixed(2) : 0;
+            }
+        });
+    });
+
+    // Initialize DataTable
     var table = $('#kt_datatable_table').DataTable({
         processing: true,
         serverSide: true,
+        
         ajax: {
             url: "{{ route('admin.pro_sales_dets.getReportData') }}",
             type: "GET",
+            data: function(d) {
+                    d.drug_filter = $('#drugFilter').val(); // Pass filter value to server
+                },
             dataSrc: function(json) {
+                if (typeof json === 'string') {
+                    try {
+                        json = JSON.parse(json);
+                    } catch (e) {
+                        console.error('Failed to parse JSON:', e);
+                        return [];
+                    }
+                }
+                
                 if (!json) {
                     console.error('Empty response from server');
                     return [];
                 }
                 
-                // Update summary panel
                 if (json.summary) {
                     $('#totalProducts').text(json.summary.total_products || 0);
                     $('#totalRecords').text(json.summary.total_records || 0);
+                    $('#start_from').text(json.summary.start_from || 0);
+                    $('#end_to').text(json.summary.end_to || 0);
+                     // Calculate duration in days if both dates exist
+                    if (json.summary.start_from && json.summary.end_to) {
+                        const startDate = new Date(json.summary.start_from);
+                        const endDate = new Date(json.summary.end_to);
+                        const timeDiff = endDate - startDate;
+                        const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                        $('#totalDays').text(daysDiff);
+                    } else {
+                        $('#totalDays').text(0);
+                    }
                 }
                 
                 return json.data || [];
             },
-            error: function(xhr, error, thrown) {
-                console.error('AJAX error:', error);
+            error: function(xhr, textStatus, error) {
+                console.error('AJAX Error:', textStatus, error);
                 return [];
             }
         },
-        columns: [
-            { 
-                data: 'product_name',
-                name: 'product_name',
-                render: function(data, type) {
-                    return type === 'display' && data && data.length > 50 ? 
-                        data.substr(0, 50) + '...' : (data || 'N/A');
-                }
-            },
-            { 
-                data: 'sell_price',
-                name: 'sell_price',
-                render: function(data) {
-                    return data ?  + parseFloat(data).toFixed(2) : '$0.00';
-                },
-                className: 'text-center'
-            },
-            { 
-                data: 'total_sales_amount',
-                name: 'total_sales_amount',
-                render: $.fn.dataTable.render.number(',', '.', 2),
-                defaultContent: '$0.00',
-                className: 'text-center'
-            },
-            { 
-                data: 'total_prod_amount',
-                name: 'total_prod_amount',
-                render: $.fn.dataTable.render.number(',', '.', 2),
-                defaultContent: '$0.00',
-                className: 'text-center'
-            },
-            // { 
-            //     data: 'ins_date',
-            //     name: 'ins_date',
-            //     render: function(data) {
-            //         return data ? new Date(data).toLocaleDateString() : 'N/A';
-            //     },
-            //     className: 'text-center'
-            // },
-            {
-                data: null,
-                orderable: false,
-                render: function(data, type, row) {
-                    if (!row.sites || row.sites.length === 0) {
-                        return '<span class="text-muted">No sites</span>';
-                    }
-                    return `<button class="btn btn-sm btn-info view-sites" 
-                            data-product="${row.product_name || 'Unknown'}" 
-                            data-sites='${JSON.stringify(row.sites || [])}'>
-                        <i class="fas fa-eye"></i> View
-                    </button>`;
-                },
-                className: 'text-center'
-            }
-        ],
-        dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+        
+        columns: columns,
+        dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'fB>>" +
              "<'row'<'col-sm-12'tr>>" +
              "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        pageLength: 25,
+             buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel"></i> Export All',
+                    className: 'btn btn-success btn-sm',
+                    action: function(e, dt, button, config) {
+                        // Simple loading indicator (works without KTApp)
+                        var loading = $('<div class="export-loading">Preparing export...</div>');
+                        $('body').append(loading);
+                        
+                        // Create a temporary form
+                        var form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = "{{ route('admin.pro_sales_dets.exportReport') }}";
+                        form.target = '_blank';
+                        
+                        // Add CSRF token
+                        var token = document.createElement('input');
+                        token.type = 'hidden';
+                        token.name = '_token';
+                        token.value = "{{ csrf_token() }}";
+                        form.appendChild(token);
+
+                        // Add drug filter value
+                        var drugFilter = document.createElement('input');
+                        drugFilter.type = 'hidden';
+                        drugFilter.name = 'drug_filter';
+                        drugFilter.value = $('#drugFilter').val();
+                        
+                        form.appendChild(drugFilter);
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+                        
+                        // Clean up after download starts
+                        setTimeout(function() {
+                            document.body.removeChild(form);
+                            loading.remove();
+                        }, 3000); // Adjust timeout as needed
+                    }
+                }
+            ],
+        pageLength: 10,
         lengthMenu: [10, 25, 50, 100],
-        order: [[0, 'asc']],
+        order: [[3, 'asc']],
         language: {
             emptyTable: "No data available",
             info: "Showing _START_ to _END_ of _TOTAL_ entries",
@@ -236,8 +447,24 @@ $(document).ready(function() {
             }
         },
         initComplete: function() {
-            // Recalculate column widths after initialization
-            this.api().columns.adjust();
+            console.log('DataTable initialized successfully');
+        },
+        createdRow: function(row, data, dataIndex) {
+            if (data.sites) {
+                sites.forEach(function(site) {
+                    var siteData = data.sites.find(function(s) {
+                        return s.site_id == site.store_id;
+                    });
+                    
+                    var balanceCell = $(row).find(`td:eq(${$(`th[data-site-control="${site.store_id}-b"]`).index()})`);
+                    balanceCell.text(siteData ?  + siteData.prod_amount.toFixed(2) : 0);
+                    balanceCell.addClass('text-center');
+                    
+                    var salesCell = $(row).find(`td:eq(${$(`th[data-site-control="${site.store_id}-s"]`).index()})`);
+                    salesCell.text(siteData ?  + siteData.sales_amount.toFixed(2) : 0);
+                    salesCell.addClass('text-center');
+                });
+            }
         }
     });
 
@@ -246,42 +473,55 @@ $(document).ready(function() {
         table.search($(this).val()).draw();
     });
 
+    $('#drugFilter').on('change', function() {
+        table.ajax.reload(); // This will resend the request with the new filter
+    });
     // Handle site details modal
     $('#kt_datatable_table').on('click', '.view-sites', function() {
         var productName = $(this).data('product');
-        var sites = $(this).data('sites') || [];
+        var sitesData = $(this).data('sites') || [];
         
         $('#sitesModal .modal-title').text('Site Details: ' + productName);
         
-        // Clear previous table if exists
         if ($.fn.DataTable.isDataTable('#sitesTable')) {
             $('#sitesTable').DataTable().destroy();
         }
         
-        // Initialize sites table
+        var siteNameMap = {};
+        sites.forEach(function(site) {
+            siteNameMap[site.store_id] = site.store_name;
+        });
+        
+        var processedData = sitesData.map(function(site) {
+            return {
+                store_name: siteNameMap[site.site_id] || 'Unknown Site',
+                sales_amount: site.sales_amount,
+                prod_amount: site.prod_amount
+            };
+        });
+        
         $('#sitesTable').DataTable({
-            data: sites,
+            data: processedData,
             columns: [
-                { data: 'site_id', className: 'text-center' },
+                { 
+                    data: 'store_name', 
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        return data || 'Unknown Site';
+                    }
+                },
                 { 
                     data: 'sales_amount',
                     render: $.fn.dataTable.render.number(',', '.', 2),
-                    className: 'text-end'
+                    className: 'text-center'
                 },
                 { 
                     data: 'prod_amount',
                     render: $.fn.dataTable.render.number(',', '.', 2),
-                    className: 'text-end'
-                },
-                { 
-                    data: null,
-                    render: function(data, type, row) {
-                        return row.sell_price ? '$' + parseFloat(row.sell_price).toFixed(2) : '$0.00';
-                    },
-                    className: 'text-end'
+                    className: 'text-center'
                 }
             ],
-            pageLength: 10,
+            pageLength: 20,
             dom: 'tpi',
             language: {
                 emptyTable: "No site data available"
@@ -298,6 +538,16 @@ $(document).ready(function() {
         }
         $('#sitesTable tbody').empty();
     });
+
+    // Prevent form submission from reloading page
+    $(document).on('submit', 'form', function(e) {
+        if ($(this).attr('target') === '_blank') {
+            return true;
+        }
+        e.preventDefault();
+        return false;
+    });
 });
 </script>
+
 @endsection

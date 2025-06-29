@@ -23,6 +23,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use App\Exports\CollectionExport;    // Assuming you'll create this export class
 use Maatwebsite\Excel\Facades\Excel; // Add this import
+use Illuminate\Support\Carbon;
 
 use Validator;
 use Auth;
@@ -709,6 +710,139 @@ class Pro_sales_detsController extends Controller
         }
         
         return false;
+    }
+
+    public function indextranssite()
+    {
+        return view('admin.pro_sales_det.indextranssite');
+    }
+
+    public function transReport(Request $request)
+    {
+        $filePath = storage_path('app/temp.json');
+        
+        if (!file_exists($filePath)) {
+            if ($request->export) {
+                return response('No data available for export', 404)
+                    ->header('Content-Type', 'text/plain');
+            }
+            return response()->json([
+                'draw' => $request->input('draw', 0),
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => [],
+                'summary' => [
+                    'start_from' => 0,
+                    'end_to' => 0,
+                    'total_products' => 0,
+                    'total_records' => 0,
+                    'generated_at' => now()->toDateTimeString()
+                ]
+            ]);
+        }
+
+        try {
+            $fileContents = file_get_contents($filePath);
+            $data = json_decode($fileContents, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception("Invalid JSON format");
+            }
+
+            $products = $data['products'] ?? [];
+            $search = $request->input('search.value');
+            $drugFilter = $request->input('drug_filter'); // Get drug filter from request
+            
+            // Filter data based on search and drug filter
+            $filteredData = array_filter($products, function($product) use ($search, $drugFilter) {
+                // Apply drug filter if specified
+                if ($drugFilter !== null && $drugFilter !== '') {
+                    if ($product['drug'] != $drugFilter) {
+                        return false;
+                    }
+                }
+                
+                // Apply search filter if specified
+                if (!empty($search)) {
+                    $nameMatch = stripos($product['product_name'] ?? '', $search) !== false;
+                    $siteMatch = false;
+                    
+                    if (!$nameMatch && isset($product['sites'])) {
+                        foreach ($product['sites'] as $site) {
+                            if (stripos($site['site_id'] ?? '', $search) !== false) {
+                                $siteMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    return $nameMatch || $siteMatch;
+                }
+                
+                return true;
+            });
+
+            
+                     
+            // Paginate the results
+            $start = (int)$request->input('start', 0);
+            $length = (int)$request->input('length', 25);
+            $paginatedData = array_slice($filteredData, $start, $length);
+
+            // Prepare summary
+            $summary = $data['summary'] ?? [
+                'total_products' => count($products),
+                'total_records' => count($products),
+                'generated_at' => now()->toDateTimeString(),
+                'days_diff' =>  0,
+            ];
+            
+            // Calculate date difference if both dates exist
+            if (!empty($summary['start_from']) && !empty($summary['end_to'])) {
+                $startDate = Carbon::parse($summary['start_from']);
+                $endDate = Carbon::parse($summary['end_to']);
+                
+                $summary['days_diff'] = $endDate->diffInDays($startDate);
+                $summary['months_diff'] = $endDate->diffInMonths($startDate);
+                $summary['years_diff'] = $endDate->diffInYears($startDate);
+            } else {
+                $summary['days_diff'] = 0;
+                $summary['months_diff'] = 0;
+                $summary['years_diff'] = 0;
+            }
+            // dd($summary);  
+
+            // Update summary counts with filtered data
+            $summary['total_products'] = count($filteredData);
+            $summary['total_records'] = count($filteredData);
+
+            return response()->json([
+                'draw' => $request->input('draw', 0),
+                'recordsTotal' => count($products),
+                'recordsFiltered' => count($filteredData),
+                'data' => $paginatedData,
+                'summary' => $summary
+            ]);
+
+
+        } catch (\Exception $e) {
+            if ($request->export) {
+                return response('Export failed: ' . $e->getMessage(), 500)
+                    ->header('Content-Type', 'text/plain');
+            }
+            return response()->json([
+                'draw' => $request->input('draw', 0),
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => [],
+                'summary' => [
+                    'total_products' => 0,
+                    'total_records' => 0,
+                    'generated_at' => now()->toDateTimeString()
+                ],
+                'error' => $e->getMessage()
+            ]);
+        }
     }
     
 }

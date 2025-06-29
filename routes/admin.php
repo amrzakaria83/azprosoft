@@ -173,6 +173,8 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/getReportData','Pro_sales_detsController@getReportData')->name('getReportData');
             Route::post('/exportReport', 'Pro_sales_detsController@exportReport')->name('exportReport');
             Route::get('/getfile','Pro_sales_detsController@getfile')->name('getfile');
+            Route::get('/indextranssite','Pro_sales_detsController@indextranssite')->name('indextranssite'); // add can
+            Route::get('/transReport', 'Pro_sales_detsController@transReport')->name('transReport');
 
             Route::get('/export','Pro_sales_detsController@export')->name('export');
 

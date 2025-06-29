@@ -99,7 +99,7 @@
                 <!--end::Card header-->
                 <!--begin::Card body-->
                 <div class="card-body py-4">
-                
+                    <h1><span>{{trans('lang.valued_date')}} <span id="valued_date">0</span></span></h1>
                     <!-- Summary Panel -->
                     <div class="alert alert-info mb-4 text-center">
                         <strong>{{trans('lang.summary')}}:</strong> 
@@ -124,8 +124,8 @@
                         <div class="col-sm-4">
                             <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.name')}}-{{trans('lang.product')}}</label>
                             <div class="col-sm-12 fv-row">
-                                <select  data-placeholder="Select an option" class=" input-text form-control  form-select  mb-3 mb-lg-0 text-center" id="contact_id" name="contact_id" data-control="select2" >
-                                    <option  disabled selected>Select an option</option>
+                                <select  data-placeholder="Select an option" class=" input-text form-control  form-select  mb-3 mb-lg-0 text-center" multiple="multiple" name="store_id[]" id="store_id" data-allow-clear="true" data-control="select2" >
+                                    <option  disabled selected></option>
                                         @foreach (\App\Models\Pro_store::get() as $az)
                                             <option value="{{$az->store_id}}">{{$az->store_name}}</option>
                                             @endforeach
@@ -135,11 +135,9 @@
                         <div class="col-sm-4">
                             <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.nutrilist')}} {{trans('lang.visit')}}</label>
                             <div class="col-sm-12 fv-row">
-                                <a href="{{ route('admin.pro_sales_dets.indextranssite') }}" >
-                                    <button type="button" class="btn btn-info btn-lg " id="searchbtn" >
-                                        {{trans('lang.transfers')}}
-                                        </button> 
-                                </a>
+                            <button type="button" class="btn btn-success btn-lg " id="searchbtn" >
+                                    Search
+                                </button> 
                             </div>
                         </div>
                     </div>
@@ -150,11 +148,14 @@
                             <tr class="text-center text-dark fw-bold fs-4 text-uppercase gs-0">
                                 <th class="min-w-125px text-center">Actions</th>
                                 <th class="min-w-125px text-center">code</th>
-                                <!-- <th class="min-w-125px text-center">code</th> -->
                                 <th class="min-w-125px text-center">{{trans('lang.product')}}</th>
+                                <!-- <th class="min-w-125px text-center">code</th> -->
+                                <!-- <th class="min-w-125px text-center">code</th> -->
                                 <th class="min-w-125px text-center">{{trans('lang.sell_price')}} {{trans('lang.unit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.sales')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.sales')}}/{{trans('lang.day')}}</th> <!-- Hidden column -->
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.balance')}}</th>
+
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th> -->
                                 @php
                                 $sites = \App\Models\Pro_store::get()
@@ -234,25 +235,6 @@ $(document).ready(function() {
                     data.substr(0, 50) + '...' : (data || 'N/A');
             }
         },
-        // {
-        //     data: 'drug',
-        //     name: 'drug',
-        //     render: function(data, type, row, meta) {
-        //         if (type === 'display') {
-        //             // Handle null/undefined cases first
-        //             if (data == null) return 'N/A';
-                    
-        //             // Convert to string for loose comparison
-        //             const strData = String(data).trim();
-                    
-        //             if (strData === '1') return '@json(trans("lang.drug"))';
-        //             if (strData === '0') return '@json(trans("lang.non_drug"))';
-                    
-        //             return 'N/A';
-        //         }
-        //         return data;
-        //     }
-        // },
         {
             data: 'product_name',
             name: 'product_name',
@@ -267,6 +249,17 @@ $(document).ready(function() {
                 return content;
             }
         },
+        // {
+        //     data: null,
+        //     name: 'days_diff',
+        //     render: function(data, type, row, meta) {
+        //         // Access the global summary from DataTables' API
+        //         const json = meta.settings.json;
+        //         const days = json?.summary?.days_diff ?? 0;
+        //         return type === 'display' ? parseInt(days) : days;
+        //     },
+        //     className: 'text-center'
+        // },
         {
             data: 'sell_price',
             name: 'sell_price',
@@ -295,6 +288,19 @@ $(document).ready(function() {
             defaultContent: 0,
             className: 'text-center',
         },
+        // Hidden column
+        { 
+            data: null,
+            name: 'sales_per_day',
+            
+            visible: true,
+            render: function(data, type, row, meta) {
+                const json = meta.settings.json;
+                const days = json?.summary?.days_diff || 1;
+                const sales = parseFloat(row.total_sales_amount) || 0;
+                return (sales / days).toFixed(2);
+            }
+        },
         { 
             data: 'total_prod_amount',
             name: 'total_prod_amount',
@@ -306,6 +312,7 @@ $(document).ready(function() {
                     $(td).addClass('text-info');
                 }
             }
+            
         }
         ];
 
@@ -342,12 +349,16 @@ $(document).ready(function() {
         serverSide: true,
         
         ajax: {
-            url: "{{ route('admin.pro_sales_dets.getReportData') }}",
+            url: "{{ route('admin.pro_sales_dets.transReport') }}",
             type: "GET",
             data: function(d) {
                     d.drug_filter = $('#drugFilter').val(); // Pass filter value to server
                 },
             dataSrc: function(json) {
+                // console.log('json:', json);
+                console.log('json:', json.summary.days_diff);
+                console.log('First row summary:', json.data[0]?.summary);
+                // console.log(json.summary);
                 if (typeof json === 'string') {
                     try {
                         json = JSON.parse(json);
@@ -363,6 +374,7 @@ $(document).ready(function() {
                 }
                 
                 if (json.summary) {
+                    $('#valued_date').text(json.summary.generated_at || 0);
                     $('#totalProducts').text(json.summary.total_products || 0);
                     $('#totalRecords').text(json.summary.total_records || 0);
                     $('#start_from').text(json.summary.start_from || 0);
@@ -391,63 +403,63 @@ $(document).ready(function() {
         dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'fB>>" +
              "<'row'<'col-sm-12'tr>>" +
              "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-             buttons: [
-                {
-                    extend: 'excel',
-                    text: '<i class="fas fa-file-excel"></i> Export All',
-                    className: 'btn btn-success btn-sm',
-                    action: function(e, dt, button, config) {
-                        // Simple loading indicator (works without KTApp)
-                        var loading = $('<div class="export-loading">Preparing export...</div>');
-                        $('body').append(loading);
+        //      buttons: [
+        //         {
+        //             extend: 'excel',
+        //             text: '<i class="fas fa-file-excel"></i> Export All',
+        //             className: 'btn btn-success btn-sm',
+        //             action: function(e, dt, button, config) {
+        //                 // Simple loading indicator (works without KTApp)
+        //                 var loading = $('<div class="export-loading">Preparing export...</div>');
+        //                 $('body').append(loading);
                         
-                        // Create a temporary form
-                        var form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = "{{ route('admin.pro_sales_dets.exportReport') }}";
-                        form.target = '_blank';
+        //                 // Create a temporary form
+        //                 var form = document.createElement('form');
+        //                 form.method = 'POST';
+        //                 form.action = "{{ route('admin.pro_sales_dets.exportReport') }}";
+        //                 form.target = '_blank';
                         
-                        // Add CSRF token
-                        var token = document.createElement('input');
-                        token.type = 'hidden';
-                        token.name = '_token';
-                        token.value = "{{ csrf_token() }}";
-                        form.appendChild(token);
+        //                 // Add CSRF token
+        //                 var token = document.createElement('input');
+        //                 token.type = 'hidden';
+        //                 token.name = '_token';
+        //                 token.value = "{{ csrf_token() }}";
+        //                 form.appendChild(token);
 
-                        // Add drug filter value
-                        var drugFilter = document.createElement('input');
-                        drugFilter.type = 'hidden';
-                        drugFilter.name = 'drug_filter';
-                        drugFilter.value = $('#drugFilter').val();
+        //                 // Add drug filter value
+        //                 var drugFilter = document.createElement('input');
+        //                 drugFilter.type = 'hidden';
+        //                 drugFilter.name = 'drug_filter';
+        //                 drugFilter.value = $('#drugFilter').val();
                         
-                        form.appendChild(drugFilter);
+        //                 form.appendChild(drugFilter);
                         
-                        document.body.appendChild(form);
-                        form.submit();
+        //                 document.body.appendChild(form);
+        //                 form.submit();
                         
-                        // Clean up after download starts
-                        setTimeout(function() {
-                            document.body.removeChild(form);
-                            loading.remove();
-                        }, 3000); // Adjust timeout as needed
-                    }
-                }
-            ],
-        pageLength: 10,
-        lengthMenu: [10, 25, 50, 100],
-        order: [[3, 'asc']],
-        language: {
-            emptyTable: "No data available",
-            info: "Showing _START_ to _END_ of _TOTAL_ entries",
-            infoEmpty: "Showing 0 to 0 of 0 entries",
-            search: "Search:",
-            paginate: {
-                first: "First",
-                last: "Last",
-                next: "Next",
-                previous: "Previous"
-            }
-        },
+        //                 // Clean up after download starts
+        //                 setTimeout(function() {
+        //                     document.body.removeChild(form);
+        //                     loading.remove();
+        //                 }, 3000); // Adjust timeout as needed
+        //             }
+        //         }
+        //     ],
+        // pageLength: 10,
+        // lengthMenu: [10, 25, 50, 100],
+        // order: [[3, 'asc']],
+        // language: {
+        //     emptyTable: "No data available",
+        //     info: "Showing _START_ to _END_ of _TOTAL_ entries",
+        //     infoEmpty: "Showing 0 to 0 of 0 entries",
+        //     search: "Search:",
+        //     paginate: {
+        //         first: "First",
+        //         last: "Last",
+        //         next: "Next",
+        //         previous: "Previous"
+        //     }
+        // },
         initComplete: function() {
             console.log('DataTable initialized successfully');
         },
@@ -552,4 +564,165 @@ $(document).ready(function() {
 });
 </script>
 
+<!-- <script> 
+function printWithCustomOptions(event) {
+    event.preventDefault(); 
+
+    const tempsaleparent = document.getElementById('tempsaleparent').value;
+    const type_receipt = document.getElementById('type_receipt').value;
+
+    let unused = 0; 
+    const unusedElement = document.getElementById('unused'); 
+    if (unusedElement) { 
+        const unusedValue = unusedElement.value;
+        if (unusedValue !== "" || unusedValue > 0) {
+            unused = parseFloat(unusedValue); 
+        }
+    }
+
+    try {
+        const dataArray = JSON.parse(tempsaleparent);
+        let totalAmount = 0;
+        let orderSummaryString = ""; 
+        let namecus = ""; 
+
+        dataArray.forEach(orderItem => {
+            
+            const productName = orderItem.getprod.name_ar ? orderItem.getprod.name_ar : 'Product Name Unavailable'; 
+            const productprice = parseFloat(orderItem.sellprice) || 0;
+            const factorun = orderItem.factor_unit;
+            const productpriceunit = productprice / factorun;
+            // const roundedproductpriceunit = Math.ceil(productpriceunit);
+            const productqntfactor = orderItem.quantity * factorun;
+            const productpricetotal = productpriceunit * productqntfactor;
+            const roundedProductQntFactor = Math.ceil(productqntfactor);
+            const totpriceprod = productpriceunit * roundedProductQntFactor;
+
+            totalAmount += totpriceprod;
+
+            orderSummaryString += `
+                <tr>
+                <td class="text-center fs-6">${productName}</td>
+                <td class="text-center fs-6">${roundedProductQntFactor}</td>
+                <td class="text-center fs-6">${productpricetotal}</td>
+                </tr>
+            `;
+        });
+
+        if (type_receipt == 2) {
+            const cust_detail = document.getElementById('cust_detail').textContent;
+            namecus = `<span>${cust_detail}</span>`; 
+        }
+
+        let seviceval = 0;
+        let vatval = (totalAmount + seviceval) * 0;
+        let payed = (totalAmount + seviceval + vatval) - unused;
+
+        const logoUrlInput = document.getElementById('logoUrl');
+        const logo = logoUrlInput.value; 
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Payment Slip</title>
+                <style>
+                    @page {
+                        margin: 0; /* Set margins to minimum */
+                    }
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        text-align: center; 
+                    }
+                    table { 
+                        border-collapse: collapse; 
+                        margin: 2px auto; 
+                        text-align: center;
+                        width: 100%; /* Use full width */
+                        table-layout: fixed; /* Distribute column widths evenly */
+                    }
+                    th, td { 
+                        
+                        border: 1px solid #000; 
+                        padding: 2px; 
+                        word-wrap: break-word; /* Allow text to wrap within cells */
+                        
+
+                    }
+                    .logo-container {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .logo-container img {
+                        max-width: 200px; 
+                        max-height: 100px; 
+                    }
+                    @media print { 
+                        /* Make sure this is not hiding your content */
+                        body * { 
+                            visibility: visible !important; 
+                        }
+                        .no-print {
+                            display: none;
+                        }
+                    }
+                    .page-header {
+                        text-align: left; 
+                        margin-bottom: 20px;
+                        page-break-after: always; 
+                    }
+                </style>
+            </head>
+            <body dir="rtl">
+                <div id="print-container"> <div class="logo-container">
+                    <img src="${logo}" alt="Logo"> 
+                </div>
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 50% !important;">الاسم</th>
+                            <th>كمية</th>
+                            <th>سعر</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        ${orderSummaryString} 
+                    </tbody>
+                    <tr>
+                        <td ><strong> القيمة:</strong></td>
+                        <td colspan="2"><strong>${totalAmount.toFixed(2)}</td> 
+                    </tr>
+                    <tr>
+                        <td ><strong>الخدمة:</strong></td>
+                        <td colspan="2"><strong>${(seviceval).toFixed(2)}</strong></td> 
+                    </tr>
+                    <tr>
+                        <td ><strong>الخصم:</strong></td>
+                        <td colspan="2"><strong>${unused}</strong></td> 
+                    </tr>
+                    <tr>
+                        <td ><strong>اجمالى</strong></td>
+                        <td colspan="2"><strong>${(payed).toFixed(0)}</strong></td> 
+                    </tr>
+                </table>
+                <p>&copy; AZ</p>
+                <h3>${namecus}</h3> 
+                </div>
+            </body>
+            </html>
+        `;
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.open();
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+
+        printWindow.onload = function() {
+            printWindow.print();
+        };
+    } catch (error) {
+        console.error("Error processing data:", error); 
+    }
+}
+</script> -->
 @endsection
