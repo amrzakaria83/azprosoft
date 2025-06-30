@@ -328,5 +328,7 @@ return [
     "drug" => "Drug",
     "non_drug" => "Undrug",
     "consumption_rate" => "Consumption rate",
+    "less_than" => "Less Than",
+    "more_than" => "More Than",
 
 ];

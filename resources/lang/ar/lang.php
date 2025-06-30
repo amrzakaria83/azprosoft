@@ -325,6 +325,8 @@ return [
     "drug" => "دواء",
     "non_drug" => "غير دواء",
     "consumption_rate" => "معدل الاستهلاك",
+    "less_than" => "اقل من",
+    "more_than" => "اكثر من",
 
 
 ];

@@ -69,6 +69,23 @@
     <div id="kt_app_content_container" class="app-container container-fluid">
 
             <div class="card no-border">
+                    <div class="row mb-6">
+                        <!-- Store Buttons Section -->
+                        <div class="col-sm-12 fv-row">
+                            <div class="d-flex flex-wrap">
+                                @foreach (\App\Models\Pro_store::whereIn('store_id', [1, 2, 3, 4, 6, 8, 9, 12, 13, 14, 21])->orderBy('store_name')->get() as $site)
+                                    <button type="button" 
+                                            class="btn btn-info btn-lg m-2 store-print-btn" 
+                                            data-store-id="{{ $site->store_id }}"
+                                            onclick="printStoreData({{ $site->store_id }}, '{{ addslashes($site->store_name) }}')">
+                                        <i class="fas fa-print me-2"></i>
+                                        {{ $site->store_name }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        
+                    </div>
                 <!--begin::Card header-->
                 <div class="card-header border-0 pt-6">
                     <div class="card-title">
@@ -144,25 +161,22 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-sm-4">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.consumption_rate')}}</label>
+                        <div class="col-sm-2">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.consumption_rate')}} {{trans('lang.less_than')}}</label>
                             <div class="col-sm-12 fv-row">
-                                <input type="number" name="consumption_rate" placeholder="{{trans('lang.day')}}" id="consumption_rate" value="" class="form-control form-control-lg form-control-solid text-center" />
+                                <input type="number" name="c_r_less_than" placeholder="{{trans('lang.day')}}" id="c_r_less_than" value="10" class="form-control form-control-lg form-control-solid text-center" />
+
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.quantity')}} {{trans('lang.consumption_rate')}}</label>
+                            <div class="col-sm-12 fv-row">
+                                <input type="number" name="c_r_quantity" placeholder="{{trans('lang.day')}}" id="c_r_quantity" value="20" class="form-control form-control-lg form-control-solid text-center" />
 
                             </div>
                         </div>
                     </div>
-                    <div class="row mb-6">
-                        <!-- <label class="col-sm-2 col-form-label fw-semibold fs-6">{{trans('lang.name')}}-{{trans('lang.employee')}}</label> -->
-                        <div class="col-sm-4">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.consumption_rate')}}</label>
-                            <div class="col-sm-12 fv-row">
-                                <input type="number" name="consumption_rate" placeholder="{{trans('lang.day')}}" id="consumption_rate" value="" class="form-control form-control-lg form-control-solid text-center" />
-
-                            </div>
-                        </div>
-                        
-                    </div>
+                    
                     <!-- Main Table -->
                 <div class="table-responsive">
                     <table class="table align-middle table-rounded table-striped table-row-dashed fs-6 w-100 sticky-left" id="kt_datatable_table">
@@ -185,6 +199,8 @@
                                 @foreach ($sites as $site) 
                                 <th class="min-w-125px text-center" data-site-control="{{$site->store_id}}-b">{{trans('lang.balance_acc')}} {{$site->store_name}}</th>
                                 <th class="min-w-125px text-center" data-site-control="{{$site->store_id}}-s">{{trans('lang.sale_acc')}} {{$site->store_name}}</th>
+                                <th class="min-w-125px text-center" data-site-control="{{$site->store_id}}-b">{{trans('lang.consumption_rate')}} {{$site->store_name}}/{{trans('lang.day')}}</th>
+                                <th class="min-w-125px text-center" data-site-control="{{$site->store_id}}-b">{{trans('lang.quantity')}} {{$site->store_name}} {{trans('lang.transfer')}}</th>
                                 @endforeach
                             </tr>
                         </thead>
@@ -230,7 +246,7 @@
 $(document).ready(function() {
     // Get all sites from PHP
     var sites = {!! \App\Models\Pro_store::get(['store_id', 'store_name'])->toJson() !!};
-    console.log('Sites data:', sites);
+    // console.log('Sites data:', sites);
 
     // First build the columns configuration
     var columns = [
@@ -271,17 +287,6 @@ $(document).ready(function() {
                 return content;
             }
         },
-        // {
-        //     data: null,
-        //     name: 'days_diff',
-        //     render: function(data, type, row, meta) {
-        //         // Access the global summary from DataTables' API
-        //         const json = meta.settings.json;
-        //         const days = json?.summary?.days_diff ?? 0;
-        //         return type === 'display' ? parseInt(days) : days;
-        //     },
-        //     className: 'text-center'
-        // },
         {
             data: 'sell_price',
             name: 'sell_price',
@@ -295,14 +300,6 @@ $(document).ready(function() {
                 }
             }
         },
-        // { 
-        //     data: 'sell_price',
-        //     name: 'sell_price',
-        //     render: function(data) {
-        //         return data ? + parseFloat(data).toFixed(2) : 0;
-        //     },
-        //     className: 'text-center'
-        // },
         { 
             data: 'total_sales_amount',
             name: 'total_sales_amount',
@@ -344,7 +341,7 @@ $(document).ready(function() {
             data: null,
             name: 'site_' + site.store_id + '_balance',
             defaultContent: 0,
-            className: 'text-center',
+            className: 'text-center text-success',
             render: function(data, type, row) {
                 if (!row.sites) return 0;
                 var siteData = row.sites.find(s => s.site_id == site.store_id);
@@ -363,6 +360,65 @@ $(document).ready(function() {
                 return siteData ?  + siteData.sales_amount.toFixed(2) : 0;
             }
         });
+            // Consumption Rate column (sales per day)
+        columns.push({
+            data: null,
+            name: 'site_' + site.store_id + '_consumption_rate',
+            defaultContent: 0,
+            className: 'text-center text-secondary',
+            render: function(data, type, row, meta) {
+                if (!row.sites) return 0;
+                var siteData = row.sites.find(s => s.site_id == site.store_id);
+                if (!siteData || !siteData.sales_amount) return 0;
+                
+                // Get days_diff from the summary data
+                const json = meta.settings.json;
+                const daysDiff = json?.summary?.days_diff || 1; // Default to 1 if not available
+                // Calculate and store consumption rate
+                const consumptionRate = (siteData.sales_amount / daysDiff).toFixed(2);
+                 // Store in row data for other columns to access
+                if (type === 'display' || type === 'filter') {
+                    if (!row._consumptionRates) row._consumptionRates = {};
+                    row._consumptionRates[site.store_id] = consumptionRate;
+                }
+                // Calculate and return consumption rate (sales per day)
+                return consumptionRate;
+            }
+        });
+        // q_added
+        columns.push({
+            data: null,
+            name: 'site_' + site.store_id + '_consumption_rate',
+            defaultContent: 0,
+            className: 'text-center text-info',
+            render: function(data, type, row, meta) {
+                // Early return if no site data
+                if (!row.sites) return '0';
+                
+                const siteData = row.sites.find(s => s.site_id == site.store_id);
+                if (!siteData || typeof siteData.prod_amount === 'undefined') return '0';
+                
+                // Get configuration values with defaults
+                const c_r_less_than = parseFloat($('#c_r_less_than').val()) || 1;
+                const c_r_quantity = parseFloat($('#c_r_quantity').val()) || 1;
+                
+                // Get consumption rate with safety checks
+                const consumptionRate = parseFloat(row._consumptionRates?.[site.store_id]) || 0;
+                if (consumptionRate <= 0) return '∞'; // Infinite supply
+                
+                // Calculate required quantities
+                const q_c_r_quantity = consumptionRate * c_r_quantity;
+                const q_added = q_c_r_quantity - (parseFloat(siteData.prod_amount) || 0);
+                
+                // Format output
+                if (q_added > 0) {
+                    // Round to nearest integer, minimum 1
+                    return Math.max(1, Math.round(q_added)).toString();
+                }
+                return '0';
+            }
+        });
+        
     });
 
         $('#store_id').select2({
@@ -393,43 +449,7 @@ $(document).ready(function() {
         ajax: {
             url: "{{ route('admin.pro_sales_dets.transReport') }}",
             type: "GET",
-        //     data: function(d) {
-        //         // Transform DataTables parameters to match your backend
-        //         return {
-        //             draw: d.draw,
-        //             start: d.start,
-        //             length: d.length,
-        //             search: d.search.value,
-        //             // selected_stores: $('#store_id').val() || [],
-        //             // store_filter: $('#storeFilter').val(),
-        //             store_id_transfer: $('#store_id_transfer').val(),
-        //             drug_filter: $('#drugFilter').val()
-        //         };
-        //     },
-        //     dataSrc: function(json) {
-        //         console.log('Server response:', json);
-                
-        //         // Update summary information
-        //         if (json.summary) {
-        //             $('#valued_date').text(json.summary.generated_at || 'N/A');
-        //             $('#totalProducts').text(json.summary.total_products || 0);
-        //             $('#totalRecords').text(json.summary.total_records || 0);
-        //             $('#start_from').text(json.summary.start_from || 'N/A');
-        //             $('#end_to').text(json.summary.end_to || 'N/A');
-                    
-        //             if (json.summary.start_from && json.summary.end_to) {
-        //                 const startDate = new Date(json.summary.start_from);
-        //                 const endDate = new Date(json.summary.end_to);
-        //                 const daysDiff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
-        //                 $('#totalDays').text(daysDiff);
-        //             } else {
-        //                 $('#totalDays').text(0);
-        //             }
-        //         }
-                
-        //         return json.data || [];
-        //     }
-        // },
+    
             data: function(d) {
                     // Get all selected store IDs as array
                     // d.selected_stores = $('#store_id').val() || [];
@@ -439,9 +459,9 @@ $(document).ready(function() {
                     d.drug_filter = $('#drugFilter').val(); // Pass filter value to server
                 },
             dataSrc: function(json) {
-                console.log('json:', json);
-                console.log('json:', json.summary.days_diff);
-                console.log('First row summary:', json.data[0]?.summary);
+                // console.log('json:', json);
+                // console.log('json:', json.summary.days_diff);
+                // console.log('First row summary:', json.data[0]?.summary);
                 // console.log(json.summary);
                 if (typeof json === 'string') {
                     try {
@@ -488,6 +508,7 @@ $(document).ready(function() {
              "<'row'<'col-sm-12'tr>>" +
              "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         
+        
         initComplete: function() {
             console.log('DataTable initialized successfully');
         },
@@ -509,13 +530,13 @@ $(document).ready(function() {
             }
         }
     });
-
+    
     // Apply search to the table
     $('#search').keyup(function() {
         table.search($(this).val()).draw();
     });
 
-    $('#drugFilter,#store_id').on('change', function() {
+    $('#drugFilter,#store_id,#store_id_transfer').on('change', function() {
         table.ajax.reload(); // This will resend the request with the new filter
     });
     // Handle site details modal
@@ -592,165 +613,146 @@ $(document).ready(function() {
 });
 </script>
 
-<!-- <script> 
-function printWithCustomOptions(event) {
-    event.preventDefault(); 
+<!-- JavaScript Implementation -->
+<script>
+    // Ensure functions are available before buttons are clicked
+    document.addEventListener('DOMContentLoaded', function() {
+        window.printStoreData = function(storeId, storeName) {
+            try {
+                if (!window.kt_datatable) {
+                    console.error('DataTable not initialized');
+                    alert('Please wait until data is loaded');
+                    return;
+                }
 
-    const tempsaleparent = document.getElementById('tempsaleparent').value;
-    const type_receipt = document.getElementById('type_receipt').value;
+                const table = $('#kt_datatable_table').DataTable();
+                const printWindow = window.open('', `PRINT_${storeId}`, 'width=1000,height=700');
+                const now = new Date();
+                
+                // Filter data for the specific store
+                const filteredData = table.rows().data().toArray().filter(row => {
+                    const needsTransfer = row.sites?.some(site => 
+                        site.site_id == storeId && 
+                        calculateTransferQty(row, storeId) > 0
+                    );
+                    return needsTransfer;
+                });
 
-    let unused = 0; 
-    const unusedElement = document.getElementById('unused'); 
-    if (unusedElement) { 
-        const unusedValue = unusedElement.value;
-        if (unusedValue !== "" || unusedValue > 0) {
-            unused = parseFloat(unusedValue); 
-        }
-    }
+                if (filteredData.length === 0) {
+                    printWindow.close();
+                    showAlert('No transfer items needed for ' + storeName, 'warning');
+                    return;
+                }
 
-    try {
-        const dataArray = JSON.parse(tempsaleparent);
-        let totalAmount = 0;
-        let orderSummaryString = ""; 
-        let namecus = ""; 
-
-        dataArray.forEach(orderItem => {
-            
-            const productName = orderItem.getprod.name_ar ? orderItem.getprod.name_ar : 'Product Name Unavailable'; 
-            const productprice = parseFloat(orderItem.sellprice) || 0;
-            const factorun = orderItem.factor_unit;
-            const productpriceunit = productprice / factorun;
-            // const roundedproductpriceunit = Math.ceil(productpriceunit);
-            const productqntfactor = orderItem.quantity * factorun;
-            const productpricetotal = productpriceunit * productqntfactor;
-            const roundedProductQntFactor = Math.ceil(productqntfactor);
-            const totpriceprod = productpriceunit * roundedProductQntFactor;
-
-            totalAmount += totpriceprod;
-
-            orderSummaryString += `
-                <tr>
-                <td class="text-center fs-6">${productName}</td>
-                <td class="text-center fs-6">${roundedProductQntFactor}</td>
-                <td class="text-center fs-6">${productpricetotal}</td>
-                </tr>
-            `;
-        });
-
-        if (type_receipt == 2) {
-            const cust_detail = document.getElementById('cust_detail').textContent;
-            namecus = `<span>${cust_detail}</span>`; 
-        }
-
-        let seviceval = 0;
-        let vatval = (totalAmount + seviceval) * 0;
-        let payed = (totalAmount + seviceval + vatval) - unused;
-
-        const logoUrlInput = document.getElementById('logoUrl');
-        const logo = logoUrlInput.value; 
-
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Payment Slip</title>
-                <style>
-                    @page {
-                        margin: 0; /* Set margins to minimum */
-                    }
-                    body { 
-                        font-family: Arial, sans-serif; 
-                        text-align: center; 
-                    }
-                    table { 
-                        border-collapse: collapse; 
-                        margin: 2px auto; 
-                        text-align: center;
-                        width: 100%; /* Use full width */
-                        table-layout: fixed; /* Distribute column widths evenly */
-                    }
-                    th, td { 
-                        
-                        border: 1px solid #000; 
-                        padding: 2px; 
-                        word-wrap: break-word; /* Allow text to wrap within cells */
-                        
-
-                    }
-                    .logo-container {
-                        text-align: center;
-                        margin-bottom: 20px;
-                    }
-                    .logo-container img {
-                        max-width: 200px; 
-                        max-height: 100px; 
-                    }
-                    @media print { 
-                        /* Make sure this is not hiding your content */
-                        body * { 
-                            visibility: visible !important; 
-                        }
-                        .no-print {
-                            display: none;
-                        }
-                    }
-                    .page-header {
-                        text-align: left; 
-                        margin-bottom: 20px;
-                        page-break-after: always; 
-                    }
-                </style>
-            </head>
-            <body dir="rtl">
-                <div id="print-container"> <div class="logo-container">
-                    <img src="${logo}" alt="Logo"> 
-                </div>
-                <table class="table table-bordered table-sm">
-                    <thead>
-                        <tr>
-                            <th style="min-width: 50% !important;">الاسم</th>
-                            <th>كمية</th>
-                            <th>سعر</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center">
-                        ${orderSummaryString} 
-                    </tbody>
-                    <tr>
-                        <td ><strong> القيمة:</strong></td>
-                        <td colspan="2"><strong>${totalAmount.toFixed(2)}</td> 
-                    </tr>
-                    <tr>
-                        <td ><strong>الخدمة:</strong></td>
-                        <td colspan="2"><strong>${(seviceval).toFixed(2)}</strong></td> 
-                    </tr>
-                    <tr>
-                        <td ><strong>الخصم:</strong></td>
-                        <td colspan="2"><strong>${unused}</strong></td> 
-                    </tr>
-                    <tr>
-                        <td ><strong>اجمالى</strong></td>
-                        <td colspan="2"><strong>${(payed).toFixed(0)}</strong></td> 
-                    </tr>
-                </table>
-                <p>&copy; AZ</p>
-                <h3>${namecus}</h3> 
-                </div>
-            </body>
-            </html>
-        `;
-
-        const printWindow = window.open('', '_blank');
-        printWindow.document.open();
-        printWindow.document.write(htmlContent);
-        printWindow.document.close();
-
-        printWindow.onload = function() {
-            printWindow.print();
+                // Generate print content
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                        <head>
+                            <title>${escapeHtml(storeName)} Transfer List</title>
+                            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                            <style>
+                                body { padding: 20px; font-family: Arial; }
+                                .header { margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+                                .title { font-size: 22px; font-weight: bold; }
+                                .date { float: right; color: #666; }
+                                table { width: 100%; margin-top: 15px; border-collapse: collapse; }
+                                th { background: #f8f9fa; text-align: left; padding: 8px; border: 1px solid #ddd; }
+                                td { padding: 8px; border: 1px solid #ddd; }
+                                .text-end { text-align: right; }
+                                .fw-bold { font-weight: bold; }
+                                @media print {
+                                    .no-print { display: none; }
+                                    body { padding: 0; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="header">
+                                <div class="title">${escapeHtml(storeName)} - Transfer List</div>
+                                <div class="date">${now.toLocaleDateString()} ${now.toLocaleTimeString()}</div>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Current Stock</th>
+                                        <th>Transfer Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${generateTransferRows(filteredData, storeId)}
+                                </tbody>
+                            </table>
+                            <div class="no-print text-center mt-3 text-muted">
+                                <small>Generated by Inventory System</small>
+                            </div>
+                            <script>
+                                window.onload = function() {
+                                    setTimeout(function() {
+                                        window.print();
+                                        setTimeout(window.close, 100);
+                                    }, 50);
+                                };
+                            <\/script>
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+            } catch (error) {
+                console.error('Print error:', error);
+                showAlert('Failed to generate printout', 'error');
+                if (printWindow) printWindow.close();
+            }
         };
-    } catch (error) {
-        console.error("Error processing data:", error); 
-    }
-}
-</script> -->
+
+        // Helper functions
+        window.calculateTransferQty = function(row, storeId) {
+            const site = row.sites?.find(s => s.site_id == storeId);
+            if (!site) return 0;
+            
+            const consumption = row._consumptionRates?.[storeId] || 0;
+            const days = parseFloat($('#c_r_quantity').val()) || 1;
+            const needed = consumption * days;
+            const current = parseFloat(site.prod_amount) || 0;
+            
+            return Math.max(0, Math.ceil(needed - current));
+        };
+
+        window.generateTransferRows = function(data, storeId) {
+            return data.map(row => {
+                const site = row.sites.find(s => s.site_id == storeId);
+                const transferQty = calculateTransferQty(row, storeId);
+                
+                return `
+                    <tr>
+                        <td>${escapeHtml(row.product_name || 'N/A')}</td>
+                        <td class="text-end">${(site?.prod_amount || 0).toFixed(2)}</td>
+                        <td class="text-end fw-bold">${transferQty}</td>
+                    </tr>
+                `;
+            }).join('');
+        };
+
+        window.escapeHtml = function(text) {
+            return text?.toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;') || '';
+        };
+
+        window.showAlert = function(message, type) {
+            if (window.toastr) {
+                toastr[type](message);
+            } else {
+                alert(message);
+            }
+        };
+
+        console.log('Transfer print functions initialized');
+    });
+</script>
+
 @endsection
