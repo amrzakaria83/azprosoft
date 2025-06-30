@@ -324,6 +324,7 @@ return [
     "sale_acc" => "بيع",
     "drug" => "دواء",
     "non_drug" => "غير دواء",
+    "consumption_rate" => "معدل الاستهلاك",
 
 
 ];

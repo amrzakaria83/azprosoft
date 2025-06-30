@@ -327,5 +327,6 @@ return [
     "sale_acc" => "sale_acc",
     "drug" => "Drug",
     "non_drug" => "Undrug",
+    "consumption_rate" => "Consumption rate",
 
 ];

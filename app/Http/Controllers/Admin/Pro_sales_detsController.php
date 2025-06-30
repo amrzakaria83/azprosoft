@@ -863,28 +863,408 @@ class Pro_sales_detsController extends Controller
     //         ]);
     //     }
     // }
-    public function transReport(Request $request)
+//     public function transReport(Request $request)
+// {
+//     $filePath = storage_path('app/temp.json');
+    
+//     if (!file_exists($filePath)) {
+//         if ($request->export) {
+//             return response('No data available for export', 404)
+//                 ->header('Content-Type', 'text/plain');
+//         }
+//         return response()->json([
+//             'draw' => $request->input('draw', 0),
+//             'recordsTotal' => 0,
+//             'recordsFiltered' => 0,
+//             'data' => [],
+//             'summary' => [
+//                 'start_from' => 0,
+//                 'end_to' => 0,
+//                 'total_products' => 0,
+//                 'total_records' => 0,
+//                 'generated_at' => now()->toDateTimeString()
+//             ]
+//         ]);
+//     }
+
+//     try {
+//         $fileContents = file_get_contents($filePath);
+//         $data = json_decode($fileContents, true);
+        
+//         if (json_last_error() !== JSON_ERROR_NONE) {
+//             throw new \Exception("Invalid JSON format");
+//         }
+
+//         $products = $data['products'] ?? [];
+//         $search = $request->input('search.value');
+//         $store_id_transfer = $request->input('store_id_transfer');
+//         $drugFilter = $request->input('drug_filter');
+//         $storeFilter = $request->input('store_filter');
+//         $selectedStores = $request->input('selected_stores', []);
+
+//         // Filter data based on all conditions
+//         $filteredData = array_filter($products, function($product) use ($search, $store_id_transfer, $drugFilter, $storeFilter, $selectedStores) {
+//                 // Apply store transfer filter if specified
+//                 if (!empty($store_id_transfer)) {
+//                     if (!isset($product['sites']) || !is_array($product['sites'])) {
+//                         return false;
+//                     }
+                    
+//                     $storeFound = false;
+//                     foreach ($product['sites'] as $store) {
+//                         if (isset($store['store_id']) && $store['store_id'] == $store_id_transfer) {
+//                             $storeFound = true;
+//                             break;
+//                         }
+//                     }
+//                     if (!$storeFound) return false;
+                    
+//                     // Additional check for prod_amount > 0 in sites
+//                     if (isset($product['sites']) && is_array($product['sites'])) {
+//                         $hasAvailableStock = false;
+//                         foreach ($product['sites'] as $site) {
+//                             if (isset($site['prod_amount']) && $site['prod_amount'] > 0) {
+//                                 $hasAvailableStock = true;
+//                                 break;
+//                             }
+//                         }
+//                         if (!$hasAvailableStock) return false;
+//                     } else {
+//                         return false; // No sites or invalid data
+//                     }
+//                 }
+//             // Apply drug filter if specified
+//             if (!empty($drugFilter)) {
+//                 if (!isset($product['drug']) || stripos($product['drug'], $drugFilter) === false) {
+//                     return false;
+//                 }
+//             }
+            
+//             // Apply store filter if specified
+//             if (!empty($storeFilter)) {
+//                 $storeMatch = false;
+//                 if (isset($product['sites'])) {
+//                     foreach ($product['sites'] as $store) {
+//                         if (stripos($store['store_name'] ?? '', $storeFilter) !== false) {
+//                             $storeMatch = true;
+//                             break;
+//                         }
+//                     }
+//                 }
+//                 if (!$storeMatch) return false;
+//             }
+            
+//             // Filter by selected stores if specified
+//             if (!empty($selectedStores) && isset($product['store_id'])) {
+//                 if (!in_array($product['store_id'], $selectedStores)) {
+//                     return false;
+//                 }
+//             }
+            
+//             // Apply search filter if specified
+//             if (!empty($search)) {
+//                 $nameMatch = isset($product['product_name']) && 
+//                             stripos($product['product_name'], $search) !== false;
+
+//                 $codeMatch = isset($product['product_code']) && 
+//                    stripos($product['product_code'], $search) !== false;
+                
+//                 $siteMatch = false;
+//                 if (isset($product['sites'])) {
+//                     foreach ($product['sites'] as $site) {
+//                         if (stripos($site['site_id'] ?? '', $search) !== false) {
+//                             $siteMatch = true;
+//                             break;
+//                         }
+//                     }
+//                 }
+//                 return $nameMatch || $codeMatch || $siteMatch;
+//             }
+            
+//             return true;
+//         });
+
+//         // Reset array keys
+//         $filteredData = array_values($filteredData);
+        
+//         // Paginate the results
+//         $start = (int)$request->input('start', 0);
+//         $length = (int)$request->input('length', 25);
+//         $paginatedData = array_slice($filteredData, $start, $length);
+
+//         // Prepare summary
+//         $summary = $data['summary'] ?? [
+//             'total_products' => count($products),
+//             'total_records' => count($products),
+//             'generated_at' => now()->toDateTimeString(),
+//             'days_diff' => 0,
+//         ];
+        
+//         // Calculate date differences if dates exist
+//         if (!empty($summary['start_from']) && !empty($summary['end_to'])) {
+//             $startDate = Carbon::parse($summary['start_from']);
+//             $endDate = Carbon::parse($summary['end_to']);
+            
+//             $summary['days_diff'] = $endDate->diffInDays($startDate);
+//             $summary['months_diff'] = $endDate->diffInMonths($startDate);
+//             $summary['years_diff'] = $endDate->diffInYears($startDate);
+//         } else {
+//             $summary['days_diff'] = 0;
+//             $summary['months_diff'] = 0;
+//             $summary['years_diff'] = 0;
+//         }
+
+//         // Update summary counts with filtered data
+//         $summary['total_products'] = count($filteredData);
+//         $summary['total_records'] = count($filteredData);
+
+//         return response()->json([
+//             'draw' => $request->input('draw', 0),
+//             'recordsTotal' => count($products),
+//             'recordsFiltered' => count($filteredData),
+//             'data' => $paginatedData,
+//             'summary' => $summary
+//         ]);
+
+//     } catch (\Exception $e) {
+//         if ($request->export) {
+//             return response('Export failed: ' . $e->getMessage(), 500)
+//                 ->header('Content-Type', 'text/plain');
+//         }
+//         return response()->json([
+//             'draw' => $request->input('draw', 0),
+//             'recordsTotal' => 0,
+//             'recordsFiltered' => 0,
+//             'data' => [],
+//             'summary' => [
+//                 'total_products' => 0,
+//                 'total_records' => 0,
+//                 'generated_at' => now()->toDateTimeString()
+//             ],
+//             'error' => $e->getMessage()
+//         ]);
+//     }
+// }
+// public function transReport(Request $request)
+// {
+//     $filePath = storage_path('app/temp.json');
+    
+//     // Initial empty response structure
+//     $emptyResponse = [
+//         'draw' => $request->input('draw', 0),
+//         'recordsTotal' => 0,
+//         'recordsFiltered' => 0,
+//         'data' => [],
+//         'summary' => [
+//             'start_from' => null,
+//             'end_to' => null,
+//             'total_products' => 0,
+//             'total_records' => 0,
+//             'days_diff' => 0,
+//             'months_diff' => 0,
+//             'years_diff' => 0,
+//             'generated_at' => now()->toDateTimeString()
+//         ]
+//     ];
+
+//     // Handle missing file case
+//     if (!file_exists($filePath)) {
+//         if ($request->export) {
+//             return response('No data available for export', 404)
+//                 ->header('Content-Type', 'text/plain');
+//         }
+//         return response()->json($emptyResponse);
+//     }
+
+//     try {
+//         $fileContents = file_get_contents($filePath);
+//         $data = json_decode($fileContents, true);
+        
+//         if (json_last_error() !== JSON_ERROR_NONE) {
+//             throw new \Exception("Invalid JSON format in temp file");
+//         }
+
+//         $products = $data['products'] ?? [];
+//         $search = $request->input('search.value');
+//         $store_id_transfer = $request->input('store_id_transfer');
+//         $drugFilter = $request->input('drug_filter');
+//         $storeFilter = $request->input('store_filter');
+//         $selectedStores = $request->input('selected_stores', []);
+
+//         // Filter data based on all conditions
+//         $filteredData = array_filter($products, function($product) use ($search, $store_id_transfer, $drugFilter, $storeFilter, $selectedStores) {
+//             // Store transfer filter with prod_amount check
+//             if (!empty($store_id_transfer)) {
+//                 if (!isset($product['sites']) || !is_array($product['sites'])) {
+//                     return false;
+//                 }
+                
+//                 $hasValidStoreWithStock = false;
+//                 foreach ($product['sites'] as $site) {
+//                     if (isset($site['store_id']) && 
+//                         $site['store_id'] == $store_id_transfer && 
+//                         isset($site['prod_amount']) && 
+//                         $site['prod_amount'] > 0) {
+//                         $hasValidStoreWithStock = true;
+//                         break;
+//                     }
+//                 }
+//                 if (!$hasValidStoreWithStock) return false;
+//             }
+
+//             // Drug filter
+//             if (!empty($drugFilter)) {
+//                 if (!isset($product['drug']) || stripos($product['drug'], $drugFilter) === false) {
+//                     return false;
+//                 }
+//             }
+            
+//             // Store name filter
+//             if (!empty($storeFilter)) {
+//                 $storeMatch = false;
+//                 if (isset($product['sites'])) {
+//                     foreach ($product['sites'] as $site) {
+//                         if (isset($site['store_name']) && stripos($site['store_name'], $storeFilter) !== false) {
+//                             $storeMatch = true;
+//                             break;
+//                         }
+//                     }
+//                 }
+//                 if (!$storeMatch) return false;
+//             }
+            
+//             // Selected stores filter
+//             if (!empty($selectedStores)) {
+//                 $storeMatch = false;
+                
+//                 // Check direct store_id if exists
+//                 if (isset($product['store_id']) && in_array($product['store_id'], $selectedStores)) {
+//                     $storeMatch = true;
+//                 }
+                
+//                 // Check sites array
+//                 if (!$storeMatch && isset($product['sites'])) {
+//                     foreach ($product['sites'] as $site) {
+//                         if (isset($site['store_id']) && in_array($site['store_id'], $selectedStores)) {
+//                             $storeMatch = true;
+//                             break;
+//                         }
+//                     }
+//                 }
+                
+//                 if (!$storeMatch) return false;
+//             }
+            
+//             // Search filter
+//             if (!empty($search)) {
+//                 $searchLower = strtolower($search);
+//                 $nameMatch = isset($product['product_name']) && 
+//                              stripos($product['product_name'], $search) !== false;
+                
+//                 $codeMatch = isset($product['product_code']) && 
+//                             stripos($product['product_code'], $search) !== false;
+                
+//                 $siteMatch = false;
+//                 if (isset($product['sites'])) {
+//                     foreach ($product['sites'] as $site) {
+//                         if ((isset($site['site_id']) && stripos($site['site_id'], $search) !== false) ||
+//                             (isset($site['site_name']) && stripos($site['site_name'], $search) !== false)) {
+//                             $siteMatch = true;
+//                             break;
+//                         }
+//                     }
+//                 }
+                
+//                 return $nameMatch || $codeMatch || $siteMatch;
+//             }
+            
+//             return true;
+//         });
+
+//         // Reset array keys and paginate
+//         $filteredData = array_values($filteredData);
+//         $start = (int)$request->input('start', 0);
+//         $length = (int)$request->input('length', 25);
+//         $paginatedData = array_slice($filteredData, $start, $length);
+
+//         // Prepare summary
+//         $summary = $data['summary'] ?? [
+//             'start_from' => null,
+//             'end_to' => null,
+//             'total_products' => count($products),
+//             'total_records' => count($products),
+//             'generated_at' => now()->toDateTimeString(),
+//         ];
+
+//         // Calculate date differences
+//         if (!empty($summary['start_from']) && !empty($summary['end_to'])) {
+//             try {
+//                 $startDate = Carbon::parse($summary['start_from']);
+//                 $endDate = Carbon::parse($summary['end_to']);
+                
+//                 $summary['days_diff'] = $endDate->diffInDays($startDate);
+//                 $summary['months_diff'] = $endDate->diffInMonths($startDate);
+//                 $summary['years_diff'] = $endDate->diffInYears($startDate);
+//             } catch (\Exception $e) {
+//                 $summary['days_diff'] = 0;
+//                 $summary['months_diff'] = 0;
+//                 $summary['years_diff'] = 0;
+//             }
+//         }
+
+//         // Update summary with filtered counts
+//         $summary['total_products'] = count($filteredData);
+//         $summary['total_records'] = count($filteredData);
+
+//         return response()->json([
+//             'draw' => $request->input('draw', 0),
+//             'recordsTotal' => count($products),
+//             'recordsFiltered' => count($filteredData),
+//             'data' => $paginatedData,
+//             'summary' => $summary
+//         ]);
+
+//     } catch (\Exception $e) {
+//         \Log::error('Transaction report error: ' . $e->getMessage());
+        
+//         if ($request->export) {
+//             return response('Export failed: ' . $e->getMessage(), 500)
+//                 ->header('Content-Type', 'text/plain');
+//         }
+        
+//         $emptyResponse['error'] = $e->getMessage();
+//         return response()->json($emptyResponse);
+//     }
+// }
+public function transReport(Request $request)
 {
     $filePath = storage_path('app/temp.json');
     
+    // Initial empty response structure
+    $emptyResponse = [
+        'draw' => $request->input('draw', 0),
+        'recordsTotal' => 0,
+        'recordsFiltered' => 0,
+        'data' => [],
+        'summary' => [
+            'start_from' => null,
+            'end_to' => null,
+            'total_products' => 0,
+            'total_records' => 0,
+            'days_diff' => 0,
+            'months_diff' => 0,
+            'years_diff' => 0,
+            'generated_at' => now()->toDateTimeString()
+        ]
+    ];
+
+    // Handle missing file case
     if (!file_exists($filePath)) {
         if ($request->export) {
             return response('No data available for export', 404)
                 ->header('Content-Type', 'text/plain');
         }
-        return response()->json([
-            'draw' => $request->input('draw', 0),
-            'recordsTotal' => 0,
-            'recordsFiltered' => 0,
-            'data' => [],
-            'summary' => [
-                'start_from' => 0,
-                'end_to' => 0,
-                'total_products' => 0,
-                'total_records' => 0,
-                'generated_at' => now()->toDateTimeString()
-            ]
-        ]);
+        return response()->json($emptyResponse);
     }
 
     try {
@@ -892,99 +1272,184 @@ class Pro_sales_detsController extends Controller
         $data = json_decode($fileContents, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception("Invalid JSON format");
+            throw new \Exception("Invalid JSON format in temp file");
         }
 
         $products = $data['products'] ?? [];
         $search = $request->input('search.value');
+        $store_id_transfer = $request->input('store_id_transfer');
         $drugFilter = $request->input('drug_filter');
         $storeFilter = $request->input('store_filter');
         $selectedStores = $request->input('selected_stores', []);
 
+        // Debug: Log filter values
+        \Log::debug('Filter values:', [
+            'store_id_transfer' => $store_id_transfer,
+            'drugFilter' => $drugFilter,
+            'storeFilter' => $storeFilter,
+            'selectedStores' => $selectedStores,
+            'search' => $search
+        ]);
+
         // Filter data based on all conditions
-        $filteredData = array_filter($products, function($product) use ($search, $drugFilter, $storeFilter, $selectedStores) {
-            // Apply drug filter if specified
+        $filteredData = array_filter($products, function($product) use ($search, $store_id_transfer, $drugFilter, $storeFilter, $selectedStores) {
+            $rejectReasons = [];
+            
+            // Store transfer filter
+            if (!empty($store_id_transfer)) {
+                if (!isset($product['sites']) || !is_array($product['sites'])) {
+                    $rejectReasons[] = 'No sites data';
+                    return false;
+                }
+                
+                $storeFound = false;
+                $hasStock = false;
+                foreach ($product['sites'] as $site) {
+                    if (isset($site['store_id']) && $site['store_id'] == $store_id_transfer) {
+                        $storeFound = true;
+                        if (isset($site['prod_amount']) && $site['prod_amount'] > 0) {
+                            $hasStock = true;
+                        }
+                    }
+                }
+                
+                if (!$storeFound) {
+                    $rejectReasons[] = 'Not in specified store';
+                    return false;
+                }
+                if (!$hasStock) {
+                    $rejectReasons[] = 'No stock in specified store';
+                    // return false; // Uncomment to enforce stock requirement
+                }
+            }
+
+            // Drug filter
             if (!empty($drugFilter)) {
                 if (!isset($product['drug']) || stripos($product['drug'], $drugFilter) === false) {
+                    $rejectReasons[] = 'Drug filter mismatch';
                     return false;
                 }
             }
             
-            // Apply store filter if specified
+            // Store name filter
             if (!empty($storeFilter)) {
                 $storeMatch = false;
-                if (isset($product['stores'])) {
-                    foreach ($product['stores'] as $store) {
-                        if (stripos($store['store_name'] ?? '', $storeFilter) !== false) {
+                if (isset($product['sites'])) {
+                    foreach ($product['sites'] as $site) {
+                        if (isset($site['store_name']) && stripos($site['store_name'], $storeFilter) !== false) {
                             $storeMatch = true;
                             break;
                         }
                     }
                 }
-                if (!$storeMatch) return false;
-            }
-            
-            // Filter by selected stores if specified
-            if (!empty($selectedStores) && isset($product['store_id'])) {
-                if (!in_array($product['store_id'], $selectedStores)) {
+                if (!$storeMatch) {
+                    $rejectReasons[] = 'Store name filter mismatch';
                     return false;
                 }
             }
             
-            // Apply search filter if specified
+            // Selected stores filter
+            if (!empty($selectedStores)) {
+                $storeMatch = false;
+                
+                // Check direct store_id if exists
+                if (isset($product['store_id']) && in_array($product['store_id'], $selectedStores)) {
+                    $storeMatch = true;
+                }
+                
+                // Check sites array
+                if (!$storeMatch && isset($product['sites'])) {
+                    foreach ($product['sites'] as $site) {
+                        if (isset($site['store_id']) && in_array($site['store_id'], $selectedStores)) {
+                            $storeMatch = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!$storeMatch) {
+                    $rejectReasons[] = 'Not in selected stores';
+                    return false;
+                }
+            }
+            
+            // Search filter
             if (!empty($search)) {
+                $searchLower = strtolower($search);
                 $nameMatch = isset($product['product_name']) && 
-                            stripos($product['product_name'], $search) !== false;
+                             stripos($product['product_name'], $search) !== false;
+                
+                $codeMatch = isset($product['product_code']) && 
+                            stripos($product['product_code'], $search) !== false;
                 
                 $siteMatch = false;
                 if (isset($product['sites'])) {
                     foreach ($product['sites'] as $site) {
-                        if (stripos($site['site_id'] ?? '', $search) !== false) {
+                        if ((isset($site['site_id']) && stripos($site['site_id'], $search) !== false) ||
+                            (isset($site['site_name']) && stripos($site['site_name'], $search) !== false)) {
                             $siteMatch = true;
                             break;
                         }
                     }
                 }
                 
-                return $nameMatch || $siteMatch;
+                if (!($nameMatch || $codeMatch || $siteMatch)) {
+                    $rejectReasons[] = 'Search term not found';
+                    return false;
+                }
+            }
+            
+            if (!empty($rejectReasons) && count($rejectReasons) > 0) {
+                \Log::debug('Product filtered:', [
+                    'product_id' => $product['product_id'] ?? 'unknown',
+                    'reasons' => $rejectReasons
+                ]);
             }
             
             return true;
         });
 
-        // Reset array keys
+        // Reset array keys and paginate
         $filteredData = array_values($filteredData);
-        
-        // Paginate the results
         $start = (int)$request->input('start', 0);
         $length = (int)$request->input('length', 25);
         $paginatedData = array_slice($filteredData, $start, $length);
 
         // Prepare summary
         $summary = $data['summary'] ?? [
+            'start_from' => null,
+            'end_to' => null,
             'total_products' => count($products),
             'total_records' => count($products),
             'generated_at' => now()->toDateTimeString(),
-            'days_diff' => 0,
         ];
-        
-        // Calculate date differences if dates exist
+
+        // Calculate date differences
         if (!empty($summary['start_from']) && !empty($summary['end_to'])) {
-            $startDate = Carbon::parse($summary['start_from']);
-            $endDate = Carbon::parse($summary['end_to']);
-            
-            $summary['days_diff'] = $endDate->diffInDays($startDate);
-            $summary['months_diff'] = $endDate->diffInMonths($startDate);
-            $summary['years_diff'] = $endDate->diffInYears($startDate);
-        } else {
-            $summary['days_diff'] = 0;
-            $summary['months_diff'] = 0;
-            $summary['years_diff'] = 0;
+            try {
+                $startDate = Carbon::parse($summary['start_from']);
+                $endDate = Carbon::parse($summary['end_to']);
+                
+                $summary['days_diff'] = $endDate->diffInDays($startDate);
+                $summary['months_diff'] = $endDate->diffInMonths($startDate);
+                $summary['years_diff'] = $endDate->diffInYears($startDate);
+            } catch (\Exception $e) {
+                $summary['days_diff'] = 0;
+                $summary['months_diff'] = 0;
+                $summary['years_diff'] = 0;
+            }
         }
 
-        // Update summary counts with filtered data
+        // Update summary with filtered counts
         $summary['total_products'] = count($filteredData);
         $summary['total_records'] = count($filteredData);
+
+        // Debug: Log filtering results
+        \Log::debug('Filtering results:', [
+            'total_products' => count($products),
+            'filtered_count' => count($filteredData),
+            'first_filtered_product' => $filteredData[0] ?? null
+        ]);
 
         return response()->json([
             'draw' => $request->input('draw', 0),
@@ -995,22 +1460,16 @@ class Pro_sales_detsController extends Controller
         ]);
 
     } catch (\Exception $e) {
+        \Log::error('Transaction report error: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+        
         if ($request->export) {
             return response('Export failed: ' . $e->getMessage(), 500)
                 ->header('Content-Type', 'text/plain');
         }
-        return response()->json([
-            'draw' => $request->input('draw', 0),
-            'recordsTotal' => 0,
-            'recordsFiltered' => 0,
-            'data' => [],
-            'summary' => [
-                'total_products' => 0,
-                'total_records' => 0,
-                'generated_at' => now()->toDateTimeString()
-            ],
-            'error' => $e->getMessage()
-        ]);
+        
+        $emptyResponse['error'] = $e->getMessage();
+        return response()->json($emptyResponse);
     }
 }
     

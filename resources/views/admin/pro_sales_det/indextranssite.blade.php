@@ -92,6 +92,17 @@
                                 <i class="bi bi-funnel-fill fs-1x"></i></button> -->
                             <!-- <button type="button" class="btn btn-sm btn-icon btn-danger btn-active-dark me-3 p-3" id="btn_delete" data-token="{{ csrf_token() }}">
                                 <i class="bi bi-trash3-fill fs-1x"></i></button> -->
+                                <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.store')}} {{trans('lang.transfer')}}</label>
+                            <div class="col-sm-12 fv-row">
+                                <select data-placeholder="Select an option" class="input-text form-control form-select mb-3 mb-lg-0 text-center" name="store_id_transfer" id="store_id_transfer" data-allow-clear="true" style="background-color :#E3FFA0FF;">
+                                    <option value="">Select an option</option>
+                                    @foreach (\App\Models\Pro_store::get() as $store)
+                                        <option value="{{ $store->store_id }}" {{ $store->store_id == 7 ? 'selected' : '' }}>
+                                            {{ $store->store_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <!--end::Card toolbar-->
@@ -109,6 +120,7 @@
                         <span id="totalProducts">0</span> {{trans('lang.products')}}, 
                         <span id="totalRecords">0</span> {{trans('lang.transactions')}}
                     </div>
+                    
                     <div class="row mb-6">
                         <!-- <label class="col-sm-2 col-form-label fw-semibold fs-6">{{trans('lang.name')}}-{{trans('lang.employee')}}</label> -->
                         <div class="col-sm-4">
@@ -133,13 +145,23 @@
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.nutrilist')}} {{trans('lang.visit')}}</label>
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.consumption_rate')}}</label>
                             <div class="col-sm-12 fv-row">
-                            <button type="button" class="btn btn-success btn-lg " id="searchbtn" >
-                                    Search
-                                </button> 
+                                <input type="number" name="consumption_rate" placeholder="{{trans('lang.day')}}" id="consumption_rate" value="" class="form-control form-control-lg form-control-solid text-center" />
+
                             </div>
                         </div>
+                    </div>
+                    <div class="row mb-6">
+                        <!-- <label class="col-sm-2 col-form-label fw-semibold fs-6">{{trans('lang.name')}}-{{trans('lang.employee')}}</label> -->
+                        <div class="col-sm-4">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.consumption_rate')}}</label>
+                            <div class="col-sm-12 fv-row">
+                                <input type="number" name="consumption_rate" placeholder="{{trans('lang.day')}}" id="consumption_rate" value="" class="form-control form-control-lg form-control-solid text-center" />
+
+                            </div>
+                        </div>
+                        
                     </div>
                     <!-- Main Table -->
                 <div class="table-responsive">
@@ -371,15 +393,53 @@ $(document).ready(function() {
         ajax: {
             url: "{{ route('admin.pro_sales_dets.transReport') }}",
             type: "GET",
+        //     data: function(d) {
+        //         // Transform DataTables parameters to match your backend
+        //         return {
+        //             draw: d.draw,
+        //             start: d.start,
+        //             length: d.length,
+        //             search: d.search.value,
+        //             // selected_stores: $('#store_id').val() || [],
+        //             // store_filter: $('#storeFilter').val(),
+        //             store_id_transfer: $('#store_id_transfer').val(),
+        //             drug_filter: $('#drugFilter').val()
+        //         };
+        //     },
+        //     dataSrc: function(json) {
+        //         console.log('Server response:', json);
+                
+        //         // Update summary information
+        //         if (json.summary) {
+        //             $('#valued_date').text(json.summary.generated_at || 'N/A');
+        //             $('#totalProducts').text(json.summary.total_products || 0);
+        //             $('#totalRecords').text(json.summary.total_records || 0);
+        //             $('#start_from').text(json.summary.start_from || 'N/A');
+        //             $('#end_to').text(json.summary.end_to || 'N/A');
+                    
+        //             if (json.summary.start_from && json.summary.end_to) {
+        //                 const startDate = new Date(json.summary.start_from);
+        //                 const endDate = new Date(json.summary.end_to);
+        //                 const daysDiff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+        //                 $('#totalDays').text(daysDiff);
+        //             } else {
+        //                 $('#totalDays').text(0);
+        //             }
+        //         }
+                
+        //         return json.data || [];
+        //     }
+        // },
             data: function(d) {
-                // Get all selected store IDs as array
-                d.selected_stores = $('#store_id').val() || [];
-                // Pass filter values
-                d.store_filter = $('#storeFilter').val();
+                    // Get all selected store IDs as array
+                    // d.selected_stores = $('#store_id').val() || [];
+                    // Pass filter values
+                    // d.store_filter = $('#storeFilter').val();
+                    d.store_id_transfer = $('#store_id_transfer').val(); // Pass filter value to server
                     d.drug_filter = $('#drugFilter').val(); // Pass filter value to server
                 },
             dataSrc: function(json) {
-                // console.log('json:', json);
+                console.log('json:', json);
                 console.log('json:', json.summary.days_diff);
                 console.log('First row summary:', json.data[0]?.summary);
                 // console.log(json.summary);
@@ -427,63 +487,7 @@ $(document).ready(function() {
         dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'fB>>" +
              "<'row'<'col-sm-12'tr>>" +
              "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        //      buttons: [
-        //         {
-        //             extend: 'excel',
-        //             text: '<i class="fas fa-file-excel"></i> Export All',
-        //             className: 'btn btn-success btn-sm',
-        //             action: function(e, dt, button, config) {
-        //                 // Simple loading indicator (works without KTApp)
-        //                 var loading = $('<div class="export-loading">Preparing export...</div>');
-        //                 $('body').append(loading);
-                        
-        //                 // Create a temporary form
-        //                 var form = document.createElement('form');
-        //                 form.method = 'POST';
-        //                 form.action = "{{ route('admin.pro_sales_dets.exportReport') }}";
-        //                 form.target = '_blank';
-                        
-        //                 // Add CSRF token
-        //                 var token = document.createElement('input');
-        //                 token.type = 'hidden';
-        //                 token.name = '_token';
-        //                 token.value = "{{ csrf_token() }}";
-        //                 form.appendChild(token);
-
-        //                 // Add drug filter value
-        //                 var drugFilter = document.createElement('input');
-        //                 drugFilter.type = 'hidden';
-        //                 drugFilter.name = 'drug_filter';
-        //                 drugFilter.value = $('#drugFilter').val();
-                        
-        //                 form.appendChild(drugFilter);
-                        
-        //                 document.body.appendChild(form);
-        //                 form.submit();
-                        
-        //                 // Clean up after download starts
-        //                 setTimeout(function() {
-        //                     document.body.removeChild(form);
-        //                     loading.remove();
-        //                 }, 3000); // Adjust timeout as needed
-        //             }
-        //         }
-        //     ],
-        // pageLength: 10,
-        // lengthMenu: [10, 25, 50, 100],
-        // order: [[3, 'asc']],
-        // language: {
-        //     emptyTable: "No data available",
-        //     info: "Showing _START_ to _END_ of _TOTAL_ entries",
-        //     infoEmpty: "Showing 0 to 0 of 0 entries",
-        //     search: "Search:",
-        //     paginate: {
-        //         first: "First",
-        //         last: "Last",
-        //         next: "Next",
-        //         previous: "Previous"
-        //     }
-        // },
+        
         initComplete: function() {
             console.log('DataTable initialized successfully');
         },
