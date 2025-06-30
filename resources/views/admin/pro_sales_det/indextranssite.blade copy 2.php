@@ -637,7 +637,7 @@ $(document).ready(function() {
             </head>
             <body>
                 <div class="header">
-                    <div class="title">${escapeHtml(storeName)}</div>
+                    <div class="title">${escapeHtml(storeName)} - Product Transfer List</div>
                     <div class="header-info">
                         <div>Generated: ${now.toLocaleString()}</div>
                         <div>Total Items: ${totalItems}</div>
@@ -647,10 +647,11 @@ $(document).ready(function() {
                 <table>
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Stock</th>
-                            <th>Qty</th>
+                            <th>Product Code</th>
+                            <th>Product Name</th>
+                            <th>Current Stock</th>
+                            <th>Daily Usage</th>
+                            <th>Transfer Qty</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -665,7 +666,7 @@ $(document).ready(function() {
                                     <td>${escapeHtml(row.product_id || 'N/A')}</td>
                                     <td>${escapeHtml(row.product_name || 'N/A')}</td>
                                     <td class="number-cell">${safeToFixed(currentStock)}</td>
-                                    
+                                    <td class="number-cell">${safeToFixed(dailyUsage)}</td>
                                     <td class="number-cell">${transferQty}</td>
                                 </tr>
                             `;
