@@ -383,19 +383,26 @@ $(document).ready(function() {
                 const siteData = row.sites.find(s => s.site_id == site.store_id);
                 if (!siteData || typeof siteData.prod_amount === 'undefined') return '0';
                 
-                const c_r_less_than = parseFloat($('#c_r_less_than').val()) || 10;
-                const c_r_quantity = parseFloat($('#c_r_quantity').val()) || 20;
+                const c_r_less_than = parseFloat($('#c_r_less_than').val());
+                const c_r_quantity = parseFloat($('#c_r_quantity').val());
                 const consumptionRate = parseFloat(row._consumptionRates?.[site.store_id]) || 0;
                 
                 if (consumptionRate <= 0) return '∞';
                 
                 const q_c_r_quantity = consumptionRate * c_r_quantity;
-                const q_added = q_c_r_quantity - (parseFloat(siteData.prod_amount) || 0);
+                const need_c_r_less_than = consumptionRate * c_r_less_than;
+                if (need_c_r_less_than < parseFloat(siteData.prod_amount) || 0)
+                    {
+                        return '0';
+                    } else {
+                        const q_added = q_c_r_quantity - (parseFloat(siteData.prod_amount) || 0);
                 
-                if (q_added > 0) {
-                    return Math.max(1, Math.round(q_added)).toString();
-                }
-                return '0';
+                        if (q_added > 0) {
+                            return Math.max(1, Math.round(q_added)).toString();
+                        }
+                        return '0';
+                    }
+                
             }
         });
     });
@@ -422,6 +429,7 @@ $(document).ready(function() {
                 d.c_r_quantity = $('#c_r_quantity').val();
             },
             dataSrc: function(json) {
+                console.log(json);
                 if (typeof json === 'string') {
                     try {
                         json = JSON.parse(json);
@@ -430,7 +438,9 @@ $(document).ready(function() {
                         return [];
                     }
                 }
-                
+                        // Store the complete response for later use (e.g., printing)
+                        this._lastJsonResponse = json;
+                console.log(json.alldata);
                 if (!json) {
                     console.error('Empty response from server');
                     return [];
@@ -546,8 +556,8 @@ $(document).ready(function() {
 
      // Define helper functions for printing with proper number handling
     window.calculateTransferQty = function(row, storeId) {
-        const c_r_quantity = parseFloat($('#c_r_quantity').val()) || 20;
-        const c_r_less_than = parseFloat($('#c_r_less_than').val()) || 10;
+        const c_r_quantity = parseFloat($('#c_r_quantity').val()) ;
+        const c_r_less_than = parseFloat($('#c_r_less_than').val()) ;
         
         const site = row.sites?.find(s => s.site_id == storeId);
         if (!site) return 0;
@@ -581,19 +591,31 @@ $(document).ready(function() {
     window.printStoreData = function(storeId, storeName) {
         try {
             const table = $('#kt_datatable_table').DataTable();
+            
             if (!table) {
                 showAlert('Data table not initialized', 'error');
                 return;
             }
+                    // Get the complete dataset from the stored AJAX response
+                    const completeData = table.ajax.json()?.alldata || [];
+                    console.log("Complete dataset:", completeData);
 
-            const filteredData = table.rows().data().toArray().filter(row => {
-                if (!row.sites) return false;
-                return row.sites.some(site => 
-                    site.site_id == storeId && 
-                    window.calculateTransferQty(row, storeId) > 0
-                );
-            });
-
+                    const filteredData = completeData.filter(row => {
+                        if (!row?.sites) return false;
+                        return row.sites.some(site => 
+                            site.site_id == storeId && 
+                            window.calculateTransferQty(row, storeId) > 0
+                        );
+                    });
+                    console.log("Filtered data for printing:", filteredData);
+            // const filteredData = table.rows().data().toArray().filter(row => {
+            //     if (!row.sites) return false;
+            //     return row.sites.some(site => 
+            //         site.site_id == storeId && 
+            //         window.calculateTransferQty(row, storeId) > 0
+            //     );
+            // });
+            
             if (filteredData.length === 0) {
                 window.showAlert('No transfer items needed for ' + storeName, 'warning');
                 return;
@@ -613,24 +635,25 @@ $(document).ready(function() {
     function generatePrintContent(data, storeId, storeName) {
         const now = new Date();
         const totalItems = data.reduce((sum, row) => sum + window.calculateTransferQty(row, storeId), 0);
-        
+        const transferStoreId = $('#store_id_transfer').val(); // Get the transfer destination store ID
+
         return `<!DOCTYPE html>
             <html>
             <head>
                 <title>${escapeHtml(storeName)} Transfer List</title>
                 <style>
-                    body { font-family: Arial; margin: 0; padding: 20px; }
-                    .header { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #333; }
-                    .header-info { display: flex; justify-content: space-between; }
+                    body { font-family: Arial; margin: 0; padding: 1px; }
+                    .header { margin-bottom: 1px; padding-bottom: 1px; border-bottom: 2px solid #333; }
+                    .header-dark { display: flex; justify-content: space-between; }
                     .title { font-size: 24px; font-weight: bold; }
-                    .summary { margin: 15px 0; padding: 10px; background: #f5f5f5; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    th { background: #333; color: white; padding: 8px; text-align: left; }
-                    td { padding: 8px; border: 1px solid #ddd; }
+                    .summary { margin: 15px 0; padding: 1px; background: #f5f5f5; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; padding: 1px; }
+                    th { background: #333; color: black; padding: 1px; text-align: left;; font-size: 15px; }
+                    td { padding: 1px; border: 1px solid #333; font-size: 12px;}
                     .number-cell { text-align: right; }
-                    .total-row { font-weight: bold; background: #f0f0f0; }
+                    .total-row { font-weight: bold; background: #000000FF; }
                     @media print {
-                        body { padding: 5mm; }
+                        body { padding: 0mm; }
                         .no-print { display: none; }
                     }
                 </style>
@@ -638,35 +661,35 @@ $(document).ready(function() {
             <body>
                 <div class="header">
                     <div class="title">${escapeHtml(storeName)}</div>
-                    <div class="header-info">
+                    <div class="header-dark">
                         <div>Generated: ${now.toLocaleString()}</div>
                         <div>Total Items: ${totalItems}</div>
                     </div>
                 </div>
                 
-                <table>
+                <table class="border">
                     <thead>
                         <tr>
-                            <th>Code</th>
+                            <th>C</th>
                             <th>Name</th>
-                            <th>Stock</th>
+                            <th>St.</th>
                             <th>Qty</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="text-center">
                         ${data.map(row => {
                             const siteData = row.sites.find(s => s.site_id == storeId);
                             const currentStock = siteData?.prod_amount || 0;
                             const dailyUsage = row._consumptionRates?.[storeId] || 0;
                             const transferQty = window.calculateTransferQty(row, storeId);
-                            
+                            const transferSiteData = row.sites.find(s => s.site_id == transferStoreId);
                             return `
-                                <tr>
+                                <tr style="margin-bottom: 1px; padding-bottom: 1px; border-bottom: 2px solid #333;">
                                     <td>${escapeHtml(row.product_id || 'N/A')}</td>
                                     <td>${escapeHtml(row.product_name || 'N/A')}</td>
-                                    <td class="number-cell">${safeToFixed(currentStock)}</td>
+                                    <td class="number-cell text-center">${(transferSiteData.prod_amount)}</td>
                                     
-                                    <td class="number-cell">${transferQty}</td>
+                                    <td class="number-cell text-center">${transferQty}</td>
                                 </tr>
                             `;
                         }).join('')}

@@ -1695,6 +1695,7 @@ public function transReport(Request $request)
             'draw' => $request->input('draw', 0),
             'recordsTotal' => count($products),
             'recordsFiltered' => count($filteredData),
+            'alldata' => $filteredData,
             'data' => $paginatedData,
             'summary' => $summary
         ]);
