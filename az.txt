@@ -87,6 +87,12 @@ goto start
 
 
 dataserver
+DB_CONNECTION=mysql
+DB_HOST=sdb-83.hosting.stackcp.net
+DB_PORT=39929
+DB_DATABASE=azproaz-353039342873
+DB_USERNAME=azproaz-353039342873
+DB_PASSWORD=a2wo4h13ye
 sdb-83.hosting.stackcp.net
 azproaz-353039342873
 a2wo4h13ye
