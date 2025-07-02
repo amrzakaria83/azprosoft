@@ -356,7 +356,7 @@ $(document).ready(function() {
             data: null,
             name: 'site_' + site.store_id + '_consumption_rate',
             defaultContent: 0,
-            className: 'text-center text-secondary',
+            className: 'text-center text-warning',
             render: function(data, type, row, meta) {
                 if (!row.sites) return 0;
                 var siteData = row.sites.find(s => s.site_id == site.store_id);
