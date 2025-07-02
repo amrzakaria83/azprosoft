@@ -467,12 +467,17 @@ class Pro_sales_detsController extends Controller
     
             // Apply drug filter if specified
             $products = collect($data['products'] ?? []);
-            if ($request->has('drug_filter') && $request->drug_filter !== '') {
+            // if ($request->has('drug_filter') && $request->drug_filter !== '') {
+            //     $products = $products->filter(function($item) use ($request) {
+            //         return isset($item['drug']) && $item['drug'] == $request->drug_filter;
+            //     });
+            // }
+            if ($request->filled('drug_filter')) {
                 $products = $products->filter(function($item) use ($request) {
                     return isset($item['drug']) && $item['drug'] == $request->drug_filter;
                 });
             }
-            
+            // dd($products);
             // Collect all unique store names
             $allStoreNames = collect();
             foreach ($products as $item) {
