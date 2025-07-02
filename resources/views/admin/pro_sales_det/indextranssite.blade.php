@@ -596,32 +596,19 @@ $(document).ready(function() {
                 showAlert('Data table not initialized', 'error');
                 return;
             }
-                    // Get the complete dataset from the stored AJAX response
-                    const completeData = table.ajax.json()?.alldata || [];
-                    console.log("Complete dataset:", completeData);
-                    const filteredData = completeData.rows().data().toArray().filter(row => {
-                        if (!row.sites) return false;
-                        return row.sites.some(site => 
-                            site.site_id == storeId && 
-                            window.calculateTransferQty(row, storeId) > 0
-                        );
-                    });
+            console.log(storeId);
+            console.log(storeName);
+            // Get the complete dataset from the stored AJAX response
+            const completeData = table.ajax.json()?.alldata || [];
+            console.log(completeData);
+            const filteredData = completeData.filter(row => {
+                if (!row?.sites) return false;
+                return row.sites.some(site => 
+                    site.site_id == storeId && 
+                    window.calculateTransferQty(row, storeId) > 0
+                );
+            });
 
-                    // const filteredData = completeData.filter(row => {
-                    //     if (!row?.sites) return false;
-                    //     return row.sites.some(site => 
-                    //         site.site_id == storeId && 
-                    //         window.calculateTransferQty(row, storeId) > 0
-                    //     );
-                    // });
-                    // console.log("Filtered data for printing:", filteredData);
-            // const filteredData = table.rows().data().toArray().filter(row => {
-            //     if (!row.sites) return false;
-            //     return row.sites.some(site => 
-            //         site.site_id == storeId && 
-            //         window.calculateTransferQty(row, storeId) > 0
-            //     );
-            // });
             console.log("Filtered data for printing:", filteredData);
 
             if (filteredData.length === 0) {
@@ -639,6 +626,7 @@ $(document).ready(function() {
             window.showAlert('Failed to generate printout: ' + error.message, 'error');
         }
     };
+ 
 
     function generatePrintContent(data, storeId, storeName) {
         const now = new Date();
