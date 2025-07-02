@@ -446,6 +446,7 @@ class Pro_sales_detsController extends Controller
     }
     public function exportReport(Request $request)
     {
+        
         $filePath = storage_path('app/temp.json');
         
         if (!file_exists($filePath)) {
@@ -471,7 +472,7 @@ class Pro_sales_detsController extends Controller
                     return isset($item['drug']) && $item['drug'] == $request->drug_filter;
                 });
             }
-    
+            
             // Collect all unique store names
             $allStoreNames = collect();
             foreach ($products as $item) {
@@ -526,6 +527,7 @@ class Pro_sales_detsController extends Controller
             }
     
             $filename = 'sales_report_' . now()->format('Y-m-d') . '.xlsx';
+            
             
             return Excel::download(new CollectionExport($exportData, $headers), $filename);
     
