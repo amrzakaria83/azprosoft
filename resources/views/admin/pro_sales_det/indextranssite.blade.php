@@ -554,10 +554,13 @@ $(document).ready(function() {
         $('#sitesTable tbody').empty();
     });
 
-     // Define helper functions for printing with proper number handling
+     // Define helper functions for printing with proper number handling  
     window.calculateTransferQty = function(row, storeId) {
         const c_r_quantity = parseFloat($('#c_r_quantity').val()) ;
         const c_r_less_than = parseFloat($('#c_r_less_than').val()) ;
+        const transferStoreId = $('#store_id_transfer').val();
+
+        const sitestore = row.sites?.find(s => s.site_id == transferStoreId);
         
         const site = row.sites?.find(s => s.site_id == storeId);
         if (!site) return 0;
@@ -601,10 +604,15 @@ $(document).ready(function() {
             // Get the complete dataset from the stored AJAX response
             const completeData = table.ajax.json()?.alldata || [];
             console.log(completeData);
+            // First just check if any rows have the storeId
+            const testFilter = completeData.filter(row => 
+                row?.sites?.some(site => site.site_id == storeId));
+            console.log("Simple storeId filter results:", testFilter);
             const filteredData = completeData.filter(row => {
                 if (!row?.sites) return false;
                 return row.sites.some(site => 
-                    site.site_id == storeId && 
+                    site.site_id == storeId 
+                    && 
                     window.calculateTransferQty(row, storeId) > 0
                 );
             });
