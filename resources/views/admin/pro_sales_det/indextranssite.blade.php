@@ -132,6 +132,7 @@
             <h1><span>{{trans('lang.valued_date')}} <span id="valued_date">0</span></span></h1>
             
             <div class="alert alert-info mb-4 text-center">
+                <input type="hidden" value="" name="totalDay" id="totalDay" />
                 <strong>{{trans('lang.summary')}}:</strong> 
                 {{trans('lang.start_from')}} <span id="start_from">0</span> , 
                 {{trans('lang.end_to')}} <span id="end_to">0</span> , 
@@ -239,6 +240,7 @@
 $(document).ready(function() {
     // Get all sites from PHP
     var sites = {!! \App\Models\Pro_store::get(['store_id', 'store_name'])->toJson() !!};
+    
 
     // First build the columns configuration
     var columns = [
@@ -398,7 +400,8 @@ $(document).ready(function() {
                         const q_added = q_c_r_quantity - (parseFloat(siteData.prod_amount) || 0);
                 
                         if (q_added > 0) {
-                            return Math.max(1, Math.round(q_added)).toString();
+                            const needed =  Math.max(1, Math.round(q_added)).toString();
+                            return needed;
                         }
                         return '0';
                     }
@@ -429,7 +432,7 @@ $(document).ready(function() {
                 d.c_r_quantity = $('#c_r_quantity').val();
             },
             dataSrc: function(json) {
-                console.log(json);
+                // console.log(json);
                 if (typeof json === 'string') {
                     try {
                         json = JSON.parse(json);
@@ -439,8 +442,8 @@ $(document).ready(function() {
                     }
                 }
                         // Store the complete response for later use (e.g., printing)
-                        this._lastJsonResponse = json;
-                console.log(json.alldata);
+                        // this._lastJsonResponse = json;
+                // console.log(json.alldata);
                 if (!json) {
                     console.error('Empty response from server');
                     return [];
@@ -459,6 +462,7 @@ $(document).ready(function() {
                         const timeDiff = endDate - startDate;
                         const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
                         $('#totalDays').text(daysDiff);
+                        $('#totalDay').val(daysDiff);
                     } else {
                         $('#totalDays').text(0);
                     }
@@ -555,28 +559,80 @@ $(document).ready(function() {
     });
 
      // Define helper functions for printing with proper number handling  
-    window.calculateTransferQty = function(row, storeId) {
-        const c_r_quantity = parseFloat($('#c_r_quantity').val()) ;
-        const c_r_less_than = parseFloat($('#c_r_less_than').val()) ;
-        const transferStoreId = $('#store_id_transfer').val();
+    // window.calculateTransferQty = function(row, storeId) {
+    //     const c_r_quantity = parseFloat($('#c_r_quantity').val()) ;
+    //     const c_r_less_than = parseFloat($('#c_r_less_than').val()) ;
+    //     const transferStoreId = $('#store_id_transfer').val();
 
-        const sitestore = row.sites?.find(s => s.site_id == transferStoreId);
+    //     const sitestore = row.sites?.find(s => s.site_id == transferStoreId);
         
-        const site = row.sites?.find(s => s.site_id == storeId);
-        if (!site) return 0;
+    //     const site = row.sites?.find(s => s.site_id == storeId);
+    //     if (!site) return 0;
         
-        // Safely parse numeric values with defaults
-        const consumptionRate = parseFloat(row._consumptionRates?.[storeId]) || 0;
-        const currentStock = parseFloat(site.prod_amount) || 0;
+    //     // Safely parse numeric values with defaults
+    //     const consumptionRate = parseFloat(row._consumptionRates?.[storeId]) || 0;
+    //     const currentStock = parseFloat(site.prod_amount) || 0;
         
-        const requiredQty = consumptionRate * c_r_quantity;
+    //     const requiredQty = consumptionRate * c_r_quantity;
         
-        if (currentStock <= (consumptionRate * c_r_less_than)) {
-            return Math.max(0, Math.ceil(requiredQty - currentStock));
+    //     if (currentStock <= (consumptionRate * c_r_less_than)) {
+    //         return Math.max(0, Math.ceil(requiredQty - currentStock));
+    //     }
+    //     return 0;
+    // };
+        window.calculateTransferQty = function(row, storeId) {
+        // 1. Get and validate inputs with proper defaults
+        const c_r_quantity = parseFloat($('#c_r_quantity').val()) || 1; // Default to 1 if empty
+        const c_r_less_than = parseFloat($('#c_r_less_than').val()) || 1; // Default to 1 if empty 
+        const transferStoreId = $('#store_id_transfer').val();
+        const daysDiff = $('#totalDay').val() || 1;
+
+        // console.log('[calculateTransferQty] Inputs:', {
+        //     product: row.product_name,
+        //     storeId,
+        //     c_r_quantity,
+        //     c_r_less_than,
+        //     transferStoreId
+        // });
+
+        // 2. Find relevant sites (with strict equality)
+        const site = row.sites?.find(s => s.site_id === Number(storeId));
+        if (!site) {
+            console.log('[calculateTransferQty] No matching site found');
+            return 0;
         }
+
+        // 3. Get consumption data with proper validation
+        const currentStock = parseFloat(site.prod_amount) || 0;
+        const currentsale = parseFloat(site.sales_amount) || 0;
+        // const consumptionRate = parseFloat(row._consumptionRates?.[site.storeId]) || 0;
+        const consumptionRate = (currentsale / daysDiff).toFixed(2)  || 0;
+        
+        // console.log('[calculateTransferQty] Stock Data:', {
+        //     consumptionRate,
+        //     currentsale,
+        //     currentStock
+        // });
+
+        // 4. Calculate requirements
+        const requiredQty = consumptionRate * c_r_quantity;
+        const threshold = consumptionRate * c_r_less_than;
+        
+        // console.log('[calculateTransferQty] Calculations:', {
+        //     requiredQty,
+        //     threshold
+        // });
+
+        // 5. Determine transfer quantity
+        if (currentStock <= threshold) {
+            const transferQty = Math.max(0, Math.ceil(requiredQty - currentStock));
+            // console.log('[calculateTransferQty] Transfer Needed:', transferQty);
+            return transferQty;
+        }
+        
+        console.log('[calculateTransferQty] Stock sufficient - no transfer needed');
         return 0;
     };
-
     window.showAlert = function(message, type = 'info') {
         if (typeof toastr !== 'undefined') {
             toastr[type](message);
@@ -599,15 +655,18 @@ $(document).ready(function() {
                 showAlert('Data table not initialized', 'error');
                 return;
             }
-            console.log(storeId);
-            console.log(storeName);
+            // console.log(storeId);
+            // console.log(storeName);
             // Get the complete dataset from the stored AJAX response
             const completeData = table.ajax.json()?.alldata || [];
-            console.log(completeData);
+            // console.log("Simple completeData:",completeData);
             // First just check if any rows have the storeId
-            const testFilter = completeData.filter(row => 
-                row?.sites?.some(site => site.site_id == storeId));
-            console.log("Simple storeId filter results:", testFilter);
+
+            // const filteredData = completeData.filter(row => 
+            //     row?.sites?.some(site => site.site_id == storeId));
+
+            // console.log("Simple storeId filter results:", filteredData);
+
             const filteredData = completeData.filter(row => {
                 if (!row?.sites) return false;
                 return row.sites.some(site => 
@@ -617,7 +676,7 @@ $(document).ready(function() {
                 );
             });
 
-            console.log("Filtered data for printing:", filteredData);
+            // console.log("Filtered data for printing:", filteredData);
 
             if (filteredData.length === 0) {
                 window.showAlert('No transfer items needed for ' + storeName, 'warning');
@@ -637,9 +696,11 @@ $(document).ready(function() {
  
 
     function generatePrintContent(data, storeId, storeName) {
-        const now = new Date();
-        const totalItems = data.reduce((sum, row) => sum + window.calculateTransferQty(row, storeId), 0);
         const transferStoreId = $('#store_id_transfer').val(); // Get the transfer destination store ID
+        const now = new Date();
+        
+        const totalItems = data.reduce((sum, row) => sum + window.calculateTransferQty(row, storeId), 0);
+        
 
         return `<!DOCTYPE html>
             <html>
@@ -681,7 +742,11 @@ $(document).ready(function() {
                         </tr>
                     </thead>
                     <tbody class="text-center">
-                        ${data.map(row => {
+                        ${data.sort((a, b) => {
+                            const nameA = a.product_name || '';
+                            const nameB = b.product_name || '';
+                            return nameA.localeCompare(nameB);
+                        }).map(row => {
                             const siteData = row.sites.find(s => s.site_id == storeId);
                             const currentStock = siteData?.prod_amount || 0;
                             const dailyUsage = row._consumptionRates?.[storeId] || 0;
