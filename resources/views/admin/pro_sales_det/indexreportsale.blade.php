@@ -145,7 +145,7 @@
                     </div>
                     <!-- Main Table -->
                 <div class="table-responsive">
-                    <table class="table align-middle table-rounded table-striped table-row-dashed fs-6 w-100 sticky-left" id="kt_datatable_table">
+                    <table class="table align-middle table-rounded table-striped table-row-dashed fs-6 w-100" id="kt_datatable_table">
                         <thead class="bg-light-dark pe-3">
                             <tr class="text-center text-dark fw-bold fs-4 text-uppercase gs-0">
                                 <th class="min-w-125px text-center">Actions</th>
