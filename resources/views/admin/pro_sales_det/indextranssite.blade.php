@@ -597,8 +597,15 @@ $(document).ready(function() {
                 return;
             }
                     // Get the complete dataset from the stored AJAX response
-                    // const completeData = table.ajax.json()?.alldata || [];
-                    // console.log("Complete dataset:", completeData);
+                    const completeData = table.ajax.json()?.alldata || [];
+                    console.log("Complete dataset:", completeData);
+                    const filteredData = completeData.rows().data().toArray().filter(row => {
+                        if (!row.sites) return false;
+                        return row.sites.some(site => 
+                            site.site_id == storeId && 
+                            window.calculateTransferQty(row, storeId) > 0
+                        );
+                    });
 
                     // const filteredData = completeData.filter(row => {
                     //     if (!row?.sites) return false;
@@ -608,13 +615,13 @@ $(document).ready(function() {
                     //     );
                     // });
                     // console.log("Filtered data for printing:", filteredData);
-            const filteredData = table.rows().data().toArray().filter(row => {
-                if (!row.sites) return false;
-                return row.sites.some(site => 
-                    site.site_id == storeId && 
-                    window.calculateTransferQty(row, storeId) > 0
-                );
-            });
+            // const filteredData = table.rows().data().toArray().filter(row => {
+            //     if (!row.sites) return false;
+            //     return row.sites.some(site => 
+            //         site.site_id == storeId && 
+            //         window.calculateTransferQty(row, storeId) > 0
+            //     );
+            // });
             console.log("Filtered data for printing:", filteredData);
 
             if (filteredData.length === 0) {
