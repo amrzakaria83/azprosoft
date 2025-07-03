@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\Pro_store;
 use App\Models\Pro_sales_det;
 use App\Models\Pro_prod_amount;
+use App\Models\Pro_product;
 use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
@@ -496,6 +497,8 @@ class Pro_sales_detsController extends Controller
                     'Total Sales Amount' => isset($item['total_sales_amount']) ? number_format($item['total_sales_amount'], 2) : 0,
                     'Total Product Amount' => isset($item['total_prod_amount']) ? number_format($item['total_prod_amount'], 2) : 0,
                     'Sell Price' => isset($item['sell_price']) ? number_format($item['sell_price'], 2) : 0,
+                    'factory_id' => Pro_product::where('product_id', $item['product_id'])->first()->getfactory->factory_name ?? 'N/A',
+
                 ];
     
                 // Initialize all store columns
@@ -524,6 +527,7 @@ class Pro_sales_detsController extends Controller
                 'Total Sales Amount',
                 'Total Product Amount',
                 'Sell Price',
+                'factory_id',
             ];
     
             foreach ($allStoreNames as $storeName) {
@@ -1522,6 +1526,7 @@ public function transReport(Request $request)
         $products = $data['products'] ?? [];
         $search = $request->input('search.value');
         $store_id_transfer = $request->input('store_id_transfer');
+        // $drugFilter = $request->input('drug_filter');
         $drugFilter = $request->input('drug_filter');
         $storeFilter = $request->input('store_filter');
         $selectedStores = $request->input('selected_stores', []);
