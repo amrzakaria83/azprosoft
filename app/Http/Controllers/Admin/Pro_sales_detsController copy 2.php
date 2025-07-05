@@ -280,7 +280,7 @@ class Pro_sales_detsController extends Controller
                 gc_collect_cycles();
             }
         }
-    // dd($productReport);
+
         // 2. Then process product amounts data
          $amountsQuery = Pro_prod_amount::query();
     

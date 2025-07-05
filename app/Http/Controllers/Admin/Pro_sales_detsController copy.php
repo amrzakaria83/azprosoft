@@ -280,107 +280,61 @@ class Pro_sales_detsController extends Controller
                 gc_collect_cycles();
             }
         }
-    // dd($productReport);
+
         // 2. Then process product amounts data
-         $amountsQuery = Pro_prod_amount::query();
-    
-    // Add date filtering if the table has an ins_date column
-    // if (Schema::hasColumn('pro_prod_amounts', 'ins_date')) {
-    //     $amountsQuery->whereBetween('ins_date', [$from_time, $to_date]);
-    // }
-    
-    // Process in chunks with optimized query
-    $amountsQuery->with(['getprod:product_id,product_name_en,sell_price,drug', 'getsite:store_id,store_name'])
-        ->select(['id', 'prod_amount', 'product_id', 'store_id'])
-        ->chunkById($batchSize, function ($amountsBatch) use (&$productReport) {
-            foreach ($amountsBatch as $amount) {
-                $productId = $amount->product_id ?? 0;
-                $productName = $amount->getprod->product_name_en ?? 'Unknown';
-                $productdrug = $amount->getprod->drug ?? 0;
-                $siteId = $amount->getsite->store_id ?? 'Unknown';
-                $prodAmount = (float)$amount->prod_amount;
+        $amountsMinMax = Pro_prod_amount::
+        // whereBetween('ins_date', [$from_time, $to_date])
+            selectRaw('MIN(id) as min_id, MAX(id) as max_id')
+            ->first();
+
+        if ($amountsMinMax) {
+            for ($id = $amountsMinMax->min_id; $id <= $amountsMinMax->max_id; $id += $batchSize) {
+                $batchEnd = $id + $batchSize - 1;
                 
-                if (!isset($productReport[$productId])) {
-                    $productReport[$productId] = [
-                        'product_id' => $productId,
-                        'product_name' => $productName,
-                        'drug' => $productdrug,
-                        'sell_price' => $amount->getprod->sell_price ?? 0,
-                        'total_sales_amount' => 0,
-                        'total_prod_amount' => 0,
-                        'sites' => []
-                    ];
+                $amountsBatch = Pro_prod_amount::
+                // whereBetween('ins_date', [$from_time, $to_date])
+                    whereBetween('id', [$id, $batchEnd])
+                    ->with(['getprod:product_id,product_name_en,sell_price', 'getsite:store_id,store_name'])
+                    ->select(['id', 'prod_amount', 'product_id', 'store_id'])
+                    ->cursor();
+                    
+                foreach ($amountsBatch as $amount) {
+                    $productId = $amount->product_id ?? 0;
+                    $productName = $amount->getprod->product_name_en ?? 'Unknown';
+                    $productdrug = $amount->getprod->drug ?? 0; //  1 drug or 0 = non drug
+                    $siteId = $amount->getsite->store_id ?? 'Unknown';
+                    $prodAmount = (float)$amount->prod_amount;
+                    
+                    // Initialize product entry if not exists
+                    if (!isset($productReport[$productId])) {
+                        $productReport[$productId] = [
+                            'product_id' => $productId,
+                            'product_name' => $productName,
+                            'drug' => $productdrug,//  1 drug or 0 = non drug
+                            'sell_price' => $amount->getprod->sell_price ?? 0,
+                            'total_sales_amount' => 0,
+                            'total_prod_amount' => 0,
+                            'sites' => []
+                        ];
+                    }
+                    
+                    // Update product amount totals
+                    $productReport[$productId]['total_prod_amount'] += $prodAmount;
+                    
+                    // Initialize site entry if not exists
+                    if (!isset($productReport[$productId]['sites'][$siteId])) {
+                        $productReport[$productId]['sites'][$siteId] = [
+                            'sales_amount' => 0,
+                            'prod_amount' => 0
+                        ];
+                    }
+                    $productReport[$productId]['sites'][$siteId]['prod_amount'] += $prodAmount;
                 }
                 
-                $productReport[$productId]['total_prod_amount'] += $prodAmount;
-                
-                if (!isset($productReport[$productId]['sites'][$siteId])) {
-                    $productReport[$productId]['sites'][$siteId] = [
-                        'sales_amount' => 0,
-                        'prod_amount' => 0
-                    ];
-                }
-                $productReport[$productId]['sites'][$siteId]['prod_amount'] += $prodAmount;
+                unset($amountsBatch);
+                gc_collect_cycles();
             }
-            
-            // Free memory explicitly
-            unset($amountsBatch);
-            gc_collect_cycles();
-        });
-
-        // $amountsMinMax = Pro_prod_amount::
-        // // whereBetween('ins_date', [$from_time, $to_date])
-        //     selectRaw('MIN(id) as min_id, MAX(id) as max_id')
-        //     ->first();
-
-        // if ($amountsMinMax) {
-        //     for ($id = $amountsMinMax->min_id; $id <= $amountsMinMax->max_id; $id += $batchSize) {
-        //         $batchEnd = $id + $batchSize - 1;
-                
-        //         $amountsBatch = Pro_prod_amount::
-        //         // whereBetween('ins_date', [$from_time, $to_date])
-        //             whereBetween('id', [$id, $batchEnd])
-        //             ->with(['getprod:product_id,product_name_en,sell_price', 'getsite:store_id,store_name'])
-        //             ->select(['id', 'prod_amount', 'product_id', 'store_id'])
-        //             ->cursor();
-                    
-        //         foreach ($amountsBatch as $amount) {
-        //             $productId = $amount->product_id ?? 0;
-        //             $productName = $amount->getprod->product_name_en ?? 'Unknown';
-        //             $productdrug = $amount->getprod->drug ?? 0; //  1 drug or 0 = non drug
-        //             $siteId = $amount->getsite->store_id ?? 'Unknown';
-        //             $prodAmount = (float)$amount->prod_amount;
-                    
-        //             // Initialize product entry if not exists
-        //             if (!isset($productReport[$productId])) {
-        //                 $productReport[$productId] = [
-        //                     'product_id' => $productId,
-        //                     'product_name' => $productName,
-        //                     'drug' => $productdrug,//  1 drug or 0 = non drug
-        //                     'sell_price' => $amount->getprod->sell_price ?? 0,
-        //                     'total_sales_amount' => 0,
-        //                     'total_prod_amount' => 0,
-        //                     'sites' => []
-        //                 ];
-        //             }
-                    
-        //             // Update product amount totals
-        //             $productReport[$productId]['total_prod_amount'] += $prodAmount;
-                    
-        //             // Initialize site entry if not exists
-        //             if (!isset($productReport[$productId]['sites'][$siteId])) {
-        //                 $productReport[$productId]['sites'][$siteId] = [
-        //                     'sales_amount' => 0,
-        //                     'prod_amount' => 0
-        //                 ];
-        //             }
-        //             $productReport[$productId]['sites'][$siteId]['prod_amount'] += $prodAmount;
-        //         }
-                
-        //         unset($amountsBatch);
-        //         gc_collect_cycles();
-        //     }
-        // }
+        }
 
         // Format the final output
         $formattedReport = [];
