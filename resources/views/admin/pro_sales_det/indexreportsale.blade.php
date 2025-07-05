@@ -348,8 +348,8 @@ $(document).ready(function() {
                     d.drug_filter = $('#drugFilter').val(); // Pass filter value to server
                 },
             dataSrc: function(json) {
-                console.log(json.summary);
-                console.log(json);
+                // console.log(json.summary);
+                // console.log(json);
                 if (typeof json === 'string') {
                     try {
                         json = JSON.parse(json);

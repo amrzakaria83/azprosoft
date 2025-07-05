@@ -253,12 +253,12 @@ class Pro_sales_detsController extends Controller
                     // $amount = (float)($sale->amount/$sale->unit_factor);
                         // Safe division
                     $amount_return = $sale->return_unit != 0 
-                    ? (float)($sale->back / $sale->return_unit) 
+                    ? $sale->back / $sale->return_unit
                     : 0;
                     $amount_sale = $sale->unit_factor != 0 
-                    ? (float)($sale->amount / $sale->unit_factor) 
+                    ? $sale->amount / $sale->unit_factor
                     : 0;
-                    $amount = $amount_sale - $amount_return ;
+                    $amount = (float)($amount_sale - $amount_return) ;
                     // Initialize product entry if not exists
                     if (!isset($productReport[$productId])) {
                         $productReport[$productId] = [
