@@ -43,6 +43,11 @@ class Pro_sales_det extends SqlServerModel
         'ins_date',
         'price',
         'total_item',
+        'unit_factor',
+        'back', // back amount
+        'return_unit', // unit_factor for return
+        'back_unit',
+        'total_return',
     ];
 
     // Define index hints for queries

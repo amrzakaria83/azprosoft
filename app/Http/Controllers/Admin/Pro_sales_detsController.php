@@ -242,7 +242,7 @@ class Pro_sales_detsController extends Controller
                 $salesBatch = Pro_sales_det::whereBetween('ins_date', [$from_time, $to_date])
                     ->whereBetween('sales_d_id', [$id, $batchEnd])
                     ->with(['getsale_site:store_id,sales_id', 'getprod:product_id,product_name_en,sell_price,drug'])
-                    ->select(['sales_d_id', 'amount', 'product_id', 'sales_id'])
+                    ->select(['sales_d_id', 'amount', 'product_id', 'sales_id', 'unit_factor', 'back', 'return_unit'])
                     ->cursor();
                     
                 foreach ($salesBatch as $sale) {
@@ -250,8 +250,15 @@ class Pro_sales_detsController extends Controller
                     $productId = $sale->getprod->product_id ?? 0; // Fixed variable assignment
                     $productdrug = $sale->getprod->drug ?? 0; //  1 drug or 0 = non drug
                     $siteId = $sale->getsale_site->store_id ?? 'Unknown';
-                    $amount = (float)$sale->amount;
-                    
+                    // $amount = (float)($sale->amount/$sale->unit_factor);
+                        // Safe division
+                    $amount_return = $sale->return_unit != 0 
+                    ? (float)($sale->back / $sale->return_unit) 
+                    : 0;
+                    $amount_sale = $sale->unit_factor != 0 
+                    ? (float)($sale->amount / $sale->unit_factor) 
+                    : 0;
+                    $amount = $amount_sale - $amount_return ;
                     // Initialize product entry if not exists
                     if (!isset($productReport[$productId])) {
                         $productReport[$productId] = [

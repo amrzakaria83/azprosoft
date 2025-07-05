@@ -147,6 +147,11 @@ ssh-keygen -t rsa -b 4096
 chmod 600 azprolab      # Private key (read/write only by owner)
 chmod 644 azprolab.pub  # Public key
 
+connecting by bash
+ssh -i azpro az3331515.com@ssh.us.stackcp.com
+cd public_html/azprosoft/azprosoft
+
+
 ssh-keygen -t rsa -b 4096
 chmod 600 azprolab
 chmod 644 azprolab.pub
@@ -213,3 +218,4 @@ try {
 
 connecting by bash
 ssh -i azpro az3331515.com@ssh.us.stackcp.com
+cd public_html/azprosoft/azprosoft
