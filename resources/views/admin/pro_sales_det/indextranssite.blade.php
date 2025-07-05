@@ -137,8 +137,8 @@
                 {{trans('lang.start_from')}} <span id="start_from">0</span> , 
                 {{trans('lang.end_to')}} <span id="end_to">0</span> , 
                 {{trans('lang.duration')}} <span id="totalDays" class="text-danger">0</span> {{trans('lang.days')}},
-                <span id="totalProducts">0</span> {{trans('lang.products')}}, 
-                <span id="totalRecords">0</span> {{trans('lang.transactions')}}
+                <span id="totalProducts">0</span> {{trans('lang.products')}}
+                <!-- <span id="totalRecords">0</span> {{trans('lang.transactions')}} -->
             </div>
             
             <div class="row mb-6">
@@ -452,7 +452,7 @@ $(document).ready(function() {
                 if (json.summary) {
                     $('#valued_date').text(json.summary.generated_at || 0);
                     $('#totalProducts').text(json.summary.total_products || 0);
-                    $('#totalRecords').text(json.summary.total_records || 0);
+                    // $('#totalRecords').text(json.summary.total_records || 0);
                     $('#start_from').text(json.summary.start_from || 0);
                     $('#end_to').text(json.summary.end_to || 0);
                     

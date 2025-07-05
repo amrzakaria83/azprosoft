@@ -175,7 +175,7 @@ ssh -i azpro -N -L 63306:localhost:1433 az3331515.com@ssh.us.stackcp.com
 $ cat azpro.pub
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDcdQEaEMiskbLSoet4+1FAjBfV+aJiZTRKFx+ElQDx0OzbCGuDdk/ntWQa99ok0Xfxxdvr092+zW5xQBAPSgd5fuZ9JYKnJ20djEVa/Qzmh0om70R6+J8ClFSCHzds2dMoCmN92ZW2Eu+zF9BIN+nq18XUWjzMHiM7kMm06PcM/Fjp+5LSM95a+d4vn/FZybxxh9jyWynEtvEcVr93ma3UJ4dRPtjR8KHL4/z9Y2Gvb72n8fnYzc2/tz9sVRwgNdetnFO32YkykvPI8jj+b6goXvrFR6JakfwVij55cQMNxahX7z9KcJzmUI9TUs9uL13wSM9xdQRX/OX6aejw+dCFLCMtajALRHNhppho/vF75/dYKGAHachZkF9TMWYF+rI/shYJOBIfrBKWbkDDrS7P9b4j3S8ciTZrO4atWVT5QmFF+oo5M2NHyI2DbRVZYfFxC24MQiXVDgEF0OMKvC92vXEFK7vqinqid2lun97hrD+V0Zcxw/bWVwepLO6TodbhMvXIuCkOvjn85ULXL7+/P8PdDEJQILJWG+TUfYCL9YhbmEESWsoT+cezVtwPYrky31hgL0nU6zZui7dbZBXCgmF0z64k6Id93y7mJGcX8xPl+c6DqriyCtIeCitEw0+xhQYE1aUftn4wZ/yfF34YpiqTRY40PInTf2d/yxC1hw== AMR@DESKTOP-PMNDNNT
 
-
+ssh -i azpro az3331515.com@ssh.us.stackcp.com
 
 mkdir -p ~/.ssh
 echo "PASTE_YOUR_PUBLIC_KEY_HERE" >> ~/.ssh/authorized_keys
@@ -189,3 +189,27 @@ Host sql-tunnel
     LocalForward 63306 localhost:1433
     ServerAliveInterval 60
     ExitOnForwardFailure yes
+
+
+in my az3331515.com
+pdo_sqlsrv.client_buffer_max_kb_size = 10240
+pdo_sqlsrv.log_severity = 0
+pdo_sqlsrv.report_additional_errors = 1
+pdo_sqlsrv.set_locale_info = 2
+<?php
+$serverName = "your_server_name";
+$database = "your_database";
+$username = "your_username";
+$password = "your_password";
+
+try {
+    $conn = new PDO("sqlsrv:Server=$serverName;Database=$database", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    echo "Connected successfully!";
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
+}
+?>
+
+connecting by bash
+ssh -i azpro az3331515.com@ssh.us.stackcp.com

@@ -107,7 +107,7 @@
                         {{trans('lang.end_to')}} <span id="end_to">0</span> , 
                         {{trans('lang.duration')}} <span id="totalDays" class="text-danger">0</span> {{trans('lang.days')}},
                         <span id="totalProducts">0</span> {{trans('lang.products')}}, 
-                        <span id="totalRecords">0</span> {{trans('lang.transactions')}}
+                        <!-- <span id="totalRecords">0</span> {{trans('lang.transactions')}} -->
                     </div>
                     <div class="row mb-6">
                         <!-- <label class="col-sm-2 col-form-label fw-semibold fs-6">{{trans('lang.name')}}-{{trans('lang.employee')}}</label> -->
@@ -207,7 +207,7 @@
 $(document).ready(function() {
     // Get all sites from PHP
     var sites = {!! \App\Models\Pro_store::get(['store_id', 'store_name'])->toJson() !!};
-    console.log('Sites data:', sites);
+    // console.log('Sites data:', sites);
 
     // First build the columns configuration
     var columns = [
@@ -348,6 +348,8 @@ $(document).ready(function() {
                     d.drug_filter = $('#drugFilter').val(); // Pass filter value to server
                 },
             dataSrc: function(json) {
+                console.log(json.summary);
+                console.log(json);
                 if (typeof json === 'string') {
                     try {
                         json = JSON.parse(json);
@@ -364,7 +366,7 @@ $(document).ready(function() {
                 
                 if (json.summary) {
                     $('#totalProducts').text(json.summary.total_products || 0);
-                    $('#totalRecords').text(json.summary.total_records || 0);
+                    // $('#totalRecords').text(json.summary.total_records || 0);
                     $('#start_from').text(json.summary.start_from || 0);
                     $('#end_to').text(json.summary.end_to || 0);
                      // Calculate duration in days if both dates exist
