@@ -257,5 +257,6 @@ class Pro_purchase_detailssController extends Controller
         return response()->json(['message' => 'success']);
     }
     
+    
 
 }

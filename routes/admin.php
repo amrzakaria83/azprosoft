@@ -147,6 +147,7 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/store','Pro_purchase_headersController@store')->name('store');
             Route::get('/edit/{id}', 'Pro_purchase_headersController@edit')->name('edit');
             Route::post('/update', 'Pro_purchase_headersController@update')->name('update');
+            Route::get('/indexh_d','Pro_purchase_headersController@indexh_d')->name('indexh_d');
             
         });
         Route::name('pro_purchase_ds.')->prefix('pro_purchase_ds')->group(function(){
