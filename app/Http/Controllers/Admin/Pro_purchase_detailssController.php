@@ -36,10 +36,28 @@ class Pro_purchase_detailssController extends Controller
                                 </div>';
                     return $checkbox;
                 })
-                ->addColumn('product_id', function($row){
-                    $product_id = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'
-                    .$row->getprod->product_name_en ?? $row->getprod->product_name.'</a></div>';
-                    return $product_id;
+                ->addColumn('product_id', function($row) {
+                    $productName = $row->getprod->product_name_en ?? $row->getprod->product_name;
+                    
+                    $textClass = (!is_null($row->back_amount) && $row->back_amount > 0) 
+                                ? 'text-danger' 
+                                : 'text-gray-800';
+                    $productId = '<div class="d-flex flex-column">
+                        <a href="javascript:;" class="'.$textClass.' text-hover-primary mb-1">'
+                        .$productName.'
+                        </a>
+                        </div>';
+                        $expireDate = $row->expire_date 
+                            ? date('d-m-y', strtotime($row->expire_date)) 
+                            : 'No expire';
+                    $productId .= '<div class="d-flex flex-column">
+                                    <a href="javascript:;" class="'.$textClass.' text-hover-primary mb-1">'
+                                    .$expireDate.
+                                    '</a>
+                                 </div>';
+                    
+                    
+                    return $productId;
                 })
                 
                 ->addColumn('expire_date', function($row){
@@ -93,6 +111,10 @@ class Pro_purchase_detailssController extends Controller
                     $total_buy = number_format($row->total_buy, 2);
                     return $total_buy;
                 })
+                ->addColumn('back_amount', function($row){
+                    $back_amount = number_format($row->back_amount, 2);
+                    return $back_amount;
+                })
                 ->filter(function ($instance) use ($request) {
                     // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
                     //     $instance->where('is_active', $request->get('is_active'));
@@ -138,7 +160,7 @@ class Pro_purchase_detailssController extends Controller
                     //     });
                     // }
                 })
-                ->rawColumns(['product_id','expire_date','amount','bouns','sell_price','buy_price','profit','tax','buy_tax','total_buy','store_id','purchase_id','valued_date','checkbox','actions'])
+                ->rawColumns(['product_id','expire_date','amount','bouns','sell_price','buy_price','profit','tax','buy_tax','total_buy','back_amount','store_id','purchase_id','valued_date','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.pro_purchase_d.index');

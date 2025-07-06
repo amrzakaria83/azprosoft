@@ -137,6 +137,7 @@
                                 <th class="min-w-125px text-center">{{trans('lang.bonus')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.tax')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.quantity')}} {{trans('lang.returns')}}</th>
                             </tr>
                             <!--end::Table row-->
                         </thead>
@@ -278,6 +279,7 @@
                 {data: 'bouns', name: 'bouns'},
                 {data: 'tax', name: 'tax'},
                 {data: 'valued_date', name: 'valued_date'},
+                {data: 'back_amount', name: 'back_amount'},
                 // {data: 'purchase_date', name: 'purchase_date'},
             ],
             order: [[1, 'desc']] // Default ordering
