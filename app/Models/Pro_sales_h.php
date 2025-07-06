@@ -45,6 +45,10 @@ class Pro_sales_h extends SqlServerModel
     {
         return $this->belongsTo(Pro_customer::class, 'cust_id');
     }
+    public function getstore()
+    {
+        return $this->belongsTo(Pro_store::class, 'store_id');
+    }
     
     
 }

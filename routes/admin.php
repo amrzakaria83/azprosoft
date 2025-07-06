@@ -139,6 +139,16 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/update', 'Pro_productsController@update')->name('update');
             
         });
+        Route::name('pro_purchase_hs.')->prefix('pro_purchase_hs')->group(function(){
+            Route::get('/','Pro_purchase_headersController@index')->name('index');
+            Route::get('/show/{id}','Pro_purchase_headersController@show')->name('show');
+            Route::post('/delete', 'Pro_purchase_headersController@destroy')->name('delete');
+            Route::get('/create','Pro_purchase_headersController@create')->name('create');
+            Route::post('/store','Pro_purchase_headersController@store')->name('store');
+            Route::get('/edit/{id}', 'Pro_purchase_headersController@edit')->name('edit');
+            Route::post('/update', 'Pro_purchase_headersController@update')->name('update');
+            
+        });
         Route::name('pro_sales_hs.')->prefix('pro_sales_hs')->group(function(){
             Route::get('/','Pro_sales_hsController@index')->name('index');
             Route::get('/show/{id}','Pro_sales_hsController@show')->name('show');

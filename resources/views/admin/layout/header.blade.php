@@ -195,6 +195,57 @@
                   </li>
                 </ul>
               </li>
+              <li class="dropdown-submenu dropend">
+                <a class="dropdown-item dropdown-toggle py-3" href="#" id="purchasesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+                  <span class="menu-icon me-3">
+                    <i class="fa-solid fa-sitemap"></i>
+                  </span>
+                  <span class="menu-title fs-3">{{trans('lang.reports')}} {{trans('lang.purchases')}}</span>
+                  <span class="menu-arrow"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="purchasesDropdown">
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_purchase_hs.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.purchases')}}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_sales_dets.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.details')}} {{trans('lang.bills_of_sale')}}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_sales_dets.reportprodsaledet')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.report')}} {{trans('lang.sales')}} {{trans('lang.details')}}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_sales_dets.indextranssite')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.report')}} {{trans('lang.transfers')}}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_sales_dets.indexreportsale')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.report')}} {{trans('lang.sales')}}</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
               @endcan
               @can('bill_of_sale')
               <!-- bill_of_sale Submenu -->

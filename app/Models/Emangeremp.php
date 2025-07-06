@@ -41,11 +41,17 @@ class Emangeremp extends SqlServerModel
          'cust_id',
          'bank_id',
          'emp_kind', // 0 = active - 1 = trainer - 2 = deactivated
+         'emp_job',
+         'k_id',
 
      ];
      public function getcust()
     {
         return $this->belongsTo(Pro_customer::class, 'cust_id');
+    }
+    public function getemp_k()
+    {
+        return $this->belongsTo(Pro_emp_k::class, 'k_id');
     }
 }
 

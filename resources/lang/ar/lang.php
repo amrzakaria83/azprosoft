@@ -327,6 +327,7 @@ return [
     "consumption_rate" => "معدل الاستهلاك",
     "less_than" => "اقل من",
     "more_than" => "اكثر من",
+    "discount" => "خصم",
 
 
 ];

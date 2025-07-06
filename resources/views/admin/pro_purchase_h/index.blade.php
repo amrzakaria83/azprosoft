@@ -21,7 +21,7 @@
         <span class="h-20px border-gray-300 border-start mx-4"></span>
         <ul class="breadcrumb breadcrumb-separatorless fw-bold fs-7 my-1">
             <li class="breadcrumb-item text-muted px-2">
-                <a  href="#" class="text-muted text-hover-primary">الموظفين</a>
+                <a  href="#" class="text-muted text-hover-primary">{{trans('lang.products')}}</a>
             </li>
             {{-- <li class="breadcrumb-item">
                 <span class="bullet bg-gray-300 w-5px h-2px"></span>
@@ -55,7 +55,7 @@
                     <div class="card-toolbar">
                         <!--begin::Toolbar-->
                         <div class="d-flex justify-content-end dbuttons">
-                            <a href="{{route('admin.emangeremps.create')}}" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3">
+                            <a href="{{route('admin.pro_purchase_hs.create')}}" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3">
                                 <i class="bi bi-plus-square fs-1x"></i></a>
                             <button type="button" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3" data-bs-toggle="modal" data-bs-target="#kt_modal_filter">
                                 <i class="bi bi-funnel-fill fs-1x"></i></button>
@@ -68,27 +68,7 @@
                 <!--end::Card header-->
                 <!--begin::Card body-->
                 <div class="card-body py-4">
-                    <div class="row mb-6">
-                                        
-                        <label class="col-sm-2 col-form-label required fw-semibold fs-6" style=" max-width: 7% !important;">{{trans('lang.status')}}</label>
-                        <div class="col-sm-2 d-flex align-items-center">
-                            <select  class="form-select form-select-lg form-select-solid" id="emp_kind"  name="emp_kind" value="" >
-                                <option value="">{{trans('lang.all')}}</option>
-                                <option value="0">{{trans('lang.active')}}</option>
-                                <option value="1">Trainer</option>
-                                <option value="2">{{trans('lang.inactive')}}</option>
-                            </select>
-                        </div>
-                        <label class="col-sm-2 col-form-label required fw-semibold fs-6" style=" max-width: 7% !important;">{{trans('lang.type_type')}}</label>
-                        <div class="col-sm-2 d-flex align-items-center">
-                        <select  data-placeholder="Select an option" class="input-text form-control  form-select  mb-3 mb-lg-0 text-center" name="k_id" id="k_id"  >
-                                    <option selected disabled>Select an option</option>
-                                        @foreach (App\Models\Pro_emp_k::get() as $item)
-                                                <option value="{{$item->k_id}}">{{$item->k_name}}</option>
-                                            @endforeach
-                                        </select>
-                        </div>
-                    </div>
+                    
                     <!--begin::Table-->
                     <table class="table align-middle table-rounded table-striped table-row-dashed fs-6" id="kt_datatable_table">
                         <!--begin::Table head-->
@@ -100,14 +80,13 @@
                                         <input class="form-check-input" type="checkbox" data-kt-check="true" data-kt-check-target="#kt_datatable_table .form-check-input" value="1" />
                                     </div>
                                 </th>
-                                <th class="min-w-125px text-center">{{trans('lang.employee')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.phone')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.emp_id')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.balance')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.numb')}} {{trans('lang.invoice')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.value')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.supplier')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.discount')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.type_type')}}</th>
-                                <!-- <th class="min-w-125px text-center">{{trans('auth.password')}}</th> -->
-                                <th class="min-w-125px text-center">{{trans('lang.status')}}</th>
-                                <th class="min-w-125px text-center">الاجراء</th>
+                                <th class="min-w-125px text-center">{{trans('lang.store')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
                             </tr>
                             <!--end::Table row-->
                         </thead>
@@ -196,7 +175,7 @@
             searching: false,
             autoWidth: false,
             responsive: true,
-            pageLength: 30,
+            pageLength: 10,
             sort: false,
             dom: 'Bfrtip',
             buttons: [
@@ -214,25 +193,24 @@
                 //{extend: 'colvis', className: 'btn secondary', text: 'إظهار / إخفاء الأعمدة '}
             ],
             ajax: {
-                url: "{{ route('admin.emangeremps.index') }}",
+                url: "{{ route('admin.pro_purchase_hs.index') }}",
                 data: function (d) {
-                    d.emp_kind = $('#emp_kind').val(),
-                    d.k_id = $('#k_id').val(),
+                    // d.is_active = $('#is_active').val(),
                     d.search = $('#search').val()
                 }
             },
             columns: [
                 {data: 'checkbox', name: 'checkbox'},
-                {data: 'name', name: 'name'},
-                {data: 'phone', name: 'phone'},
-                {data: 'emp_id', name: 'emp_id'},
-                {data: 'cust_c_m', name: 'cust_c_m'},
-                {data: 'k_id', name: 'k_id'},
-                // {data: 'emp_pass', name: 'emp_pass'},
-                {data: 'emp_kind', name: 'emp_kind'},
-                {data: 'emangeremp_id', name: 'emangeremp_id'},
-                // {data: 'emp_pass', name: 'emp_pass'},
-            ]
+                {data: 'purchase_no', name: 'purchase_no',orderable: true},
+                {data: 'p_total_after', name: 'p_total_after'},
+                {data: 'vendor_id', name: 'vendor_id'},
+                {data: 'p_discount_p', name: 'p_discount_p'},
+                {data: 'kind', name: 'kind'},
+                {data: 'store_id', name: 'store_id'},
+                // {data: 'p_discount_p', name: 'p_discount_p'},
+            ],
+            order: [[1, 'desc']] // Default ordering
+
         });
 
         table.buttons().container().appendTo($('.dbuttons'));
@@ -241,7 +219,7 @@
         filterSearch.addEventListener('keyup', function (e) {
             table.draw();
         });
-        $('#emp_kind,#k_id').change(function() {
+        $('#phone').change(function() {
             table.draw();
         });
 
@@ -264,7 +242,7 @@
             confirmButtonText: 'موافق',cancelButtonText: 'لا'}).then(function (isConfirm) {
                 if (isConfirm.value) {
             $.ajax({
-                url: "{{route('admin.emangeremps.delete')}}",
+                url: "{{route('admin.pro_purchase_hs.delete')}}",
                 type: 'post',
                 dataType: "JSON",
                 data: {

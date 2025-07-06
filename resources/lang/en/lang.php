@@ -330,5 +330,6 @@ return [
     "consumption_rate" => "Consumption rate",
     "less_than" => "Less Than",
     "more_than" => "More Than",
+    "discount" => "Discount",
 
 ];

@@ -19,9 +19,13 @@ class EmangerempsController extends Controller
     {
         $data = Emangeremp::get();
         if ($request->ajax()) {
-            $data = Emangeremp::query();
+            
+            $data = Emangeremp::with(['getcust']);
             // $data = $data->orderBy('id', 'DESC');
             return Datatables::of($data)
+                ->order(function ($query) {
+                    $query->orderBy('emp_id', 'DESC');
+                })
                 ->addColumn('checkbox', function($row){
                     $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
                                     <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
@@ -57,9 +61,16 @@ class EmangerempsController extends Controller
                 })
                 ->addColumn('cust_c_m', function($row) {
                     if ($row->cust_id && $row->getcust) {
-                        return '<span>'.number_format($row->getcust->cust_current_money, 2).'</span>';
+                        $cust_c_m = '<span class="text-info">('.number_format($row->getcust->cust_current_money, 2).')</span>';
+                        $cust_c_m .= '<br><span class="text-dark">'.$row->cust_id.'</span>';
+                    } else {
+                        $cust_c_m = '<span class="text-muted">N/A</span>';
                     }
-                    return '<span class="text-muted">N/A</span>';
+                    return $cust_c_m;
+                })
+                ->addColumn('k_id', function($row){
+                    $k_id = $row->getemp_k->k_name ?? 'No Kind';
+                    return $k_id;
                 })
                 // ->addColumn('cust_c_m', function($row){
                 //     $cust_c_m = '';
@@ -82,7 +93,7 @@ class EmangerempsController extends Controller
                             <br><span>'.trans('lang.addnew').' '.trans('lang.administrators').'</span>
                             </div>';
                     } else {
-                        $emangeremp_id .= $emp_code->emailaz;
+                        $emangeremp_id .= '<span>no emp_code add</span>';
                     }
 
                    
@@ -104,18 +115,28 @@ class EmangerempsController extends Controller
                     // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
                     //     $instance->where('is_active', $request->get('is_active'));
                     // }
-                    
-
+                    if ($request->get('emp_kind') != Null)
+                    {
+                    $instance->where(function ($query) use ($request) {
+                        $query->where('emp_kind', $request->get('emp_kind'));
+                    });
+                    }
+                    if ($request->get('k_id') != Null)
+                    {
+                    $instance->where(function ($query) use ($request) {
+                        $query->where('k_id', $request->get('k_id'));
+                    });
+                    }
                     if (!empty($request->get('search'))) {
                             $instance->where(function($w) use($request){
                             $search = $request->get('search');
-                            $w->orWhere('name_ar', 'LIKE', "%$search%")
-                            ->orWhere('phone', 'LIKE', "%$search%")
-                            ->orWhere('emailaz', 'LIKE', "%$search%");
+                            $w->orWhere('emp_name', 'LIKE', "%$search%")
+                            ->orWhere('emp_name_en', 'LIKE', "%$search%")
+                            ->orWhere('emp_id', 'LIKE', "%$search%");
                         });
                     }
                 })
-                ->rawColumns(['name','phone','emp_kind','emp_pass','emp_id','cust_c_m','emangeremp_id','checkbox','actions'])
+                ->rawColumns(['name','phone','emp_kind','emp_pass','emp_id','cust_c_m','emangeremp_id','k_id','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.emangeremp.index');

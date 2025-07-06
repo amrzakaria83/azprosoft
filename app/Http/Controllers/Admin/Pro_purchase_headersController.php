@@ -1,0 +1,205 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+set_time_limit(3600);
+ini_set('max_execution_time', 4800);
+ini_set('memory_limit', '4096M');
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use App\Models\Pro_purchase_header;
+use \Yajra\Datatables\Datatables;
+use Rap2hpoutre\FastExcel\FastExcel;
+use Spatie\Permission\Models\Role;
+
+use Validator;
+use Auth;
+class Pro_purchase_headersController extends Controller
+{
+
+    public function index(Request $request)
+    {
+        set_time_limit(3600);
+        ini_set('max_execution_time', 4800);
+        ini_set('memory_limit', '4096M');
+        
+        if ($request->ajax()) {
+            $data = Pro_purchase_header::with(['getstore','getvendor']);
+
+            return Datatables::of($data)
+                ->order(function ($query) {
+                        $query->orderBy('purchase_serial', 'DESC');
+                    })
+                ->addColumn('checkbox', function($row){
+                    $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
+                                    <input class="form-check-input" type="checkbox" value="'.$row->purchase_serial.'" />
+                                </div>';
+                    return $checkbox;
+                })
+                ->addColumn('purchase_no', function($row){
+                    $purchase_no = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->purchase_no.'</a></div>';
+                    // $purchase_no .= '<br><span>'.$row->product_name.'</span>';
+                    return $purchase_no;
+                })
+                
+                ->addColumn('store_id', function($row){
+                    $store_id = $row->getstore->store_name;
+                    return $store_id;
+                })
+                ->addColumn('vendor_id', function($row){
+                    $vendor_id = $row->getvendor->vendor_name ?? $row->getvendor->vendor_name_en ;
+                    return $vendor_id;
+                })
+                ->addColumn('p_total_after', function($row){
+                    $p_total_after = number_format($row->p_total_after, 2);
+                    return $p_total_after;
+                })
+                ->addColumn('p_discount_p', function($row){
+                    $p_discount_p = number_format($row->p_discount_p, 3) ?? 0;
+                    return $p_discount_p;
+                })
+                ->addColumn('store_id', function($row){
+                    $store_id = $row->getstore->store_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
+                    return $store_id;
+                })
+                
+                ->addColumn('kind', function($row){// 1 = cash - 2 = delayed - 3 = delivery - 4 = visa 
+                    $kind_t = $row->kind;
+                    if ($kind_t == 1) {
+                        $kind = '<span class="text-success">'.trans('lang.cash').'</span>';
+                    } elseif ($kind_t == 2) {
+                        $kind = '<span class="text-danger">'.trans('lang.delayed').'</span>';
+                    } elseif ($kind_t == 3) {
+                        $kind = '<span class="text-info">'.trans('lang.delivry').'</span>';
+                    } elseif ($kind_t == 4) {
+                        $kind = '<span class="text-dark">'.trans('lang.visa').'</span>';
+                    } else {
+                        $kind = '<span class="text-info">'.trans('lang.without').'</span>';
+                    }
+                    return $kind;
+                })
+                // ->addColumn('actions', function($row){
+                //     $actions = '<div class="ms-2">
+                //                 <a href="'.route('admin.pro_purchase_hs.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                //                     <i class="bi bi-eye-fill fs-1x"></i>
+                //                 </a>
+                //                 <a href="'.route('admin.pro_purchase_hs.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                //                     <i class="bi bi-pencil-square fs-1x"></i>
+                //                 </a>
+                //             </div>';
+                //     return $actions;
+                // })
+                ->filter(function ($instance) use ($request) {
+                    // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
+                    //     $instance->where('is_active', $request->get('is_active'));
+                    // }
+                    
+
+                    if (!empty($request->get('search'))) {
+                            $instance->where(function($w) use($request){
+                            $search = $request->get('search');
+                            $w->orWhere('product_name_en', 'LIKE', "%$search%")
+                            ->orWhere('sell_price', 'LIKE', "%$search%")
+                            ->orWhere('product_name', 'LIKE', "%$search%");
+                        });
+                    }
+                })
+                ->rawColumns(['purchase_no','store_id','vendor_id','p_total_after','p_discount_p','kind','store_id','checkbox','actions'])
+                ->make(true);
+        }
+        return view('admin.pro_purchase_h.index');
+    }
+
+    public function create()
+    {
+        return view('admin.pro_purchase_h.create');
+    }
+
+    public function store(Request $request)
+    {
+        $rule = [
+            'name_ar' => 'required|string',
+            'name_en' => 'required|string',
+            'emailaz' => 'nullable',
+            'password' =>'required',
+            
+        ];
+        $validate = Validator::make($request->all(), $rule);
+        if ($validate->fails()) {
+            return redirect()->back()->with('message', $validate->messages()->first())->with('status', 'error');}
+
+        $row = Pro_purchase_header::create([
+            'emp_code' => $request->emp_code,
+            'name_ar' => $request->name_ar,
+            'name_en' => $request->name_en,
+            'phone' => $request->phone,
+            'emailaz' => $request->emailaz,
+            'password' => Hash::make($request->password),
+            'type' => $request->type , //0 = admin, 1 = no dash 3 = subadmin, 4 = superadmin
+            'is_active' => $request->is_active ?? 1,
+            'role_id' => $request->role_id,
+            
+        ]);
+        if($request->hasFile('attach') && $request->file('attach')->isValid()){
+            $row->addMediaFromRequest('attach')->toMediaCollection('profile');
+        }
+        $role = Role::find($request->role_id);
+        $row->syncRoles([]);
+        $row->assignRole($role->name);
+
+        return redirect('admin/pro_purchase_hs')->with('message', 'تم الاضافة بنجاح')->with('status', 'success');
+    }
+    public function show($id)
+    {
+        $data = Pro_purchase_header::find($id);
+        return view('admin.pro_purchase_h.show', compact('data'));
+    }
+    public function edit($id)
+    {
+        $data = Pro_purchase_header::find($id);
+        return view('admin.pro_purchase_h.edit', compact('data'));
+    }
+
+    public function update(Request $request)
+    {
+        $rule = [
+            'name_ar' => 'required|string',
+            
+        ];
+        $validate = Validator::make($request->all(), $rule);
+        if ($validate->fails()) {
+            return redirect()->back()->with('message', $validate->messages()->first())->with('status', 'error');
+        }
+        $data = Pro_purchase_header::find($request->id);
+        $data->update([
+            'emp_code' => $request->emp_code,
+            'name_ar' => $request->name_ar,
+            'name_en' => $request->name_en,
+            'phone' => $request->phone,
+            'emailaz' => $request->emailaz,
+            'password' => Hash::make($request->password),
+            'type' => $request->type , //0 = admin, 1 = no dash 3 = subadmin, 4 = superadmin
+            'is_active' => $request->is_active ?? 1,
+            'role_id' => $request->role_id,
+
+        ]);
+
+        if($request->hasFile('photo') && $request->file('photo')->isValid()){
+            $data->addMediaFromRequest('photo')->toMediaCollection('profile');
+        }
+
+        return redirect('admin/pro_purchase_hs')->with('message', 'تم التعديل بنجاح')->with('status', 'success');
+    }
+
+    public function destroy(Request $request)
+    {
+        try{
+            Pro_purchase_header::whereIn('id',$request->id)->delete();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error']);
+        }
+        return response()->json(['message' => 'success']);
+    }
+    
+
+}
