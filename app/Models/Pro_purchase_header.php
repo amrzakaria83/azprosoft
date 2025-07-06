@@ -45,6 +45,7 @@ class Pro_purchase_header extends SqlServerModel
         'p_discount_p',
         'p_discount',
         'p_total_after',
+        'purchase_date',
         'tax',
         'back',
         'total_back',
@@ -70,6 +71,10 @@ class Pro_purchase_header extends SqlServerModel
     public function getvendor()
     {
         return $this->belongsTo(Pro_vendor::class, 'vendor_id');
+    }
+    public function getemp_id()
+    {
+        return $this->belongsTo(Emangeremp::class, 'emp_id');
     }
 }
 

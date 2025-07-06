@@ -331,5 +331,11 @@ return [
     "less_than" => "Less Than",
     "more_than" => "More Than",
     "discount" => "Discount",
+    "before" => "before",
+    "after" => "after",
+    "expiry_date" => "Expiry Date",
+    "bonus" => "Bonus",
+    "price" => "Price",
+    "profit" => "Profit",
 
 ];

@@ -328,6 +328,12 @@ return [
     "less_than" => "اقل من",
     "more_than" => "اكثر من",
     "discount" => "خصم",
+    "before" => "قبل",
+    "after" => "بعد",
+    "expiry_date" => "تاريخ الصلاحية",
+    "bonus" => "اضافى",
+    "price" => "سعر",
+    "profit" => "ربح",
 
 
 ];

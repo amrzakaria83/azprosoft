@@ -47,12 +47,16 @@ class Pro_purchase_headersController extends Controller
                     return $store_id;
                 })
                 ->addColumn('vendor_id', function($row){
-                    $vendor_id = $row->getvendor->vendor_name ?? $row->getvendor->vendor_name_en ;
+                    $vendor_id = $row->getvendor->vendor_name ?? $row->getvendor->vendor_name_en ?? 'null';
                     return $vendor_id;
                 })
                 ->addColumn('p_total_after', function($row){
                     $p_total_after = number_format($row->p_total_after, 2);
                     return $p_total_after;
+                })
+                ->addColumn('p_total', function($row){
+                    $p_total = number_format($row->p_total, 2);
+                    return $p_total;
                 })
                 ->addColumn('p_discount_p', function($row){
                     $p_discount_p = number_format($row->p_discount_p, 3) ?? 0;
@@ -62,21 +66,13 @@ class Pro_purchase_headersController extends Controller
                     $store_id = $row->getstore->store_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
                     return $store_id;
                 })
-                
-                ->addColumn('kind', function($row){// 1 = cash - 2 = delayed - 3 = delivery - 4 = visa 
-                    $kind_t = $row->kind;
-                    if ($kind_t == 1) {
-                        $kind = '<span class="text-success">'.trans('lang.cash').'</span>';
-                    } elseif ($kind_t == 2) {
-                        $kind = '<span class="text-danger">'.trans('lang.delayed').'</span>';
-                    } elseif ($kind_t == 3) {
-                        $kind = '<span class="text-info">'.trans('lang.delivry').'</span>';
-                    } elseif ($kind_t == 4) {
-                        $kind = '<span class="text-dark">'.trans('lang.visa').'</span>';
-                    } else {
-                        $kind = '<span class="text-info">'.trans('lang.without').'</span>';
-                    }
-                    return $kind;
+                ->addColumn('purchase_date', function($row){
+                    $purchase_date = $row->purchase_date;
+                    return $purchase_date;
+                })
+                ->addColumn('emp_id', function($row){
+                    $emp_id = $row->getemp_id->emp_name ?? $row->getemp_id->emp_name_en ;
+                    return $emp_id;
                 })
                 // ->addColumn('actions', function($row){
                 //     $actions = '<div class="ms-2">
@@ -93,18 +89,35 @@ class Pro_purchase_headersController extends Controller
                     // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
                     //     $instance->where('is_active', $request->get('is_active'));
                     // }
-                    
+                    if ($request->get('store_id') != Null)
+                    {
+                    $instance->where(function ($query) use ($request) {
+                        $query->where('store_id', $request->get('store_id'));
+                    });
+                    }
+                    if ($request->get('vendor_id') != Null)
+                    {
+                    $instance->where(function ($query) use ($request) {
+                        $query->where('vendor_id', $request->get('vendor_id'));
+                    });
+                    }
+                    if ($request->get('emp_id') != Null)
+                    {
+                    $instance->where(function ($query) use ($request) {
+                        $query->where('emp_id', $request->get('emp_id'));
+                    });
+                    }
 
                     if (!empty($request->get('search'))) {
                             $instance->where(function($w) use($request){
                             $search = $request->get('search');
-                            $w->orWhere('product_name_en', 'LIKE', "%$search%")
+                            $w->orWhere('purchase_no', 'LIKE', "%$search%")
                             ->orWhere('sell_price', 'LIKE', "%$search%")
                             ->orWhere('product_name', 'LIKE', "%$search%");
                         });
                     }
                 })
-                ->rawColumns(['purchase_no','store_id','vendor_id','p_total_after','p_discount_p','kind','store_id','checkbox','actions'])
+                ->rawColumns(['purchase_no','store_id','vendor_id','p_total_after','p_total','p_discount_p','purchase_date','emp_id','store_id','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.pro_purchase_h.index');
