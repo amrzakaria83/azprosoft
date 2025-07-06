@@ -219,3 +219,12 @@ try {
 connecting by bash
 ssh -i azpro az3331515.com@ssh.us.stackcp.com
 cd public_html/azprosoft/azprosoft
+
+
+
+DB_SQLSRV_CONNECTION=sqlsrv
+DB_SQLSRV_HOST=41.33.4.125
+DB_SQLSRV_PORT=63307
+DB_SQLSRV_DATABASE=Emanger
+DB_SQLSRV_USERNAME=sa
+DB_SQLSRV_PASSWORD=1
