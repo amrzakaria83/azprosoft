@@ -128,14 +128,14 @@
                                 <th class="min-w-125px text-center">{{trans('lang.products')}}</th>
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th> -->
                                 <th class="min-w-125px text-center">{{trans('lang.quantity')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.price')}} {{trans('lang.buying')}} {{trans('lang.unit')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.price')}} {{trans('lang.buying')}} {{trans('lang.unit')}} {{trans('lang.without')}} {{trans('lang.tax')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.supplier')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.sell_price')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.buying')}} {{trans('lang.unit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.buying')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.profit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.bonus')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.tax')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.tax')}} {{trans('lang.unit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.quantity')}} {{trans('lang.returns')}}</th>
                             </tr>
