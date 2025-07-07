@@ -49,7 +49,7 @@ class Pro_purchase_detailssController extends Controller
                         </div>';
                         $expireDate = $row->expire_date 
                             ? date('d-m-y', strtotime($row->expire_date)) 
-                            : 'No expire';
+                            : '<span class="text-danger">No expire</span>';
                     $productId .= '<div class="d-flex flex-column">
                                     <a href="javascript:;" class="'.$textClass.' text-hover-primary mb-1">'
                                     .$expireDate.

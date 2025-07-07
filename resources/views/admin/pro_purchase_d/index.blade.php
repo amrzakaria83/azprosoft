@@ -134,8 +134,8 @@
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.buying')}} {{trans('lang.unit')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.buying')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.profit')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.bonus')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.tax')}} {{trans('lang.unit')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.bonus')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.quantity')}} {{trans('lang.returns')}}</th>
                             </tr>
@@ -276,8 +276,8 @@
                 {data: 'buy_tax', name: 'buy_tax'},
                 {data: 'total_buy', name: 'total_buy'},
                 {data: 'profit', name: 'profit'},
-                {data: 'bouns', name: 'bouns'},
                 {data: 'tax', name: 'tax'},
+                {data: 'bouns', name: 'bouns'},
                 {data: 'valued_date', name: 'valued_date'},
                 {data: 'back_amount', name: 'back_amount'},
                 // {data: 'purchase_date', name: 'purchase_date'},
