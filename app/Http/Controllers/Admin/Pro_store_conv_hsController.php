@@ -66,10 +66,10 @@ class Pro_store_conv_hsController extends Controller
                 })
                 // ->addColumn('actions', function($row){
                 //     $actions = '<div class="ms-2">
-                //                 <a href="'.route('admin.pro_purchase_hs.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                //                 <a href="'.route('admin.pro_store_conv_hs.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                 //                     <i class="bi bi-eye-fill fs-1x"></i>
                 //                 </a>
-                //                 <a href="'.route('admin.pro_purchase_hs.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                //                 <a href="'.route('admin.pro_store_conv_hs.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                 //                     <i class="bi bi-pencil-square fs-1x"></i>
                 //                 </a>
                 //             </div>';
@@ -110,12 +110,12 @@ class Pro_store_conv_hsController extends Controller
                 ->rawColumns(['sales_id','store_id','vendor_id','p_total_after','p_total','p_discount_p','purchase_date','emp_id','store_id','checkbox','actions'])
                 ->make(true);
         }
-        return view('admin.pro_purchase_h.index');
+        return view('admin.pro_store_conv_h.index');
     }
 
     public function create()
     {
-        return view('admin.pro_purchase_h.create');
+        return view('admin.pro_store_conv_h.create');
     }
 
     public function store(Request $request)
@@ -150,17 +150,17 @@ class Pro_store_conv_hsController extends Controller
         $row->syncRoles([]);
         $row->assignRole($role->name);
 
-        return redirect('admin/pro_purchase_hs')->with('message', 'تم الاضافة بنجاح')->with('status', 'success');
+        return redirect('admin/pro_store_conv_hs')->with('message', 'تم الاضافة بنجاح')->with('status', 'success');
     }
     public function show($id)
     {
         $data = Pro_store_conv_h::find($id);
-        return view('admin.pro_purchase_h.show', compact('data'));
+        return view('admin.pro_store_conv_h.show', compact('data'));
     }
     public function edit($id)
     {
         $data = Pro_store_conv_h::find($id);
-        return view('admin.pro_purchase_h.edit', compact('data'));
+        return view('admin.pro_store_conv_h.edit', compact('data'));
     }
 
     public function update(Request $request)
@@ -191,7 +191,7 @@ class Pro_store_conv_hsController extends Controller
             $data->addMediaFromRequest('photo')->toMediaCollection('profile');
         }
 
-        return redirect('admin/pro_purchase_hs')->with('message', 'تم التعديل بنجاح')->with('status', 'success');
+        return redirect('admin/pro_store_conv_hs')->with('message', 'تم التعديل بنجاح')->with('status', 'success');
     }
 
     public function destroy(Request $request)
@@ -263,10 +263,10 @@ class Pro_store_conv_hsController extends Controller
                 })
                 // ->addColumn('actions', function($row){
                 //     $actions = '<div class="ms-2">
-                //                 <a href="'.route('admin.pro_purchase_hs.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                //                 <a href="'.route('admin.pro_store_conv_hs.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                 //                     <i class="bi bi-eye-fill fs-1x"></i>
                 //                 </a>
-                //                 <a href="'.route('admin.pro_purchase_hs.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                //                 <a href="'.route('admin.pro_store_conv_hs.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                 //                     <i class="bi bi-pencil-square fs-1x"></i>
                 //                 </a>
                 //             </div>';
@@ -307,7 +307,7 @@ class Pro_store_conv_hsController extends Controller
                 ->rawColumns(['purchase_no','store_id','vendor_id','p_total_after','p_total','p_discount_p','purchase_date','emp_id','store_id','checkbox','actions'])
                 ->make(true);
         }
-        return view('admin.pro_purchase_h.indexh_d');
+        return view('admin.pro_store_conv_h.indexh_d');
     }
     
 
