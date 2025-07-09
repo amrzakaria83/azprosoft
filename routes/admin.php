@@ -160,6 +160,16 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/update', 'Pro_purchase_detailssController@update')->name('update');
             
         });
+        Route::name('pro_prod_logs.')->prefix('pro_prod_logs')->group(function(){
+            Route::get('/','Pro_prod_logsController@index')->name('index');
+            Route::get('/show/{id}','Pro_prod_logsController@show')->name('show');
+            Route::post('/delete', 'Pro_prod_logsController@destroy')->name('delete');
+            Route::get('/create','Pro_prod_logsController@create')->name('create');
+            Route::post('/store','Pro_prod_logsController@store')->name('store');
+            Route::get('/edit/{id}', 'Pro_prod_logsController@edit')->name('edit');
+            Route::post('/update', 'Pro_prod_logsController@update')->name('update');
+            
+        });
         Route::name('pro_sales_hs.')->prefix('pro_sales_hs')->group(function(){
             Route::get('/','Pro_sales_hsController@index')->name('index');
             Route::get('/show/{id}','Pro_sales_hsController@show')->name('show');

@@ -132,13 +132,41 @@
                   <span class="menu-title fs-3">{{trans('lang.customers')}}</span>
                 </a>
               </li>
-              <li>
+              <!-- <li>
                 <a class="dropdown-item py-3" href="{{route('admin.pro_products.index')}}">
                   <span class="menu-icon me-3">
                     <i class="fa-solid fa-file-import"></i>
                   </span>
                   <span class="menu-title fs-3">{{trans('lang.products')}}</span>
                 </a>
+              </li> -->
+              <li class="dropdown-submenu dropend">
+                <a class="dropdown-item dropdown-toggle py-3" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+                  <span class="menu-icon me-3">
+                    <i class="fa-solid fa-sitemap"></i>
+                  </span>
+                  <span class="menu-title fs-3">{{trans('lang.reports')}} {{trans('lang.products')}}</span>
+                  <span class="menu-arrow"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="productsDropdown">
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_products.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.products')}}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_prod_logs.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.movement')}} {{trans('lang.products')}}</span>
+                    </a>
+                  </li>
+                  
+                </ul>
               </li>
               <!-- Employees Section -->
               {{-- <li class="dropdown-header py-2 px-3 fs-4 text-muted">Employee Management</li> --}}
