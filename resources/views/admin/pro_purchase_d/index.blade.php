@@ -21,7 +21,7 @@
         <span class="h-20px border-gray-300 border-start mx-4"></span>
         <ul class="breadcrumb breadcrumb-separatorless fw-bold fs-7 my-1">
             <li class="breadcrumb-item text-muted px-2">
-                <a  href="#" class="text-muted text-hover-primary">{{trans('lang.products')}}</a>
+                <a  href="#" class="text-muted text-hover-primary">{{trans('lang.details')}} {{trans('lang.purchases')}}</a>
             </li>
             {{-- <li class="breadcrumb-item">
                 <span class="bullet bg-gray-300 w-5px h-2px"></span>
