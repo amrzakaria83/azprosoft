@@ -334,6 +334,8 @@ return [
     "bonus" => "اضافى",
     "price" => "سعر",
     "profit" => "ربح",
+    "transfer_from" => "تحويل من",
+    "transfer_to" => "تحويل الى",
 
 
 ];

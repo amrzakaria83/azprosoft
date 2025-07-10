@@ -69,12 +69,25 @@
                 <!--begin::Card body-->
                 <div class="card-body py-4">
                     <div class="row mb-6">
-                        <div class="col-sm-4">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.store')}}</label>
+                        <div class="col-sm-2">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.transfer_from')}} {{trans('lang.store')}}</label>
                             <div class="col-sm-12 fv-row">
                             <select data-placeholder="Select an option" class="input-text form-control form-select mb-3 mb-lg-0 text-center" 
                                 name="store_id" 
                                 id="store_id"  data-control="select2">
+                                <option value="">Select an option</option>
+                                    @foreach (\App\Models\Pro_store::get() as $store)
+                                        <option value="{{ $store->store_id }}" >{{ $store->store_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.transfer_to')}} {{trans('lang.store')}}</label>
+                            <div class="col-sm-12 fv-row">
+                            <select data-placeholder="Select an option" class="input-text form-control form-select mb-3 mb-lg-0 text-center" 
+                                name="to_store_id" 
+                                id="to_store_id"  data-control="select2">
                                 <option value="">Select an option</option>
                                     @foreach (\App\Models\Pro_store::get() as $store)
                                         <option value="{{ $store->store_id }}" >{{ $store->store_name }}</option>
@@ -126,16 +139,16 @@
                                         <input class="form-check-input" type="checkbox" data-kt-check="true" data-kt-check-target="#kt_datatable_table .form-check-input" value="1" />
                                     </div>
                                 </th>
-                                <th class="min-w-125px text-center">{{trans('lang.products')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.numb')}}</th>
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th> -->
-                                <th class="min-w-125px text-center">{{trans('lang.store')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.movement')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.quantity')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.transfer_from')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.transfer_to')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.employee')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.balance')}} {{trans('lang.before')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.balance')}} {{trans('lang.after')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.transfer_from')}} {{trans('lang.employee')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.transfer_to')}} {{trans('lang.employee')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.value')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.note')}}</th>
+                                
                             </tr>
                             <!--end::Table row-->
                         </thead>
@@ -257,6 +270,7 @@
                 url: "{{ route('admin.pro_store_conv_hs.index') }}",
                 data: function (d) {
                     d.store_id = $('#store_id').val(),
+                    d.to_store_id = $('#to_store_id').val(),
                     d.from_date = $('#kt_datepicker_1').val(),
                     d.to_date = $('#kt_datepicker_2').val(),
                     
@@ -265,15 +279,16 @@
             },
             columns: [
                 {data: 'checkbox', name: 'checkbox'},
-                {data: 'product_id', name: 'product_id'},
+                {data: 'sales_id', name: 'sales_id'},
                 {data: 'store_id', name: 'store_id'},
-                {data: 'from_note', name: 'from_note'},
-                {data: 'amount', name: 'amount'},
-                {data: 'ins_date', name: 'ins_date'},
+                {data: 'to_store_id', name: 'to_store_id'},
+                {data: 'date', name: 'date'},
                 {data: 'emp_id', name: 'emp_id'},
-                {data: 'old_amount', name: 'old_amount'},
-                {data: 'new_amount', name: 'new_amount'},
-                {data: 'expire_date', name: 'expire_date'},
+                {data: 'r_emp_id', name: 'r_emp_id'},
+                {data: 'inv_total', name: 'inv_total'},
+                {data: 'note', name: 'note'},
+                // {data: 'new_amount', name: 'new_amount'},
+                // {data: 'expire_date', name: 'expire_date'},
                 // {data: 'total_buy', name: 'total_buy'},
                 
             ],
@@ -287,7 +302,7 @@
         filterSearch.addEventListener('keyup', function (e) {
             table.draw();
         });
-        $('#store_id,#kt_datepicker_1,#kt_datepicker_2').change(function() {
+        $('#store_id,#to_store_id,#kt_datepicker_1,#kt_datepicker_2').change(function() {
             table.draw();
         });
 

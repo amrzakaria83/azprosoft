@@ -11,6 +11,7 @@ use App\Models\Pro_store_conv_h;
 use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Artisan;
 
 use Validator;
 use Auth;
@@ -22,7 +23,8 @@ class Pro_store_conv_hsController extends Controller
         set_time_limit(3600);
         ini_set('max_execution_time', 4800);
         ini_set('memory_limit', '4096M');
-        
+        Artisan::call('cache:clear');
+
         if ($request->ajax()) {
             $data = Pro_store_conv_h::with(['getstorefrom','getemp_id_send']);
 
@@ -48,6 +50,25 @@ class Pro_store_conv_hsController extends Controller
                     $date = $row->date;
                     return $date;
                 })
+                ->addColumn('emp_id', function($row){
+                    
+                    $emp_name = $row->getemp_id_send->emp_name ?? $row->getemp_id_send->emp_name_en ?? '' ;
+                    
+                    $textClass = (!is_null($row->is_open) && $row->is_open > 0) // 0 = received  - 1 = under delivery
+                                ? 'text-danger' 
+                                : 'text-gray-800';
+                    $emp_id = '<div class="d-flex flex-column">
+                        <a href="javascript:;" class="'.$textClass.' text-hover-primary mb-1">'
+                        .$emp_name.'
+                        </a>
+                        </div>';
+                        
+                    return $emp_id;
+                })
+                ->addColumn('r_emp_id', function($row){
+                    $r_emp_id = $row->getemp_id_rece->emp_name ?? $row->getemp_id_rece->emp_name_en ?? '' ;
+                    return $r_emp_id;
+                })
                 ->addColumn('inv_total', function($row){
                     $inv_total = number_format($row->inv_total, 2);
                     return $inv_total;
@@ -56,14 +77,12 @@ class Pro_store_conv_hsController extends Controller
                     $to_store_id = $row->getstoreto->store_name ?? '<span class="text-info">'.trans('lang.without').'</span>';
                     return $to_store_id;
                 })
-                ->addColumn('emp_id', function($row){
-                    $emp_id = $row->getemp_id_send->emp_name ?? $row->getemp_id_send->emp_name_en ?? '' ;
-                    return $emp_id;
+                
+                ->addColumn('note', function($row){
+                    $note = $row->notes;
+                    return $note;
                 })
-                ->addColumn('r_emp_id', function($row){
-                    $r_emp_id = $row->getemp_id_rece->emp_name ?? $row->getemp_id_rece->emp_name_en ?? '' ;
-                    return $r_emp_id;
-                })
+                
                 // ->addColumn('actions', function($row){
                 //     $actions = '<div class="ms-2">
                 //                 <a href="'.route('admin.pro_store_conv_hs.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
@@ -76,21 +95,23 @@ class Pro_store_conv_hsController extends Controller
                 //     return $actions;
                 // })
                 ->filter(function ($instance) use ($request) {
-                    // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
-                    //     $instance->where('is_active', $request->get('is_active'));
-                    // }
+                    if (!empty($request->get('from_date') || $request->get('to_date'))) {
+                        $instance->whereDate('date', '>=', $request->get('from_date'));
+                        $instance->whereDate('date', '<=', $request->get('to_date'));
+                    }
                     if ($request->get('store_id') != Null)
                     {
                     $instance->where(function ($query) use ($request) {
                         $query->where('store_id', $request->get('store_id'));
                     });
                     }
-                    if ($request->get('vendor_id') != Null)
+                    if ($request->get('to_store_id') != Null)
                     {
                     $instance->where(function ($query) use ($request) {
-                        $query->where('vendor_id', $request->get('vendor_id'));
+                        $query->where('to_store_id', $request->get('to_store_id'));
                     });
                     }
+                    
                     if ($request->get('emp_id') != Null)
                     {
                     $instance->where(function ($query) use ($request) {
@@ -102,15 +123,15 @@ class Pro_store_conv_hsController extends Controller
                             $instance->where(function($w) use($request){
                             $search = $request->get('search');
                             $w->orWhere('sales_id', 'LIKE', "%$search%")
-                            ->orWhere('sell_price', 'LIKE', "%$search%")
+                            ->orWhere('date', 'LIKE', "%$search%")
                             ->orWhere('product_name', 'LIKE', "%$search%");
                         });
                     }
                 })
-                ->rawColumns(['sales_id','store_id','vendor_id','p_total_after','p_total','p_discount_p','purchase_date','emp_id','store_id','checkbox','actions'])
+                ->rawColumns(['sales_id','store_id','date','r_emp_id','note','emp_id','to_store_id','inv_total','checkbox','actions'])
                 ->make(true);
         }
-        return view('admin.pro_store_conv_h.index');
+        return view('admin.pro_store_conv_hs.index');
     }
 
     public function create()
