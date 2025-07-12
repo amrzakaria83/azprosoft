@@ -11,6 +11,8 @@ use App\Models\Pro_purchase_header;
 use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Carbon;
 
 use Validator;
 use Auth;
@@ -22,7 +24,8 @@ class Pro_purchase_headersController extends Controller
         set_time_limit(3600);
         ini_set('max_execution_time', 4800);
         ini_set('memory_limit', '4096M');
-        
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
         if ($request->ajax()) {
             $data = Pro_purchase_header::with(['getstore','getvendor']);
 

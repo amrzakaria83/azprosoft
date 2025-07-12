@@ -1,0 +1,136 @@
+data sql in server named "asd" which i need to replicate for another data in other device which have the same database anamed "qwe" but not have latest data with static ip only data which need newest data have static ip but original server is dinamic 
+not make asd data is secure and make it connected and send only with qwe data not opposite
+
+# Secure One-Way SQL Server Replication from Dynamic IP (ASD) to Static IP (QWE)
+
+Here's a solution that ensures data flows only from ASD (dynamic IP) to QWE (static IP) while maintaining security:
+
+## Solution: Secure Push Replication with Limited Permissions
+
+### On QWE Server (Static IP - Destination):
+```sql
+-- 1. Create a dedicated login with minimal permissions
+CREATE LOGIN [ASD_Replicator] WITH PASSWORD = 'StrongPassword123!';
+CREATE USER [ASD_Replicator] FOR LOGIN [ASD_Replicator];
+
+-- 2. Create a special database for replication (optional but recommended)
+CREATE DATABASE ReplicationControl;
+GO
+USE ReplicationControl;
+CREATE TABLE ConnectionLog (ID INT IDENTITY, ConnectTime DATETIME, SourceIP VARCHAR(50));
+
+-- 3. Grant only necessary permissions
+GRANT CONNECT TO [ASD_Replicator];
+GRANT INSERT ON ReplicationControl.ConnectionLog TO [ASD_Replicator];
+```
+
+### On ASD Server (Dynamic IP - Source):
+```sql
+-- 1. Set up distributor pointing to QWE's static IP
+USE master;
+EXEC sp_adddistributor @distributor = 'QWE_IP_ADDRESS', 
+    @password = 'DistributorPassword123!';
+
+-- 2. Configure publication (push only)
+USE YourDatabase;
+EXEC sp_replicationdboption @dbname = 'YourDatabase', 
+    @optname = 'publish', 
+    @value = 'true';
+
+-- 3. Create publication with immediate sync and no pull
+EXEC sp_addpublication 
+    @publication = 'ASD_to_QWE',
+    @description = 'Secure one-way replication',
+    @sync_method = 'native',
+    @repl_freq = 'continuous',
+    @independent_agent = 'true',
+    @immediate_sync = 'true',
+    @allow_pull = 'false',
+    @allow_push = 'true';
+
+-- 4. Add articles with row filtering if needed
+EXEC sp_addarticle 
+    @publication = 'ASD_to_QWE',
+    @article = 'YourTable',
+    @source_owner = 'dbo',
+    @source_object = 'YourTable';
+
+-- 5. Add push subscription
+EXEC sp_addsubscription 
+    @publication = 'ASD_to_QWE',
+    @subscriber = 'QWE_IP_ADDRESS',
+    @destination_db = 'qwe',
+    @subscription_type = 'push';
+```
+
+## Network Security Configuration:
+
+1. **Firewall Rules on QWE**:
+   - Only allow inbound SQL connections from ASD on port 1433
+   - Set up Windows Firewall to log connection attempts
+
+2. **Connection Script on ASD** (to handle dynamic IP):
+```powershell
+# PowerShell script to run on ASD server
+$qweIP = "192.168.1.100" # QWE's static IP
+$connectionString = "Server=$qweIP;Database=ReplicationControl;User Id=ASD_Replicator;Password=StrongPassword123!;"
+
+try {
+    $conn = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+    $conn.Open()
+    $cmd = $conn.CreateCommand()
+    $cmd.CommandText = "INSERT INTO ConnectionLog (ConnectTime, SourceIP) VALUES (GETDATE(), '$((Test-Connection -ComputerName $env:COMPUTERNAME -Count 1).IPV4Address.IPAddressToString)')"
+    $cmd.ExecuteNonQuery()
+    $conn.Close()
+    
+    # Start replication if not running
+    Start-Service -Name SQLSERVERAGENT
+    Invoke-Sqlcmd -Query "EXEC sp_startpublication_snapshot @publication = 'ASD_to_QWE'"
+} catch {
+    Write-Output "Connection failed: $_"
+}
+```
+
+## Security Enhancements:
+
+1. **IP Restriction**:
+```sql
+-- On QWE server
+CREATE TRIGGER tr_CheckSourceIP
+ON ALL SERVER
+FOR LOGON
+AS
+BEGIN
+    IF ORIGINAL_LOGIN() = 'ASD_Replicator' AND
+       NOT EXISTS (SELECT 1 FROM ReplicationControl.ConnectionLog 
+                  WHERE SourceIP = EVENTDATA().value('(/EVENT_INSTANCE/ClientHost)[1]', 'varchar(50)')
+                  AND DATEDIFF(MINUTE, ConnectTime, GETDATE()) < 10)
+    BEGIN
+        ROLLBACK;
+    END
+END;
+```
+
+2. **Data Encryption**:
+```sql
+-- On both servers
+USE master;
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'EncryptionPassword123!';
+CREATE CERTIFICATE ReplicationCert WITH SUBJECT = 'Replication Certificate';
+CREATE ENDPOINT [ReplicationEndpoint]
+    STATE = STARTED
+    AS TCP (LISTENER_PORT = 5022)
+    FOR DATABASE_MIRRORING (
+        AUTHENTICATION = CERTIFICATE ReplicationCert,
+        ENCRYPTION = REQUIRED ALGORITHM AES
+    );
+```
+
+This solution ensures:
+- Data only flows from ASD → QWE, never the opposite direction
+- ASD initiates all connections (works with dynamic IP)
+- Minimal permissions granted
+- Connection attempts are logged
+- Optional data encryption available
+
+Would you like me to add any specific monitoring components or adjust the security levels further?

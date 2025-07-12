@@ -11,6 +11,8 @@ use App\Models\Pro_purchase_details;
 use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Carbon;
 
 use Validator;
 use Auth;
@@ -22,7 +24,8 @@ class Pro_purchase_detailssController extends Controller
         set_time_limit(3600);
         ini_set('max_execution_time', 4800);
         ini_set('memory_limit', '4096M');
-        
+        // Artisan::call('cache:clear');
+        // Artisan::call('view:clear');
         if ($request->ajax()) {
             $data = Pro_purchase_details::with(['getprod','getpurchase_h']);
 
@@ -119,13 +122,23 @@ class Pro_purchase_detailssController extends Controller
                     // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
                     //     $instance->where('is_active', $request->get('is_active'));
                     // }
-                    if (!empty($request->get('from_date')) || !empty($request->get('to_date'))) {
+                    // if (!empty($request->get('from_date')) || !empty($request->get('to_date'))) {
+                    //     $instance->whereHas('getpurchase_h', function ($q) use ($request) {
+                    //         if (!empty($request->get('from_date'))) {
+                    //             $q->whereDate('purchase_date', '>=', Carbon::parse($request->get('from_date'))->startOfDay());
+                    //         }
+                    //         if (!empty($request->get('to_date'))) {
+                    //             $q->whereDate('purchase_date', '<=', Carbon::parse($request->get('to_date'))->endOfDay());
+                    //         }
+                    //     });
+                    // }
+                    if ($request->filled('from_date') || $request->filled('to_date')) {
                         $instance->whereHas('getpurchase_h', function ($q) use ($request) {
-                            if (!empty($request->get('from_date'))) {
-                                $q->whereDate('purchase_date', '>=', $request->get('from_date'));
+                            if ($request->filled('from_date')) {
+                                $q->where('purchase_date', '>=', Carbon::parse($request->from_date));
                             }
-                            if (!empty($request->get('to_date'))) {
-                                $q->whereDate('purchase_date', '<=', $request->get('to_date'));
+                            if ($request->filled('to_date')) {
+                                $q->where('purchase_date', '<=', Carbon::parse($request->to_date));
                             }
                         });
                     }

@@ -12,11 +12,17 @@ use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Carbon;
 
 use Validator;
 use Auth;
 class Pro_store_conv_hsController extends Controller
 {
+    public function __construct()
+    {
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
+    }
 
     public function index(Request $request)
     {

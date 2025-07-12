@@ -220,12 +220,12 @@
     $("#kt_datepicker_1").flatpickr({
         defaultDate: new Date().setDate(new Date().getDate() - 30),
         allowInput: true,           // Allow manual input
-        enableTime: false,
+        enableTime: true,
     });
     $("#kt_datepicker_2").flatpickr({
         defaultDate: new Date().setDate(new Date().getDate() + 1),
         allowInput: true,           // Allow manual input
-        enableTime: false,
+        enableTime: true,
 
     });
 </script>

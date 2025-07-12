@@ -12,6 +12,7 @@ use App\Models\Cashier;
 use App;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Site;
+use Illuminate\Support\Facades\Artisan;
 
 class HomeController extends Controller
 {
