@@ -132,16 +132,16 @@ class Pro_purchase_detailssController extends Controller
                     //         }
                     //     });
                     // }
-                    if ($request->filled('from_date') || $request->filled('to_date')) {
-                        $instance->whereHas('getpurchase_h', function ($q) use ($request) {
-                            if ($request->filled('from_date')) {
-                                $q->where('purchase_date', '>=', Carbon::parse($request->from_date));
-                            }
-                            if ($request->filled('to_date')) {
-                                $q->where('purchase_date', '<=', Carbon::parse($request->to_date));
-                            }
-                        });
-                    }
+                    // if ($request->filled('from_date') || $request->filled('to_date')) {
+                    //     $instance->whereHas('getpurchase_h', function ($q) use ($request) {
+                    //         if ($request->filled('from_date')) {
+                    //             $q->where('purchase_date', '>=', Carbon::parse($request->from_date));
+                    //         }
+                    //         if ($request->filled('to_date')) {
+                    //             $q->where('purchase_date', '<=', Carbon::parse($request->to_date));
+                    //         }
+                    //     });
+                    // }
                     if ($request->get('vendor_id') != null) {
                         $instance->whereHas('getpurchase_h.getvendor', function ($q) use ($request) {
                             $q->where('vendor_id', $request->get('vendor_id'));
