@@ -1,0 +1,131 @@
+# Secure One-Way SQL Server Replication from Dynamic IP (ASD) to Static IP (QWE)
+
+Here's a secure solution that ensures data only flows from your dynamic IP server (ASD) to the static IP server (QWE), without exposing ASD to inbound connections:
+
+## Solution: Pull Subscription with VPN Tunnel
+
+### Step 1: Network Configuration (Most Secure Approach)
+1. **Set up a VPN** where QWE (static IP) can initiate connection to ASD
+2. **Only open outgoing ports** on ASD (no inbound ports exposed)
+3. **Use IP restriction** on ASD to only accept connections from QWE's VPN IP
+
+### Step 2: Configure SQL Server on ASD (Publisher)
+```sql
+-- On ASD server (dynamic IP):
+USE master;
+EXEC sp_adddistributor @distributor = N'ASD';
+EXEC sp_adddistributiondb @database = N'distribution';
+
+-- Create publication (no subscription yet)
+USE YourDatabase;
+EXEC sp_addpublication 
+    @publication = N'ASD_to_QWE',
+    @description = N'One-way replication to QWE',
+    @sync_method = N'native',
+    @repl_freq = N'continuous',
+    @allow_pull = 1, -- Enable pull subscriptions
+    @allow_push = 0; -- Disable push subscriptions
+
+-- Add articles (tables to replicate)
+EXEC sp_addarticle 
+    @publication = N'ASD_to_QWE',
+    @article = N'YourTable',
+    @source_owner = N'dbo',
+    @source_object = N'YourTable';
+```
+
+### Step 3: Configure SQL Server on QWE (Subscriber)
+```sql
+-- On QWE server (static IP):
+-- Create pull subscription
+USE YourDatabase;
+EXEC sp_addpullsubscription 
+    @publisher = N'ASD',
+    @publication = N'ASD_to_QWE',
+    @publisher_db = N'YourDatabase',
+    @subscription_type = N'pull';
+
+EXEC sp_addpullsubscription_agent 
+    @publisher = N'ASD',
+    @publisher_db = N'YourDatabase',
+    @publication = N'ASD_to_QWE',
+    @distributor = N'ASD',
+    @job_login = N'YourLogin',
+    @job_password = 'YourPassword';
+```
+
+### Step 4: Security Hardening
+1. **On ASD (Publisher)**:
+```sql
+-- Create limited permission login for replication
+CREATE LOGIN [QWE_Replicator] WITH PASSWORD = 'StrongPassword!123';
+GRANT VIEW SERVER STATE TO [QWE_Replicator];
+GRANT CONNECT REPLICATION TO [QWE_Replicator];
+
+-- Restrict to only necessary permissions
+USE YourDatabase;
+CREATE USER [QWE_Replicator] FOR LOGIN [QWE_Replicator];
+GRANT SELECT ON SCHEMA::dbo TO [QWE_Replicator];
+```
+
+2. **On QWE (Subscriber)**:
+```sql
+-- Create job to periodically check for ASD's IP changes
+USE msdb;
+EXEC dbo.sp_add_job
+    @job_name = N'Update_ASD_Connection';
+
+EXEC sp_add_jobstep
+    @job_name = N'Update_ASD_Connection',
+    @step_name = N'Resolve ASD DNS',
+    @subsystem = N'PowerShell',
+    @command = N'# Script to update connection info if ASD IP changes';
+```
+
+### Alternative Simplified Solution: Backup with One-Way Sync
+If replication is too complex, use this secure backup approach:
+
+1. **On ASD (dynamic IP)**:
+```powershell
+# PowerShell script to:
+# 1. Create differential backup
+# 2. Encrypt with certificate
+# 3. Upload to secure location only QWE can access
+
+$backupFile = "D:\Backups\ASD_$(Get-Date -Format yyyyMMdd).bak"
+$certThumbprint = "YourCertThumbprint"
+
+BACKUP DATABASE YourDatabase TO DISK = $backupFile
+WITH COMPRESSION, ENCRYPTION (ALGORITHM = AES_256, SERVER CERTIFICATE = $certThumbprint);
+
+# Upload to secured network share (QWE pull-only access)
+Copy-Item $backupFile -Destination "\\QWE\SecureDrop\" -Force
+```
+
+2. **On QWE (static IP)**:
+```sql
+-- Job to check for new backups and restore
+USE master;
+CREATE PROCEDURE dbo.SyncFromASD
+AS
+BEGIN
+    DECLARE @backupFile NVARCHAR(255) = 'D:\Incoming\ASD_*.bak';
+    
+    -- Find latest backup
+    EXEC xp_cmdshell 'for /f %i in (''dir D:\Incoming\ASD_*.bak /b /o-d'') do set latest=%i';
+    
+    -- Restore with recovery
+    RESTORE DATABASE YourDatabase FROM DISK = @backupFile
+    WITH REPLACE, RECOVERY,
+    DECRYPTION BY CERTIFICATE = YourQWE_Certificate;
+END
+```
+
+## Key Security Features:
+1. **No inbound ports** open on ASD (dynamic IP server)
+2. **All connections initiated** by QWE (static IP server)
+3. **Data encrypted** during transfer
+4. **Minimal permissions** granted
+5. **One-way data flow** enforced at multiple levels
+
+Would you like me to provide specific scripts for any part of this solution or adjust the security level further?

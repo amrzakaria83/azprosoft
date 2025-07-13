@@ -84,14 +84,14 @@
               </li>
               @endcan
               <li class="dropdown-submenu dropend">
-                <a class="dropdown-item dropdown-toggle py-3" href="#" id="administratorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+                <a class="dropdown-item dropdown-toggle py-3" href="#" id="employeesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
                   <span class="menu-icon me-3">
                     <i class="fa-solid fa-sitemap"></i>
                   </span>
                   <span class="menu-title fs-3">{{trans('lang.employees')}}</span>
                   <span class="menu-arrow"></span>
                 </a>
-                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="administratorDropdown">
+                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="employeesDropdown">
                   <li>
                     <a class="dropdown-item py-3" href="{{route('admin.emangeremps.index')}}">
                       <span class="menu-icon me-3">
@@ -116,6 +116,70 @@
           </li>
         </ul>
         @endcan
+        <!-- purshase Menu -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="purshasesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+              <button type="button" class="btn btn-info btn-lg fs-3">{{trans('lang.purchases')}}</button>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg" aria-labelledby="purshasesDropdown">
+              
+              <!-- Employees Section -->
+              {{-- <li class="dropdown-header py-2 px-3 fs-4 text-muted">Employee Management</li> --}}
+              @can('administrators')
+              <!-- administrators Submenu -->
+              <li class="dropdown-submenu dropend">
+                <a class="dropdown-item dropdown-toggle py-3" href="#" id="purshaseprodsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+                  <span class="menu-icon me-3">
+                    <i class="fa-solid fa-sitemap"></i>
+                  </span>
+                  <span class="menu-title fs-3">{{trans('lang.purchases')}}</span>
+                  <span class="menu-arrow"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="purshaseprodsDropdown">
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.employees.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.all')}} {{trans('lang.administrators')}}</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              @endcan
+              <li class="dropdown-submenu dropend">
+                <a class="dropdown-item dropdown-toggle py-3" href="#" id="employeesssDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+                  <span class="menu-icon me-3">
+                    <i class="fa-solid fa-sitemap"></i>
+                  </span>
+                  <span class="menu-title fs-3">{{trans('lang.employees')}}</span>
+                  <span class="menu-arrow"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="employeesssDropdown">
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.emangeremps.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.all')}} {{trans('lang.employees')}}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_emp_atts.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.report')}} {{trans('lang.attendance')}}</span>
+                    </a>
+                  </li>
+                
+                </ul>
+              </li>
+              
+            </ul>
+          </li>
+        </ul>
         @can('sales')
        <!-- Human sales Menu -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">

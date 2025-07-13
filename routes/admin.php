@@ -190,6 +190,37 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/update', 'Pro_sales_hsController@update')->name('update');
             
         });
+        Route::name('trans_dels.')->prefix('trans_dels')->group(function(){
+            Route::get('/','Trans_delsController@index')->name('index');
+            Route::get('/show/{id}','Trans_delsController@show')->name('show');
+            Route::post('/delete', 'Trans_delsController@destroy')->name('delete');
+            Route::get('/create','Trans_delsController@create')->name('create');
+            Route::post('/store','Trans_delsController@store')->name('store');
+            Route::get('/edit/{id}', 'Trans_delsController@edit')->name('edit');
+            Route::post('/update', 'Trans_delsController@update')->name('update');
+            Route::get('/done/{id?}/{status?}', 'Trans_delsController@done')->name('done');
+            Route::get('/cancel/{id?}/{status?}', 'Trans_delsController@cancel')->name('cancel');
+            Route::get('/createmang','Trans_delsController@createmang')->name('createmang');
+            Route::post('/storemang','Trans_delsController@storemang')->name('storemang');
+            Route::post('/storemangwait','Trans_delsController@storemangwait')->name('storemangwait');
+            Route::get('/indexmang','Trans_delsController@indexmang')->name('indexmang');
+            Route::get('/edit_status/{id?}/{status?}', 'Trans_delsController@edit_status')->name('edit_status');
+            Route::get('/edit_to_id/{id?}/{status?}', 'Trans_delsController@edit_to_id')->name('edit_to_id');
+            Route::get('/edit_del/{id?}/{status?}', 'Trans_delsController@edit_del')->name('edit_del');
+            Route::post('/editno_receit', 'Trans_delsController@editno_receit')->name('editno_receit');
+            Route::get('/indexreq','Trans_delsController@indexreq')->name('indexreq');
+            Route::get('/indexsite','Trans_delsController@indexsite')->name('indexsite');
+            Route::get('/indexsiteondel','Trans_delsController@indexsiteondel')->name('indexsiteondel');
+            Route::get('/indexalldelrep','Trans_delsController@indexalldelrep')->name('indexalldelrep');
+            Route::get('/delrepdura','Trans_delsController@delrepdura')->name('delrepdura');
+            Route::get('/indexalldelrepdura/{from_time?}/{to_date?}/{duration?}','Trans_delsController@indexalldelrepdura')->name('indexalldelrepdura');
+            Route::get('/indexdel','Trans_delsController@indexdel')->name('indexdel');
+            Route::get('/indexdel_view/{del_code?}/{fromdate?}/{todate?}', 'Trans_delsController@indexdel_view')->name('indexdel_view');
+            Route::get('/indexreport/{del_code?}/{fromdate?}/{todate?}', 'Trans_delsController@indexreport')->name('indexreport');
+            Route::get('/indexreport1/{del_code?}/{fromdate?}/{todate?}', 'Trans_delsController@indexreport1')->name('indexreport1');
+            Route::get('/indexdelreport','Trans_delsController@indexdelreport')->name('indexdelreport');
+            Route::get('/indexall','Trans_delsController@indexall')->name('indexall');
+        });
         Route::name('pro_customers.')->prefix('pro_customers')->group(function(){
             Route::get('/','Pro_customersController@index')->name('index');
             Route::get('/show/{id}','Pro_customersController@show')->name('show');

@@ -55,14 +55,14 @@ class Pro_purchase_detailssController extends Controller
                         .$productName.'
                         </a>
                         </div>';
-                        $expireDate = $row->expire_date 
-                            ? date('d-m-y', strtotime($row->expire_date)) 
-                            : '<span class="text-danger">No expire</span>';
-                    $productId .= '<div class="d-flex flex-column">
-                                    <a href="javascript:;" class="'.$textClass.' text-hover-primary mb-1">'
-                                    .$expireDate.
-                                    '</a>
-                                 </div>';
+                    // $expireDate = $row->expire_date 
+                    //         ? date('d-m-y', strtotime($row->expire_date)) 
+                    //         : '<span class="text-danger">No expire</span>';
+                    // $productId .= '<div class="d-flex flex-column">
+                    //                 <a href="javascript:;" class="'.$textClass.' text-hover-primary mb-1">'
+                    //                 .$expireDate.
+                    //                 '</a>
+                    //              </div>';
                     
                     return $productId;
                 })
@@ -73,7 +73,25 @@ class Pro_purchase_detailssController extends Controller
                     return $expire_date;
                 })
                 ->addColumn('amount', function($row){
-                    $amount = number_format($row->amount, 2);
+                    $textClass = (!is_null($row->back_amount) && $row->back_amount > 0) 
+                                ? 'text-danger' 
+                                : 'text-gray-800';
+                    $amountq = number_format($row->amount, 2);
+                    $amount = '<div class="d-flex flex-column">
+                        <a href="javascript:;" class="'.$textClass.' text-hover-primary mb-1">'
+                        .$amountq.'
+                        </a>
+                        </div>';
+                    
+                    $expireDate = $row->expire_date 
+                    ? date('d-m-y', strtotime($row->expire_date)) 
+                    : '<span class="text-danger">No expire</span>';
+                    $amount .= '<div class="d-flex flex-column">
+                        <a href="javascript:;" class="'.$textClass.' text-hover-primary mb-1">'
+                        .$expireDate.
+                        '</a>
+                        </div>';
+                    
                     return $amount;
                 })
                 ->addColumn('bouns', function($row){
