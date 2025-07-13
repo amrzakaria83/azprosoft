@@ -63,7 +63,7 @@ class Pro_purchase_details extends SqlServerModel
     }
     public function getpurchase_h()
     {
-        return $this->belongsTo(Pro_purchase_header::class, 'purchase_id');
+        return $this->belongsTo(Pro_purchase_header::class, 'purchase_id','purchase_id');
     }
     
 }

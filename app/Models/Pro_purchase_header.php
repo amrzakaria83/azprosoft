@@ -64,6 +64,11 @@ class Pro_purchase_header extends SqlServerModel
         'rest',
         
     ];
+        // Add date casting for proper datetime handling
+        protected $casts = [
+            'purchase_date' => 'datetime:Y-m-d H:i:s.v',
+            'return_date' => 'datetime:Y-m-d H:i:s.v',
+        ];
     public function getstore()
     {
         return $this->belongsTo(Pro_store::class, 'store_id');

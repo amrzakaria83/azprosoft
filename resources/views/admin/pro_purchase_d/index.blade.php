@@ -126,7 +126,7 @@
                                     </div>
                                 </th>
                                 <th class="min-w-125px text-center">{{trans('lang.products')}}</th>
-                                <!-- <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th> -->
+                                <!-- <th class="min-w-125px text-center">{{trans('lang.id')}}</th> -->
                                 <th class="min-w-125px text-center">{{trans('lang.quantity')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.price')}} {{trans('lang.buying')}} {{trans('lang.unit')}} {{trans('lang.without')}} {{trans('lang.tax')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.supplier')}}</th>
@@ -221,11 +221,15 @@
         defaultDate: new Date().setDate(new Date().getDate() - 30),
         allowInput: true,           // Allow manual input
         enableTime: true,
+        // dateFormat: "Y-m-d H:i:s",
+
     });
     $("#kt_datepicker_2").flatpickr({
         defaultDate: new Date().setDate(new Date().getDate() + 1),
         allowInput: true,           // Allow manual input
         enableTime: true,
+        // dateFormat: "Y-m-d H:i:s",
+
 
     });
 </script>
@@ -261,14 +265,13 @@
                     d.vendor_id = $('#vendor_id').val(),
                     d.from_date = $('#kt_datepicker_1').val(),
                     d.to_date = $('#kt_datepicker_2').val(),
-                    
                     d.search = $('#search').val()
                 }
             },
             columns: [
                 {data: 'checkbox', name: 'checkbox'},
                 {data: 'product_id', name: 'product_id'},
-                // {data: 'expire_date', name: 'expire_date',orderable: true},
+                // {data: 'id_pur', name: 'id_pur'},
                 {data: 'amount', name: 'amount'},
                 {data: 'buy_price', name: 'buy_price'},
                 {data: 'purchase_id', name: 'purchase_id'},
@@ -294,6 +297,7 @@
         });
         $('#vendor_id,#kt_datepicker_1,#kt_datepicker_2').change(function() {
             table.draw();
+            
         });
 
         $('#submit').click(function(){

@@ -12,6 +12,7 @@ use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 
 use Validator;
@@ -21,12 +22,16 @@ class Pro_purchase_detailssController extends Controller
 
     public function index(Request $request)
     {
+        
         set_time_limit(3600);
         ini_set('max_execution_time', 4800);
         ini_set('memory_limit', '4096M');
         // Artisan::call('cache:clear');
         // Artisan::call('view:clear');
+        // Clear specific caches instead of all
+        // Cache::forget('purchase_details_cache');
         if ($request->ajax()) {
+            // dd($request->ajax());
             $data = Pro_purchase_details::with(['getprod','getpurchase_h']);
 
             return Datatables::of($data)
@@ -58,7 +63,6 @@ class Pro_purchase_detailssController extends Controller
                                     .$expireDate.
                                     '</a>
                                  </div>';
-                    
                     
                     return $productId;
                 })
@@ -102,8 +106,14 @@ class Pro_purchase_detailssController extends Controller
                     $purchase_id = $row->getpurchase_h->getvendor->vendor_name ?? $row->getpurchase_h->getvendor->vendor_name_en ?? 'No';
                     return $purchase_id;
                 })
+                ->addColumn('id_pur', function($row){
+                    $id_pur = $row->purchase_id;
+                    return $id_pur;
+                })
                 ->addColumn('valued_date', function($row){
-                    $valued_date = $row->getpurchase_h->purchase_date ?? 'No';
+                    $valued_date = 
+                     Carbon::parse($row->getpurchase_h->purchase_date)->format('d-m-Y H:i')
+                    ?? 'No';
                     return $valued_date;
                 })
                 ->addColumn('buy_tax', function($row){
@@ -122,16 +132,16 @@ class Pro_purchase_detailssController extends Controller
                     // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
                     //     $instance->where('is_active', $request->get('is_active'));
                     // }
-                    // if (!empty($request->get('from_date')) || !empty($request->get('to_date'))) {
-                    //     $instance->whereHas('getpurchase_h', function ($q) use ($request) {
-                    //         if (!empty($request->get('from_date'))) {
-                    //             $q->whereDate('purchase_date', '>=', Carbon::parse($request->get('from_date'))->startOfDay());
-                    //         }
-                    //         if (!empty($request->get('to_date'))) {
-                    //             $q->whereDate('purchase_date', '<=', Carbon::parse($request->get('to_date'))->endOfDay());
-                    //         }
-                    //     });
-                    // }
+                    if (!empty($request->get('from_date')) || !empty($request->get('to_date'))) {
+                        $instance->whereHas('getpurchase_h', function ($q) use ($request) {
+                            if (!empty($request->get('from_date'))) {
+                                $q->whereDate('purchase_date', '>=', Carbon::parse($request->get('from_date'))->startOfDay());
+                            }
+                            if (!empty($request->get('to_date'))) {
+                                $q->whereDate('purchase_date', '<=', Carbon::parse($request->get('to_date'))->endOfDay());
+                            }
+                        });
+                    }
                     // if ($request->filled('from_date') || $request->filled('to_date')) {
                     //     $instance->whereHas('getpurchase_h', function ($q) use ($request) {
                     //         if ($request->filled('from_date')) {
@@ -147,12 +157,12 @@ class Pro_purchase_detailssController extends Controller
                             $q->where('vendor_id', $request->get('vendor_id'));
                         });
                     }
-                    if ($request->get('emp_id') != Null)
-                    {
-                    $instance->where(function ($query) use ($request) {
-                        $query->where('emp_id', $request->get('emp_id'));
-                    });
-                    }
+                    // if ($request->get('emp_id') != Null)
+                    // {
+                    // $instance->where(function ($query) use ($request) {
+                    //     $query->where('emp_id', $request->get('emp_id'));
+                    // });
+                    // }
                     // Search logic
                     if (!empty($request->get('search'))) {
                         $search = $request->get('search'); // Define $search variable
@@ -173,7 +183,7 @@ class Pro_purchase_detailssController extends Controller
                     //     });
                     // }
                 })
-                ->rawColumns(['product_id','expire_date','amount','bouns','sell_price','buy_price','profit','tax','buy_tax','total_buy','back_amount','store_id','purchase_id','valued_date','checkbox','actions'])
+                ->rawColumns(['product_id','expire_date','amount','bouns','sell_price','id_pur','buy_price','profit','tax','buy_tax','total_buy','back_amount','store_id','purchase_id','valued_date','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.pro_purchase_d.index');
