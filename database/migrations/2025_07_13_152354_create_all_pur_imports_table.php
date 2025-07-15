@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pur_imports', function (Blueprint $table) {
+        Schema::create('all_pur_imports', function (Blueprint $table) {
             $table->id();
             $table->text('pro_emp_code');
             $table->string('product_id')->nullable();
@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('balance_req')->nullable();
             $table->string('note')->nullable();
             $table->tinyInteger('status')->default(0)->comment("0 = active - 1 = not active ");
+            $table->tinyInteger('status_request')->default(0)->comment('0 = waitting - 1 = pur_drug_requests');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pur_imports');
+        Schema::dropIfExists('all_pur_imports');
     }
 };

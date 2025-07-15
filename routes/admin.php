@@ -139,6 +139,29 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/update', 'Pro_productsController@update')->name('update');
             
         });
+        Route::name('store_pur_requests.')->prefix('store_pur_requests')->group(function(){
+            Route::get('/','Store_pur_requestsController@index')->name('index');
+            Route::get('/show/{id}','Store_pur_requestsController@show')->name('show');
+            Route::post('/delete', 'Store_pur_requestsController@destroy')->name('delete');
+            Route::get('/create','Store_pur_requestsController@create')->name('create');
+            Route::post('/store','Store_pur_requestsController@store')->name('store');
+            Route::get('/edit/{id}', 'Store_pur_requestsController@edit')->name('edit');
+            Route::post('/update', 'Store_pur_requestsController@update')->name('update');
+            Route::get('/ProdName','Store_pur_requestsController@ProdName')->name('ProdName');
+
+        });
+        Route::name('pur_imports.')->prefix('pur_imports')->group(function(){
+            Route::get('/','Pur_importsController@index')->name('index');
+            Route::get('/show/{id}','Pur_importsController@show')->name('show');
+            Route::post('/delete', 'Pur_importsController@destroy')->name('delete');
+            Route::get('/create','Pur_importsController@create')->name('create');
+            Route::post('/store','Pur_importsController@store')->name('store');
+            Route::post('/import','Pur_importsController@import')->name('import');
+            Route::get('/edit/{id}', 'Pur_importsController@edit')->name('edit');
+            Route::post('/update', 'Pur_importsController@update')->name('update');
+            Route::get('/ProdName','Pur_importsController@ProdName')->name('ProdName');
+
+        });
         Route::name('pro_purchase_hs.')->prefix('pro_purchase_hs')->group(function(){
             Route::get('/','Pro_purchase_headersController@index')->name('index');
             Route::get('/show/{id}','Pro_purchase_headersController@show')->name('show');
