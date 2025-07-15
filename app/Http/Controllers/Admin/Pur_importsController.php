@@ -134,7 +134,7 @@ class Pur_importsController extends Controller
         }
 
         DB::commit();
-        return redirect()->route('admin.pur_prod_imps.create')->with('success', 'Excel data imported successfully!');
+        return redirect('/admin')->with('success', 'Excel data imported successfully!');
 
     } catch (\Exception $e) {
         DB::rollBack();
@@ -144,7 +144,6 @@ class Pur_importsController extends Controller
 
     public function create()
     {
-        
         return view('admin.pur_import.create');
     }
     // public function create()
