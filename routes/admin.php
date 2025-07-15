@@ -160,7 +160,17 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/edit/{id}', 'Pur_importsController@edit')->name('edit');
             Route::post('/update', 'Pur_importsController@update')->name('update');
             Route::get('/ProdName','Pur_importsController@ProdName')->name('ProdName');
-
+        });
+        Route::name('pur_requests.')->prefix('pur_requests')->group(function(){
+            Route::get('/','Pur_requestsController@index')->name('index');
+            Route::get('/show/{id}','Pur_requestsController@show')->name('show');
+            Route::post('/delete', 'Pur_requestsController@destroy')->name('delete');
+            Route::get('/create','Pur_requestsController@create')->name('create');
+            Route::post('/store','Pur_requestsController@store')->name('store');
+            Route::post('/import','Pur_requestsController@import')->name('import');
+            Route::get('/edit/{id}', 'Pur_requestsController@edit')->name('edit');
+            Route::post('/update', 'Pur_requestsController@update')->name('update');
+            Route::get('/ProdName','Pur_requestsController@ProdName')->name('ProdName');
         });
         Route::name('pro_purchase_hs.')->prefix('pro_purchase_hs')->group(function(){
             Route::get('/','Pro_purchase_headersController@index')->name('index');

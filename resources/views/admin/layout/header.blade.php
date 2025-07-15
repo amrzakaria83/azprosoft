@@ -157,20 +157,20 @@
               </li>
               @endcan
               <li class="dropdown-submenu dropend">
-                <a class="dropdown-item dropdown-toggle py-3" href="#" id="employeesssDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
+                <a class="dropdown-item dropdown-toggle py-3" href="#" id="pur_requestsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,8">
                   <span class="menu-icon me-3">
                     <i class="fa-solid fa-sitemap"></i>
                   </span>
-                  <span class="menu-title fs-3">{{trans('lang.employees')}}</span>
+                  <span class="menu-title fs-3">{{trans('lang.requests')}}  {{trans('lang.purchases')}}</span>
                   <span class="menu-arrow"></span>
                 </a>
-                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="employeesssDropdown">
+                <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="pur_requestsDropdown">
                   <li>
-                    <a class="dropdown-item py-3" href="{{route('admin.emangeremps.index')}}">
+                    <a class="dropdown-item py-3" href="{{route('admin.pur_requests.index')}}">
                       <span class="menu-icon me-3">
                       <i class="fa-solid fa-users"></i>
                       </span>
-                      <span class="menu-title fs-3">{{trans('lang.all')}} {{trans('lang.employees')}}</span>
+                      <span class="menu-title fs-3">{{trans('lang.all')}} {{trans('lang.requests')}} {{trans('lang.purchases')}}</span>
                     </a>
                   </li>
                   <li>

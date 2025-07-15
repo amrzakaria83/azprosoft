@@ -12,14 +12,31 @@ use DataTables;
 use Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Bus; // Add this import
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Pur_requestsController extends Controller
 {
 
     public function index(Request $request)
     {
-        $data = Pur_request::get();
+        // Artisan::call('optimize:clear');
+        // Artisan::call('cache:clear');
+        // Artisan::call('view:clear');
+        // Artisan::call('config:clear');
+        $dataallpur = All_pur_import::where('status_request', 0)
+        ->select(['id','product_id','quantity'])
+        ->get();
 
+        $datastreq = Store_pur_request::where('status_request', 0)
+        ->select(['id','pro_prod_id','quantity'])
+        ->get();
+
+        $data = Pur_request::where('status_pur', 0)->get();
+
+        dd($datastreq);
         if ($request->ajax()) {
             $data = Pur_request::query();
             $data = $data->orderBy('id', 'DESC');
@@ -58,10 +75,10 @@ class Pur_requestsController extends Controller
                 })
                 ->addColumn('actions', function($row){
                     $actions = '<div class="ms-2">
-                                <a href="'.route('admin.vacation_causes.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                <a href="'.route('admin.pur_requests.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                                     <i class="bi bi-eye-fill fs-1x"></i>
                                 </a>
-                                <a href="'.route('admin.vacation_causes.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                <a href="'.route('admin.pur_requests.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                                     <i class="bi bi-pencil-square fs-1x"></i>
                                 </a>
                             </div>';
@@ -83,18 +100,18 @@ class Pur_requestsController extends Controller
                 ->rawColumns(['name_ar','name_en','description','note','status','checkbox','actions'])
                 ->make(true);
         }
-        return view('admin.vacation_cause.index');
+        return view('admin.pur_request.index');
     }
 
     public function show($id)
     {
         $data = Pur_request::find($id);
-        return view('admin.vacation_cause.show', compact('data'));
+        return view('admin.pur_request.show', compact('data'));
     }
 
     public function create()
     {
-        return view('admin.vacation_cause.create');
+        return view('admin.pur_request.create');
     }
 
     public function store(Request $request)
@@ -114,7 +131,7 @@ class Pur_requestsController extends Controller
             'note' => $request->note,
             'status' => $request->status ?? 0,
         ]);
-        return redirect('admin/vacation_causes')->with('message', 'Added successfully')->with('status', 'success');
+        return redirect('admin/pur_requests')->with('message', 'Added successfully')->with('status', 'success');
     }
     public function storemodel(Request $request)
     {
@@ -138,7 +155,7 @@ class Pur_requestsController extends Controller
     public function edit($id)
     {
         $data = Pur_request::find($id);
-        return view('admin.vacation_cause.edit', compact('data'));
+        return view('admin.pur_request.edit', compact('data'));
     }
 
     public function update(Request $request)
@@ -160,7 +177,7 @@ class Pur_requestsController extends Controller
             'status' => $request->status ?? 0,
         ]);
 
-        return redirect('admin/vacation_causes')->with('message', 'Modified successfully')->with('status', 'success');
+        return redirect('admin/pur_requests')->with('message', 'Modified successfully')->with('status', 'success');
     }
 
     public function destroy(Request $request)

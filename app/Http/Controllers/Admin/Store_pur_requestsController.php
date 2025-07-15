@@ -147,11 +147,11 @@ class Store_pur_requestsController extends Controller
         if($request->hasFile('attach') && $request->file('attach')->isValid()){
             $row->addMediaFromRequest('attach')->toMediaCollection('profile');
         }
-        $role = Role::find($request->role_id);
-        $row->syncRoles([]);
-        $row->assignRole($role->name);
+        // $role = Role::find($request->role_id);
+        // $row->syncRoles([]);
+        // $row->assignRole($role->name);
 
-        return redirect('admin/store_pur_requests')->with('message', 'تم الاضافة بنجاح')->with('status', 'success');
+        return redirect()->back()->with('message', 'تم الاضافة بنجاح')->with('status', 'success');
     }
     public function show($id)
     {
