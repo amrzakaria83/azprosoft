@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('work_locations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('emp_id');
+            $table->unsignedBigInteger('emp_id')->nullable();
             $table->foreign('emp_id')
                     ->references('id')->on('employees')->onDelete('cascade')->comment('emp_add');
             $table->text('name_en')->nullable();
@@ -29,7 +29,7 @@ return new class extends Migration
         DB::table('work_locations')->insert([
             [
                 'id' => 1,
-                'emp_id' => 1,
+                'emp_id' => NULL,
                 'name_en' => 'amr zakaria ph',
                 'name_ar' => 'ص عمرو زكريا',
                 'status' => 0,
@@ -40,7 +40,7 @@ return new class extends Migration
             ],
             [
                 'id' => 2,
-                'emp_id' => 1,
+                'emp_id' => NULL,
                 'name_en' => 'amr zakaria gaballah ph',
                 'name_ar' => 'ص عمرو زكريا جاب الله',
                 'status' => 0,

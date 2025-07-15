@@ -27,7 +27,7 @@ return new class extends Migration
         DB::table('vacation_causes')->insert([
             [
                 'id' => 1,
-                'emp_id' => 1,
+                'emp_id' => null,
                 'name_en' => 'General',
                 'name_ar' => 'عادية',
                 'status' => 0,
@@ -38,7 +38,7 @@ return new class extends Migration
             ],
             [
                 'id' => 2,
-                'emp_id' => 1,
+                'emp_id' => null,
                 'name_en' => 'Sick Leave',
                 'name_ar' => 'اجازة مرضى',
                 'status' => 0,
