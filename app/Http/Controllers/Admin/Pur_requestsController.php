@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\Pur_request;
 use App\Models\All_pur_import;
+use App\Models\Store_pur_request;
 use DataTables;
 use Validator;
 use Carbon\Carbon;

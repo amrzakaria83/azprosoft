@@ -93,7 +93,11 @@ return [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_CASE => PDO::CASE_NATURAL,
                 PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true
-            ]
+            ],
+             'retries' => [
+                    'max' => env('DB_SQLSRV_RETRIES', 3), // Max reconnection attempts
+                    'delay' => 2000, // Delay between attempts in milliseconds
+                ],
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
