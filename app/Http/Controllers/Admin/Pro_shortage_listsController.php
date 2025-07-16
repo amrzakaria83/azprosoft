@@ -21,191 +21,197 @@ use Auth;
 class Pro_shortage_listsController extends Controller
 {
 
-    // public function index(Request $request)
-    // {
-
-    //     Artisan::call('optimize:clear');
-    //     Artisan::call('cache:clear');
-    //     Artisan::call('view:clear');
-    //     Artisan::call('config:clear');
-        
-    //     if ($request->ajax()) {
-            
-    //         $data = Pro_shortage_list::with(['getprod','getstore']);
-
-    //         return Datatables::of($data)
-    //             ->order(function ($query) {
-    //                     $query->orderBy('id', 'DESC');
-    //                 })
-    //             ->addColumn('checkbox', function($row){
-    //                 $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
-    //                                 <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
-    //                             </div>';
-    //                 return $checkbox;
-    //             })
-    //             ->addColumn('product_id', function($row){
-    //                 $product_id = '<div class="d-flex flex-column">
-    //                 <a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->getprod->product_name_en ?? $row->getprod->product_name.'</a></div>';
-    //                 return $product_id;
-    //             })
-    //             ->addColumn('store_id', function($row){
-    //                 $store_id = $row->getstore->store_name;
-    //                 return $store_id;
-    //             })
-    //             ->addColumn('balance', function($row){
-    //                 $balance = Pro_prod_amount::where([
-    //                     ['product_id', $row->getprod->product_id],
-    //                     ['prod_amount', '>', 0]
-    //                 ])->sum('prod_amount') ?? 0;
-
-    //                 return $balance;
-    //             })
-    //             ->addColumn('from_note', function($row){
-    //                 $from_note = $row->from_note;
-    //                 return $from_note;
-    //             })
-    //             ->addColumn('expire_date', function($row){
-    //                 $expire_date = $row->expire_date 
-    //                 ? date('d-m-y', strtotime($row->expire_date)) 
-    //                 : '<span class="text-danger">No expire</span>';;
-    //                 return $expire_date;
-    //             })
-    //             ->addColumn('ins_date', function($row){
-    //                 $ins_date = $row->ins_date ?? '<span class="text-danger">No date</span>';
-    //                 return $ins_date;
-    //             })
-    //             ->addColumn('emp_id', function($row){
-    //                 $emp_id = $row->getemp_id->emp_name ?? $row->getemp_id->emp_name_en ?? '' ;
-    //                 return $emp_id;
-    //             })
-                
-    //             ->addColumn('old_amount', function($row){
-    //                 $old_amount = number_format($row->old_amount,2);
-    //                 return $old_amount;
-    //             })
-    //             ->addColumn('new_amount', function($row){
-    //                 $new_amount = '<span class="text-info">'.number_format($row->new_amount,2).'</span';
-    //                 return $new_amount;
-    //             })
-    //             // ->addColumn('actions', function($row){
-    //             //     $actions = '<div class="ms-2">
-    //             //                 <a href="'.route('admin.pro_shortage_lists.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-    //             //                     <i class="bi bi-eye-fill fs-1x"></i>
-    //             //                 </a>
-    //             //                 <a href="'.route('admin.pro_shortage_lists.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-    //             //                     <i class="bi bi-pencil-square fs-1x"></i>
-    //             //                 </a>
-    //             //             </div>';
-    //             //     return $actions;
-    //             // })
-    //             ->filter(function ($instance) use ($request) {
-    //                 // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
-    //                 //     $instance->where('is_active', $request->get('is_active'));
-    //                 // }
-
-    //                 if ($request->get('store_id') != Null)
-    //                 {
-    //                 $instance->where(function ($query) use ($request) {
-    //                     $query->where('store_id', $request->get('store_id'));
-    //                 });
-    //                 }
-                    
-    //                 if ($request->get('emp_id') != Null)
-    //                 {
-    //                 $instance->where(function ($query) use ($request) {
-    //                     $query->where('emp_id', $request->get('emp_id'));
-    //                 });
-    //                 }
-    //                 // Search logic
-    //                 if (!empty($request->get('search'))) {
-    //                     $search = $request->get('search'); // Define $search variable
-    //                     $instance->whereHas('getprod', function ($q) use ($search) {
-    //                         $q->where(function ($query) use ($search) {
-    //                             $query->orWhere('product_name_en', 'LIKE', "%$search%")
-    //                                 ->orWhere('product_name', 'LIKE', "%$search%")
-    //                                 ->orWhere('product_id', 'LIKE', "%$search%"); // additional field
-    //                         });
-    //                     });
-    //                 }
-
-    //             })
-    //             ->rawColumns(['product_id','store_id','balance','from_note','expire_date','ins_date','old_amount','emp_id','new_amount','checkbox','actions'])
-    //             ->make(true);
-    //     }
-    //     return view('admin.pro_shortage_list.index');
-    // }
     public function index(Request $request)
-{
-    Artisan::call('optimize:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('view:clear');
-    Artisan::call('config:clear');
-    
-    if ($request->ajax()) {
-        // Group by product_id and get sum of amounts
-        $data = Pro_shortage_list::with(['getprod', 'getstore'])
-            ->selectRaw('product_id, store_id, insert_uid, SUM(amount) as total_amount')
-            ->groupBy('product_id', 'store_id', 'insert_uid');
-        
-        return Datatables::of($data)
-            ->order(function ($query) {
-                $query->orderBy('product_id', 'DESC');
-            })
-            ->addColumn('checkbox', function($row){
-                $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
-                                <input class="form-check-input" type="checkbox" value="'.$row->product_id.'" />
-                            </div>';
-                return $checkbox;
-            })
-            ->addColumn('product_id', function($row){
-                $product_id = '<div class="d-flex flex-column">
-                <a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->getprod->product_name_en ?? $row->getprod->product_name.'</a></div>';
-                return $product_id;
-            })
-            ->addColumn('store_id', function($row){
-                $store_id = $row->getstore->store_name ?? '';
-                return $store_id;
-            })
-            ->addColumn('balance', function($row){
-                $balance = Pro_prod_amount::where([
-                    ['product_id', $row->product_id],
-                    ['prod_amount', '>', 0]
-                ])->sum('prod_amount') ?? 0;
+    {
 
-                return $balance;
-            })
-            ->addColumn('amount', function($row){
-                return number_format($row->total_amount, 2);
-            })
-            ->addColumn('emp_id', function($row){
-                $emp_id = $row->getemp_id->emp_name ?? $row->getemp_id->emp_name_en ?? '' ;
-                return $emp_id;
-            })
-            ->filter(function ($instance) use ($request) {
-                if ($request->get('store_id') != Null) {
-                    $instance->where('store_id', $request->get('store_id'));
-                }
+        Artisan::call('optimize:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
+        Artisan::call('config:clear');
+        
+        if ($request->ajax()) {
+            
+            $data = Pro_shortage_list::with(['getprod','getstore']);
+
+            return Datatables::of($data)
+                ->order(function ($query) {
+                        $query->orderBy('id', 'DESC');
+                    })
+                ->addColumn('checkbox', function($row){
+                    $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
+                                    <input class="form-check-input" type="checkbox" value="'.$row->id.'" />
+                                </div>';
+                    return $checkbox;
+                })
+                ->addColumn('product_id', function($row){
+                    $product_id = '<div class="d-flex flex-column">
+                    <a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->getprod->product_name_en ?? $row->getprod->product_name.'</a></div>';
+                    return $product_id;
+                })
+                ->addColumn('store_id', function($row){
+                    $store_id = $row->getstore->store_name;
+                    return $store_id;
+                })
+                ->addColumn('balance', function($row){
+                    $balance = Pro_prod_amount::where([
+                        ['product_id', $row->getprod->product_id],
+                        ['prod_amount', '>', 0]
+                    ])->sum('prod_amount') ?? 0;
+
+                    return $balance;
+                })
+                ->addColumn('sell_price', function($row){
+                    $sell_price = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'
+                    .$row->getprod->sell_price ?? 'Unknowen'.'</a><div>';
+
+                    return $sell_price;
+                })
+                ->addColumn('from_note', function($row){
+                    $from_note = $row->from_note;
+                    return $from_note;
+                })
+                ->addColumn('expire_date', function($row){
+                    $expire_date = $row->expire_date 
+                    ? date('d-m-y', strtotime($row->expire_date)) 
+                    : '<span class="text-danger">No expire</span>';;
+                    return $expire_date;
+                })
+                ->addColumn('ins_date', function($row){
+                    $ins_date = $row->ins_date ?? '<span class="text-danger">No date</span>';
+                    return $ins_date;
+                })
+                ->addColumn('emp_id', function($row){
+                    $emp_id = $row->getemp_id->emp_name ?? $row->getemp_id->emp_name_en ?? '' ;
+                    return $emp_id;
+                })
                 
-                if ($request->get('emp_id') != Null) {
-                    $instance->where('insert_uid', $request->get('emp_id'));
-                }
-                
-                if (!empty($request->get('search'))) {
-                    $search = $request->get('search');
-                    $instance->whereHas('getprod', function ($q) use ($search) {
-                        $q->where(function ($query) use ($search) {
-                            $query->orWhere('product_name_en', 'LIKE', "%$search%")
-                                ->orWhere('product_name', 'LIKE', "%$search%")
-                                ->orWhere('product_id', 'LIKE', "%$search%");
-                        });
+                ->addColumn('old_amount', function($row){
+                    $old_amount = number_format($row->old_amount,2);
+                    return $old_amount;
+                })
+                ->addColumn('new_amount', function($row){
+                    $new_amount = '<span class="text-info">'.number_format($row->new_amount,2).'</span';
+                    return $new_amount;
+                })
+                // ->addColumn('actions', function($row){
+                //     $actions = '<div class="ms-2">
+                //                 <a href="'.route('admin.pro_shortage_lists.show', $row->id).'" class="btn btn-sm btn-icon btn-warning btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                //                     <i class="bi bi-eye-fill fs-1x"></i>
+                //                 </a>
+                //                 <a href="'.route('admin.pro_shortage_lists.edit', $row->id).'" class="btn btn-sm btn-icon btn-info btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                //                     <i class="bi bi-pencil-square fs-1x"></i>
+                //                 </a>
+                //             </div>';
+                //     return $actions;
+                // })
+                ->filter(function ($instance) use ($request) {
+                    // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
+                    //     $instance->where('is_active', $request->get('is_active'));
+                    // }
+
+                    if ($request->get('store_id') != Null)
+                    {
+                    $instance->where(function ($query) use ($request) {
+                        $query->where('store_id', $request->get('store_id'));
                     });
-                }
-            })
-            ->rawColumns(['product_id', 'checkbox'])
-            ->make(true);
+                    }
+                    
+                    if ($request->get('emp_id') != Null)
+                    {
+                    $instance->where(function ($query) use ($request) {
+                        $query->where('emp_id', $request->get('emp_id'));
+                    });
+                    }
+                    // Search logic
+                    if (!empty($request->get('search'))) {
+                        $search = $request->get('search'); // Define $search variable
+                        $instance->whereHas('getprod', function ($q) use ($search) {
+                            $q->where(function ($query) use ($search) {
+                                $query->orWhere('product_name_en', 'LIKE', "%$search%")
+                                    ->orWhere('product_name', 'LIKE', "%$search%")
+                                    ->orWhere('product_id', 'LIKE', "%$search%"); // additional field
+                            });
+                        });
+                    }
+
+                })
+                ->rawColumns(['product_id','store_id','balance','from_note','sell_price','ins_date','old_amount','emp_id','new_amount','checkbox','actions'])
+                ->make(true);
+        }
+        return view('admin.pro_shortage_list.index');
     }
-    return view('admin.pro_shortage_list.index');
-}
+//     public function index(Request $request)
+// {
+//     Artisan::call('optimize:clear');
+//     Artisan::call('cache:clear');
+//     Artisan::call('view:clear');
+//     Artisan::call('config:clear');
+    
+//     if ($request->ajax()) {
+//         // Group by product_id and get sum of amounts
+//         $data = Pro_shortage_list::with(['getprod', 'getstore'])
+//             ->selectRaw('product_id, store_id, insert_uid, SUM(amount) as total_amount');
+//             // ->groupBy('product_id', 'store_id', 'insert_uid');
+        
+//         return Datatables::of($data)
+//             ->order(function ($query) {
+//                 $query->orderBy('product_id', 'DESC');
+//             })
+//             ->addColumn('checkbox', function($row){
+//                 $checkbox = '<div class="form-check form-check-sm p-3 form-check-custom form-check-solid">
+//                                 <input class="form-check-input" type="checkbox" value="'.$row->product_id.'" />
+//                             </div>';
+//                 return $checkbox;
+//             })
+//             ->addColumn('product_id', function($row){
+//                 $product_id = '<div class="d-flex flex-column">
+//                 <a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->getprod ? $row->getprod->product_name_en : 'N/A'.'</a></div>';
+//                 return $product_id;
+//             })
+//             ->addColumn('store_id', function($row){
+//                 $store_id = $row->getstore->store_name ?? '';
+//                 return $store_id;
+//             })
+//             ->addColumn('balance', function($row){
+//                 $balance = Pro_prod_amount::where([
+//                     ['product_id', $row->product_id],
+//                     ['prod_amount', '>', 0]
+//                 ])->sum('prod_amount') ?? 0;
+
+//                 return $balance;
+//             })
+//             ->addColumn('amount', function($row){
+//                 return number_format($row->total_amount, 2);
+//             })
+//             ->addColumn('emp_id', function($row){
+//                 $emp_id = $row->getemp_id->emp_name ?? $row->getemp_id->emp_name_en ?? '' ;
+//                 return $emp_id;
+//             })
+//             ->filter(function ($instance) use ($request) {
+//                 if ($request->get('store_id') != Null) {
+//                     $instance->where('store_id', $request->get('store_id'));
+//                 }
+                
+//                 if ($request->get('emp_id') != Null) {
+//                     $instance->where('insert_uid', $request->get('emp_id'));
+//                 }
+                
+//                 if (!empty($request->get('search'))) {
+//                     $search = $request->get('search');
+//                     $instance->whereHas('getprod', function ($q) use ($search) {
+//                         $q->where(function ($query) use ($search) {
+//                             $query->orWhere('product_name_en', 'LIKE', "%$search%")
+//                                 ->orWhere('product_name', 'LIKE', "%$search%")
+//                                 ->orWhere('product_id', 'LIKE', "%$search%");
+//                         });
+//                     });
+//                 }
+//             })
+//             ->rawColumns(['product_id', 'store_id','balance','checkbox'])
+//             ->make(true);
+//     }
+//     return view('admin.pro_shortage_list.index');
+// }
 
     public function create()
     {

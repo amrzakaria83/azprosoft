@@ -173,6 +173,7 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/updaterequest','Pur_requestsController@updaterequest')->name('updaterequest');
             Route::get('/pur_done/{id?}/{suppl_id?}','Pur_requestsController@pur_done')->name('pur_done');
             Route::get('/pur_unavilable/{id?}/{suppl_id?}','Pur_requestsController@pur_unavilable')->name('pur_unavilable');
+            Route::get('/pur_some_done/{id?}/{suppl_id?}/{quantity?}','Pur_requestsController@pur_some_done')->name('pur_some_done');
         });
         Route::name('pro_purchase_hs.')->prefix('pro_purchase_hs')->group(function(){
             Route::get('/','Pro_purchase_headersController@index')->name('index');

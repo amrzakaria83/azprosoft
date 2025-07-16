@@ -128,7 +128,8 @@
                                 </th>
                                 <th class="min-w-125px text-center">{{trans('lang.products')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.store')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.balance')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.total')}} {{trans('lang.balance')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.sell_price')}}</th>
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.balance')}}</th> -->
 
                             </tr>
@@ -251,7 +252,7 @@
             ajax: {
                 url: "{{ route('admin.pro_shortage_lists.index') }}",
                 data: function (d) {
-                    d.store_id = $('#store_id').val(),
+                    // d.store_id = $('#store_id').val(),
                     d.from_date = $('#kt_datepicker_1').val(),
                     d.to_date = $('#kt_datepicker_2').val(),
                     
@@ -263,7 +264,7 @@
                 {data: 'product_id', name: 'product_id'},
                 {data: 'store_id', name: 'store_id'},
                 {data: 'balance', name: 'balance'},
-                // {data: 'amount', name: 'amount'},
+                {data: 'sell_price', name: 'sell_price'},
                 // {data: 'ins_date', name: 'ins_date'},
                 // {data: 'emp_id', name: 'emp_id'},
                 // {data: 'old_amount', name: 'old_amount'},

@@ -79,7 +79,7 @@ class Pur_requestsController extends Controller
                 ->addColumn('reqquantity', function($row){
                     $display_quantity = $row->quantity ?? 1; // Default to current row's quantity
 
-                    $reqquantity =  '<div ><input type="number" id="'.$row->id.'" class="text-center" name="reqquantity" value="'.$display_quantity.'" /></div>';
+                    $reqquantity =  '<div ><input type="number" id="'.$row->id.'" class="text-center" name="reqquantity" value="'.$display_quantity.'" max="'.$display_quantity.'" /></div>';
                     return $reqquantity;
                 })
                 ->addColumn('sell_price', function($row){
@@ -533,5 +533,79 @@ class Pur_requestsController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Modified successfully']);
 
        
+    }
+    public function pur_some_done($id, $suppl_id, $quantity)
+    {
+        DB::beginTransaction();
+        
+        try {
+            $databefor = Pur_request::find($id);
+            
+            if (!$databefor) {
+                return response()->json(['status' => 'error', 'message' => 'Request not found.'], 404);
+            }
+
+            // Validate the requested quantity doesn't exceed original quantity
+            if ($quantity > $databefor->quantity) {
+                return response()->json([
+                    'status' => 'error', 
+                    'message' => 'Requested quantity cannot exceed original quantity.'
+                ], 400);
+            }
+
+            // Process partial completion
+            if ($quantity < $databefor->quantity) {
+                // Create a new request for the remaining quantity
+                $remainingQuantity = $databefor->quantity - $quantity;
+                
+                $newRequest = Pur_request::create([
+                    'pro_emp_code' => Auth::guard('admin')->user()->id,
+                    'pro_prod_id' => $databefor->pro_prod_id,
+                    'suppl_id' => $suppl_id,
+                    'quantity' => $remainingQuantity,
+                    'status_pur' => 0, // Keep as pending
+                    'status' => $databefor->status,
+                    'note' => $databefor->note,
+                    'table_name_id' => $databefor->table_name_id,
+                    // Copy other relevant fields
+                ]);
+
+                // Update the original request with the completed quantity
+                $databefor->update([
+                    'quantity' => $quantity,
+                    'status_pur' => 2, // 2 = some_done
+                    'status' => 8,
+                ]);
+            } else {
+                // Full quantity completed
+                $databefor->update([
+                    'status_pur' => 1, // 1 = done
+                    'status' => 1,
+                ]);
+            }
+
+            // Process the table_name_id JSON
+            $this->processTableNameId($databefor->table_name_id);
+
+            // Create transaction record
+            $this->createPurTransaction($databefor);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success', 
+                'message' => 'Request processed successfully.',
+                'remaining_quantity' => isset($remainingQuantity) ? $remainingQuantity : 0
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Purchase partial completion failed: ' . $e->getMessage());
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to process request: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

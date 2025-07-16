@@ -440,4 +440,57 @@
         }
 
     </script>
+    <script>
+        function pur_some_done(id) {
+            const suppl_id = $("#vendor_id").val(); // Corrected selector for ID
+            const quantity = $('#' + id).val(); // Correctly select the input by its ID
+            if (!suppl_id) {
+                toastr.error("{{ trans('lang.error') }}", "{{ trans('validation.attributes.suppliers') }} {{ trans('validation.required') }}");
+                return;
+            }
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax(
+                {
+                    url: "{{ route('admin.pur_requests.pur_some_done') }}/" + id+'/'+suppl_id+'/'+quantity,
+                    type: 'GET',
+                    dataType: 'json',
+                    headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                    // data: {
+                    //     // "id": checkIDs,
+                    //     "_method": 'GET',
+                        
+                    // },
+                    delay: 250,
+                    cache: true, // Consider caching behavior
+                    success: function (response) {
+                        if(response.status === 'success'){
+                            toastr.success("{{ trans('lang.message') }}", response.message);
+                            // $('#kt_datatable_table').DataTable().draw(false); // Refresh DataTable
+                            const action_div = document.getElementById('div'+id); // Use the function's id parameter
+                            if (action_div) action_div.style.display = 'none';
+                            const action_input = document.getElementById(id); // Use the function's id parameter
+                            if (action_input) {
+                                action_input.style.backgroundColor = '#5BD15BFF'; // Corrected: camelCase and string for color
+                                action_input.disabled = true;
+                            }
+                        } else {
+                            toastr.error("{{ trans('lang.error') }}", response.message || "{{ trans('lang.error') }}");
+                        }
+                    },
+                    error: function(xhr, status, error){
+                        // console.error("AJAX Error: ", status, error, xhr.responseText);
+                        toastr.error("{{ trans('lang.error') }}", "{{ trans('lang.error') }}");
+
+                    }
+                });
+
+        }
+
+    </script>
 @endsection

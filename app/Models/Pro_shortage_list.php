@@ -51,7 +51,7 @@ class Pro_shortage_list extends SqlServerModel
     ];
     public function getprod()
     {
-        return $this->belongsTo(Pro_product::class, 'product_id');
+        return $this->belongsTo(Pro_product::class, 'product_id', 'product_id');
     }
     public function getstore()
     {
