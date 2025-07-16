@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pur_requests', function (Blueprint $table) {
+        Schema::create('pur_trans', function (Blueprint $table) {
             $table->id();
             $table->text('pro_emp_code')->nullable();
-            $table->json('table_name_id')->nullable()->comment('0 =  all_pur_imports - 1 = store_pur_requests - 2 = unknowen');
+            $table->unsignedBigInteger('id_in_pur_requests')->nullable();
             $table->text('pro_prod_id')->nullable();
+            $table->text('pro_vendor_id')->nullable();
             $table->text('note')->nullable();
             $table->text('quantity')->nullable();
-            $table->tinyInteger('status')->default(0)->comment('0 =  Pending - 1 = Requested - 2 = Arrived at the pharmacy -
-             3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase - 7 = done - 8 = updated');
-            $table->tinyInteger('status_pur')->default(0)->nullable()->comment('0 =  Pending - 1 = done - 2 = some_done - 3 = cancell_all');
+            $table->tinyInteger('type_action')->default(0)->comment('0 = done_pur - 1 = unavilable - 2 = cancell_pur - 3 = some_pur - 4 = udatequnt');
+            $table->text('quantity_befor')->nullable();
+            $table->text('quantity_after')->nullable();
+            $table->tinyInteger('status')->default(0)->comment("0 = active - 1 = not active ");
             $table->softDeletes();
             $table->timestamps();
         });
@@ -31,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pur_requests');
+        Schema::dropIfExists('pur_trans');
     }
 };

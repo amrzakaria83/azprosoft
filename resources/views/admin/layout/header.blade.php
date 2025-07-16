@@ -166,6 +166,14 @@
                 </a>
                 <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="pur_requestsDropdown">
                   <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pur_requests.updaterequest')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.to_update')}} {{trans('lang.requests')}} {{trans('lang.purchases')}}</span>
+                    </a>
+                  </li>
+                  <li>
                     <a class="dropdown-item py-3" href="{{route('admin.pur_requests.index')}}">
                       <span class="menu-icon me-3">
                       <i class="fa-solid fa-users"></i>

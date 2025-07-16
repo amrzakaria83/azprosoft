@@ -170,7 +170,8 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/import','Pur_requestsController@import')->name('import');
             Route::get('/edit/{id}', 'Pur_requestsController@edit')->name('edit');
             Route::post('/update', 'Pur_requestsController@update')->name('update');
-            Route::get('/ProdName','Pur_requestsController@ProdName')->name('ProdName');
+            Route::get('/updaterequest','Pur_requestsController@updaterequest')->name('updaterequest');
+            Route::get('/pur_done/{id?}/{suppl_id?}','Pur_requestsController@pur_done')->name('pur_done');
         });
         Route::name('pro_purchase_hs.')->prefix('pro_purchase_hs')->group(function(){
             Route::get('/','Pro_purchase_headersController@index')->name('index');

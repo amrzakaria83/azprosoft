@@ -3,6 +3,8 @@
 @section('css')
     <link href="{{asset('dash/assets/plugins/custom/datatables/datatables.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('dash/assets/plugins/custom/datatables/buttons.bootstrap4.min.css')}}" rel="stylesheet" type="text/css" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
 @endsection
 
 @section('style')
@@ -69,28 +71,15 @@
                 <!--begin::Card body-->
                 <div class="card-body py-4">
                     <div class="row mb-6">
-                        <div class="col-sm-2">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.transfer_from')}} {{trans('lang.store')}}</label>
+                        <div class="col-sm-4">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.supplier')}}</label>
                             <div class="col-sm-12 fv-row">
                             <select data-placeholder="Select an option" class="input-text form-control form-select mb-3 mb-lg-0 text-center" 
-                                name="store_id" 
-                                id="store_id"  data-control="select2">
+                                name="vendor_id" 
+                                id="vendor_id"  data-control="select2">
                                 <option value="">Select an option</option>
-                                    @foreach (\App\Models\Pro_store::active()->get() as $store)
-                                        <option value="{{ $store->store_id }}" >{{ $store->store_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-sm-2">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.transfer_to')}} {{trans('lang.store')}}</label>
-                            <div class="col-sm-12 fv-row">
-                            <select data-placeholder="Select an option" class="input-text form-control form-select mb-3 mb-lg-0 text-center" 
-                                name="to_store_id" 
-                                id="to_store_id"  data-control="select2">
-                                <option value="">Select an option</option>
-                                    @foreach (\App\Models\Pro_store::active()->get() as $store)
-                                        <option value="{{ $store->store_id }}" >{{ $store->store_name }}</option>
+                                    @foreach (\App\Models\Pro_vendor::get() as $store)
+                                        <option value="{{ $store->vendor_id }}" >{{ $store->vendor_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -128,6 +117,7 @@
                         </div>
                     </div>
                     
+                    
                     <!--begin::Table-->
                     <table class="table align-middle table-rounded table-striped table-row-dashed fs-6" id="kt_datatable_table">
                         <!--begin::Table head-->
@@ -139,15 +129,18 @@
                                         <input class="form-check-input" type="checkbox" data-kt-check="true" data-kt-check-target="#kt_datatable_table .form-check-input" value="1" />
                                     </div>
                                 </th>
-                                <th class="min-w-125px text-center">{{trans('lang.numb')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.products')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.quantity')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.requested')}}</th>
+                                <th class="min-w-200px text-center">{{trans('lang.action')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.created_at')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.balance')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.sell_price')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.factory')}}</th>
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th> -->
-                                <th class="min-w-125px text-center">{{trans('lang.transfer_from')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.transfer_to')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.valued_date')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.transfer_from')}} {{trans('lang.employee')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.transfer_to')}} {{trans('lang.employee')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.value')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.note')}}</th>
+                                <!-- <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th> -->
+                                <!-- <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th> -->
+                                
                                 
                             </tr>
                             <!--end::Table row-->
@@ -267,10 +260,9 @@
                 //{extend: 'colvis', className: 'btn secondary', text: 'إظهار / إخفاء الأعمدة '}
             ],
             ajax: {
-                url: "{{ route('admin.store_pur_requests.index') }}",
+                url: "{{ route('admin.pur_requests.index') }}",
                 data: function (d) {
-                    d.store_id = $('#store_id').val(),
-                    d.to_store_id = $('#to_store_id').val(),
+                    
                     d.from_date = $('#kt_datepicker_1').val(),
                     d.to_date = $('#kt_datepicker_2').val(),
                     
@@ -279,14 +271,14 @@
             },
             columns: [
                 {data: 'checkbox', name: 'checkbox'},
-                {data: 'sales_id', name: 'sales_id'},
-                {data: 'store_id', name: 'store_id'},
-                {data: 'to_store_id', name: 'to_store_id'},
-                {data: 'date', name: 'date'},
-                {data: 'emp_id', name: 'emp_id'},
-                {data: 'r_emp_id', name: 'r_emp_id'},
-                {data: 'inv_total', name: 'inv_total'},
-                {data: 'note', name: 'note'},
+                {data: 'name_ar', name: 'name_ar'},
+                {data: 'quantity', name: 'quantity'},
+                {data: 'reqquantity', name: 'reqquantity'},
+                {data: 'actions', name: 'actions'},
+                {data: 'created_at', name: 'created_at'},
+                {data: 'balance', name: 'balance'},
+                {data: 'sell_price', name: 'sell_price'},
+                {data: 'factory_name', name: 'factory_name'},
                 // {data: 'new_amount', name: 'new_amount'},
                 // {data: 'expire_date', name: 'expire_date'},
                 // {data: 'total_buy', name: 'total_buy'},
@@ -325,7 +317,7 @@
             confirmButtonText: 'موافق',cancelButtonText: 'لا'}).then(function (isConfirm) {
                 if (isConfirm.value) {
             $.ajax({
-                url: "{{route('admin.store_pur_requests.delete')}}",
+                url: "{{route('admin.pur_requests.delete')}}",
                 type: 'post',
                 dataType: "JSON",
                 data: {
@@ -345,5 +337,55 @@
 
             }});
     });
+</script>
+<script>
+    function pur_done(id) {
+        const suppl_id = $("#vendor_id").val(); // Corrected selector for ID
+        console.log(suppl_id);
+        if (!suppl_id) {
+            toastr.error("{{ trans('lang.error') }}", "{{ trans('validation.attributes.suppliers') }} {{ trans('validation.required') }}");
+            return;
+        }
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        $.ajax(
+        {
+            url: "{{ route('admin.pur_requests.pur_done') }}/" + id+'/'+suppl_id,
+            type: 'GET',
+            dataType: 'json',
+            headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+            // data: {
+            //     // "id": checkIDs,
+            //     "_method": 'GET',
+                
+            // },
+            delay: 250,
+            cache: true, // Consider caching behavior
+            success: function (response) {
+                if(response.status === 'success'){
+                    toastr.success("{{ trans('lang.message') }}", response.message);
+                    // $('#kt_datatable_table').DataTable().draw(false); // Refresh DataTable
+                    const action_div = document.getElementById('div'+id); // Use the function's id parameter
+                    if (action_div) action_div.style.display = 'none';
+                    const action_input = document.getElementById(id); // Use the function's id parameter
+                    if (action_input) {
+                        action_input.style.backgroundColor = '#5BD15BFF'; // Corrected: camelCase and string for color
+                        action_input.disabled = true;
+                    }
+                } else {
+                    toastr.error("{{ trans('lang.error') }}", response.message || "{{ trans('lang.error') }}");
+                }
+            },
+            error: function(xhr, status, error){
+                // console.error("AJAX Error: ", status, error, xhr.responseText);
+                toastr.error("{{ trans('lang.error') }}", "{{ trans('lang.error') }}");
+            }
+        });
+        }
 </script>
 @endsection

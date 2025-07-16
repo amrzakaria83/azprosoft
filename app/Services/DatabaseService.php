@@ -25,17 +25,23 @@ class DatabaseService
             try {
                 return $callback();
             } catch (QueryException | PDOException $e) {
-                if (str_contains($e->getMessage(), 'The wait operation timed out')) {
+                if ($this->shouldRetry($e)) {
                     $attempts++;
                     if ($attempts >= $this->maxRetries) {
                         throw $e;
                     }
-                    usleep($this->retryDelay * 1000);
-                    DB::reconnect();
+                    usleep($this->retryDelay * 1000); // Convert to microseconds
+                    DB::reconnect('sqlsrv');
                     continue;
                 }
                 throw $e;
             }
         }
+    }
+
+    protected function shouldRetry($exception): bool
+    {
+        return str_contains($exception->getMessage(), 'The wait operation timed out') ||
+               str_contains($exception->getMessage(), 'Login failed');
     }
 }

@@ -98,6 +98,10 @@ return [
                     'max' => env('DB_SQLSRV_RETRIES', 3), // Max reconnection attempts
                     'delay' => 2000, // Delay between attempts in milliseconds
                 ],
+                    // Add these for better connection handling
+                'pooling' => true,
+                'connection_pooling' => 1,
+                'appname' => 'Laravel', // Helps identify connections in SQL Server
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],

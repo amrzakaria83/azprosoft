@@ -6,22 +6,29 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Pur_request extends Model
+class Pur_trans extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'pro_emp_code', 
-        'table_name_id', // 0 =  all_pur_imports - 1 = store_pur_requests - 2 = unknowen (json)
+        'id_in_pur_requests',
         'pro_prod_id',
-        'quantity',
+        'pro_vendor_id', 
         'note', 
-        'status', //0 =  Pending - 1 = Requested - 2 = Arrived at the pharmacy - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase - 7 = done - 8 = updated
-        'status_pur', //0 =  Pending - 1 = done - 2 = some_done - 3 = cancell_all
-        
+        'quantity', 
+        'type_action', //0 = done_pur - 1 = unavilable - 2 = cancell_pur - 3 = some_pur - 4 = udatequnt
+        'quantity_befor', 
+        'quantity_after', 
+        'status', 
+
     ];
     public function getprod()
     {
         return $this->belongsTo(Pro_product::class, 'pro_prod_id', 'product_id');
+    }
+    public function getvendor()
+    {
+        return $this->belongsTo(Pro_vendor::class, 'pro_vendor_id', 'vendor_id');
     }
 }
