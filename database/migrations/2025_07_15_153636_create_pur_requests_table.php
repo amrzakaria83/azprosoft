@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->text('quantity')->nullable();
             $table->tinyInteger('status')->default(0)->comment('0 =  Pending - 1 = Requested - 2 = Arrived at the pharmacy -
-             3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase');
+             3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase - 7 = done');
             $table->tinyInteger('status_pur')->default(0)->nullable()->comment('0 =  Pending - 1 = done - 2 = some_done - 3 = cancell_all');
             $table->softDeletes();
             $table->timestamps();

@@ -29,14 +29,45 @@ class Pur_requestsController extends Controller
         $dataallpur = All_pur_import::where('status_request', 0)
         ->select(['id','product_id','quantity'])
         ->get();
-
+        
         $datastreq = Store_pur_request::where('status_request', 0)
         ->select(['id','pro_prod_id','quantity'])
         ->get();
 
-        $data = Pur_request::where('status_pur', 0)->get();
+        // Combine and transform the collections
+        $combined = $dataallpur->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'product_id' => $item->product_id,
+                'quantity' => (int)$item->quantity,
+                'table' => '0' // Add table identifier
+            ];
+        })->concat($datastreq->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'product_id' => $item->pro_prod_id,
+                'quantity' => (int)$item->quantity,
+                'table' => '1' // Add table identifier
+            ];
+        }));
 
+        $summedQuantities = $combined->groupBy('product_id')->map(function ($group, $productId) {
+            return [
+                'product_id' => $productId,
+                'total_quantity' => $group->sum('quantity'),
+                'sources' => $group->map(function ($item) {
+                    return [
+                        'id' => $item['id'],
+                        'table' => $item['table']
+                    ];
+                })->toArray()
+                // 'sources' => $group->count()
+            ];
+        })->values(); // to reset keys to 0, 1, 2...
+        dd($summedQuantities);
+        
         dd($datastreq);
+        $data = Pur_request::where('status_pur', 0)->get();
         if ($request->ajax()) {
             $data = Pur_request::query();
             $data = $data->orderBy('id', 'DESC');
