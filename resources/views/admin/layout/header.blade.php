@@ -182,11 +182,11 @@
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item py-3" href="{{route('admin.pro_emp_atts.index')}}">
+                    <a class="dropdown-item py-3" href="{{route('admin.pro_shortage_lists.index')}}">
                       <span class="menu-icon me-3">
                       <i class="fa-solid fa-users"></i>
                       </span>
-                      <span class="menu-title fs-3">{{trans('lang.report')}} {{trans('lang.attendance')}}</span>
+                      <span class="menu-title fs-3">{{trans('lang.shortcomings')}}</span>
                     </a>
                   </li>
                 

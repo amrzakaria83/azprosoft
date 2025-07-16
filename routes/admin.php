@@ -172,6 +172,7 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/update', 'Pur_requestsController@update')->name('update');
             Route::get('/updaterequest','Pur_requestsController@updaterequest')->name('updaterequest');
             Route::get('/pur_done/{id?}/{suppl_id?}','Pur_requestsController@pur_done')->name('pur_done');
+            Route::get('/pur_unavilable/{id?}/{suppl_id?}','Pur_requestsController@pur_unavilable')->name('pur_unavilable');
         });
         Route::name('pro_purchase_hs.')->prefix('pro_purchase_hs')->group(function(){
             Route::get('/','Pro_purchase_headersController@index')->name('index');
@@ -192,6 +193,16 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::post('/store','Pro_purchase_detailssController@store')->name('store');
             Route::get('/edit/{id}', 'Pro_purchase_detailssController@edit')->name('edit');
             Route::post('/update', 'Pro_purchase_detailssController@update')->name('update');
+            
+        });
+        Route::name('pro_shortage_lists.')->prefix('pro_shortage_lists')->group(function(){
+            Route::get('/','Pro_shortage_listsController@index')->name('index');
+            Route::get('/show/{id}','Pro_shortage_listsController@show')->name('show');
+            Route::post('/delete', 'Pro_shortage_listsController@destroy')->name('delete');
+            Route::get('/create','Pro_shortage_listsController@create')->name('create');
+            Route::post('/store','Pro_shortage_listsController@store')->name('store');
+            Route::get('/edit/{id}', 'Pro_shortage_listsController@edit')->name('edit');
+            Route::post('/update', 'Pro_shortage_listsController@update')->name('update');
             
         });
         Route::name('pro_prod_logs.')->prefix('pro_prod_logs')->group(function(){

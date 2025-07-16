@@ -514,4 +514,24 @@ class Pur_requestsController extends Controller
             'status' => $purRequest->status ?? 0,
         ]);
     }
+    public function pur_unavilable($id,$suppl_id)
+    {
+       
+        $data = Pur_request::find($id);
+
+        $rowupdate = Pur_trans::create([
+            'pro_emp_code' => Auth::guard('admin')->user()->id,
+            'id_in_pur_requests' => $data->id,
+            'pro_prod_id' => $data->pro_prod_id,
+            'note' => $data->note,
+            'quantity' => $data->quantity,
+            'type_action' => 1, //0 = done_pur - 1 = unavilable - 2 = cancell_pur - 3 = some_pur - 4 = udatequnt
+            'quantity_befor' => $data->quantity ?? null,
+            'quantity_after' => $data->quantity ?? null,
+            'status' => $data->status ?? 0,
+            ]);
+        return response()->json(['status' => 'success', 'message' => 'Modified successfully']);
+
+       
+    }
 }

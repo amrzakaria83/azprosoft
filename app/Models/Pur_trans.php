@@ -14,7 +14,7 @@ class Pur_trans extends Model
         'pro_emp_code', 
         'id_in_pur_requests',
         'pro_prod_id',
-        'pro_vendor_id', 
+        'pro_vendor_id',
         'note', 
         'quantity', 
         'type_action', //0 = done_pur - 1 = unavilable - 2 = cancell_pur - 3 = some_pur - 4 = udatequnt

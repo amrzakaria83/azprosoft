@@ -336,6 +336,7 @@ return [
     "profit" => "ربح",
     "transfer_from" => "تحويل من",
     "transfer_to" => "تحويل الى",
+    "shortcomings" => "نواقص",
 
 
 ];

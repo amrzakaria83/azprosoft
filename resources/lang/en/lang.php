@@ -337,5 +337,7 @@ return [
     "bonus" => "Bonus",
     "price" => "Price",
     "profit" => "Profit",
+    "shortcomings" => "Shortcomings",
+
 
 ];
