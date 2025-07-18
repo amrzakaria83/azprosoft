@@ -77,33 +77,33 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
-            'sqlsrv' => [
-                'driver'   => 'sqlsrv',
-                'host'     => env('MSSQL_HOST', '41.33.4.126'),
-                'port'     => env('MSSQL_PORT', '1433'),
-                'database' => env('MSSQL_DATABASE', 'Emanger'),
-                'username' => env('MSSQL_USERNAME', 'sa'),
-                'password' => env('MSSQL_PASSWORD', '1'),
+            // 'sqlsrv' => [
+            //     'driver'   => 'sqlsrv',
+            //     'host'     => env('MSSQL_HOST', '41.33.4.126'),
+            //     'port'     => env('MSSQL_PORT', '1433'),
+            //     'database' => env('MSSQL_DATABASE', 'Emanger'),
+            //     'username' => env('MSSQL_USERNAME', 'sa'),
+            //     'password' => env('MSSQL_PASSWORD', '1'),
+            // ],
+        'sqlsrv' => [
+            'driver' => 'sqlsrv',
+            'host' => env('DB_SQLSRV_HOST', '41.33.4.126'),
+            'port' => env('DB_SQLSRV_PORT', '1433'),
+            'database' => env('DB_SQLSRV_DATABASE', 'Emanger'),
+            'username' => env('DB_SQLSRV_USERNAME', 'sa'),
+            'password' => env('DB_SQLSRV_PASSWORD', '1'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            // 👇 Force TCP/IP and disable Named Pipes
+            'odbc' => true,
+            'odbc_datasource_name' => "Driver={ODBC Driver 17 for SQL Server};Server=41.33.4.126,1433;Database=Emanger;",
+            'options' => [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                // PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
+                // 👇 Disable Named Pipes explicitly
+                // PDO::SQLSRV_ATTR_CONNECTION_POOLING => false,
             ],
-        // 'sqlsrv' => [
-        //     'driver' => 'sqlsrv',
-        //     'host' => env('DB_SQLSRV_HOST', '41.33.4.126'),
-        //     'port' => env('DB_SQLSRV_PORT', '1433'),
-        //     'database' => env('DB_SQLSRV_DATABASE', 'Emanger'),
-        //     'username' => env('DB_SQLSRV_USERNAME', 'sa'),
-        //     'password' => env('DB_SQLSRV_PASSWORD', '1'),
-        //     'charset' => 'utf8',
-        //     'prefix' => '',
-        //     // 👇 Force TCP/IP and disable Named Pipes
-        //     'odbc' => true,
-        //     'odbc_datasource_name' => "Driver={ODBC Driver 17 for SQL Server};Server=41.33.4.126,1433;Database=Emanger;",
-        //     'options' => [
-        //         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        //         // PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
-        //         // 👇 Disable Named Pipes explicitly
-        //         // PDO::SQLSRV_ATTR_CONNECTION_POOLING => false,
-        //     ],
-        // ],
+        ],
         // 'sqlsrv' => [
         //     'driver' => 'sqlsrv',
         //     'url' => env('DATABASE_URL'),
