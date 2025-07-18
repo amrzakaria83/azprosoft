@@ -160,6 +160,7 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/edit/{id}', 'Pur_importsController@edit')->name('edit');
             Route::post('/update', 'Pur_importsController@update')->name('update');
             Route::get('/ProdName','Pur_importsController@ProdName')->name('ProdName');
+            Route::post('/preview','Pur_importsController@preview')->name('preview');
         });
         Route::name('pur_requests.')->prefix('pur_requests')->group(function(){
             Route::get('/','Pur_requestsController@index')->name('index');

@@ -84,17 +84,40 @@ class Pur_importsController extends Controller
     //     return redirect()->route('admin.pur_prod_imps.create')->with('success', 'Excel data imported and processed successfully!');
 
     // }
-    public function import(Request $request)
+
+    public function preview(Request $request)
+{
+    $request->validate([
+        'excel_file' => 'required|file|mimes:xls,xlsx|max:51200'
+    ]);
+
+    try {
+        // Store the file temporarily
+        $path = $request->file('excel_file')->store('temp');
+        $fullPath = storage_path('app/' . $path);
+        
+        // Get the first row to extract headers
+        $data = (new FastExcel)->import($fullPath);
+        $headers = $data->count() > 0 ? array_keys($data->first()) : [];
+        
+        return response()->json([
+            'headers' => $headers,
+            'file_path' => $path
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error reading file: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function import(Request $request)
 {
     // Set execution limits
     set_time_limit(3600);
     ini_set('max_execution_time', 4800);
     ini_set('memory_limit', '4096M');
-
-    // Validate the input
-    $request->validate([
-        'excel_file' => 'required|file|mimes:xls,xlsx|max:51200'
-    ]);
 
     try {
         DB::beginTransaction();
@@ -102,21 +125,25 @@ class Pur_importsController extends Controller
         // Clear existing imports
         DB::table('pur_imports')->truncate();
 
-        $path = $request->file('excel_file')->getRealPath();
-        $data = (new FastExcel)->import($path);
+        // Get the file path from the request
+        $filePath = $request->input('file_path');
+        $fullPath = storage_path('app/' . $filePath);
+        
+        if (!file_exists($fullPath)) {
+            throw new \Exception("Temporary file not found");
+        }
+
+        $data = (new FastExcel)->import($fullPath);
+        $currentUser = Auth::guard('admin')->user()->id;
 
         if ($data->count() > 0) {
-            $firstRow = $data->first();
-            $excelHeadings = array_keys($firstRow);
-            $currentUser = Auth::guard('admin')->user()->id;
-
             foreach ($data as $excelRowData) {
-                // Create pur_import record
+                // Create pur_import record using mapped columns
                 $purImport = Pur_import::create([
-                    'product_id' => $excelRowData[$excelHeadings[0]] ?? null,
-                    'quantity' => $excelRowData[$excelHeadings[1]] ?? null,
-                    'balance_req' => $excelRowData[$excelHeadings[2]] ?? null,
-                    'note' => $excelRowData[$excelHeadings[3]] ?? null,
+                    'product_id' => $excelRowData[$request->input('product_id_column')] ?? null,
+                    'quantity' => $excelRowData[$request->input('quantity_column')] ?? null,
+                    'balance_req' => $excelRowData[$request->input('balance_req_column')] ?? null,
+                    'note' => $excelRowData[$request->input('note_column')] ?? null,
                     'pro_emp_code' => $currentUser,
                 ]);
 
@@ -133,14 +160,77 @@ class Pur_importsController extends Controller
             }
         }
 
+        // Delete the temporary file
+        unlink($fullPath);
+
         DB::commit();
         return redirect('/admin')->with('success', 'Excel data imported successfully!');
 
     } catch (\Exception $e) {
         DB::rollBack();
+        if (isset($fullPath)) {
+            @unlink($fullPath);
+        }
         return redirect()->back()->with('error', 'Error importing data: ' . $e->getMessage());
     }
 }
+//     public function import(Request $request)
+// {
+//     // Set execution limits
+//     set_time_limit(3600);
+//     ini_set('max_execution_time', 4800);
+//     ini_set('memory_limit', '4096M');
+
+//     // Validate the input
+//     $request->validate([
+//         'excel_file' => 'required|file|mimes:xls,xlsx|max:51200'
+//     ]);
+
+//     try {
+//         DB::beginTransaction();
+
+//         // Clear existing imports
+//         DB::table('pur_imports')->truncate();
+
+//         $path = $request->file('excel_file')->getRealPath();
+//         $data = (new FastExcel)->import($path);
+
+//         if ($data->count() > 0) {
+//             $firstRow = $data->first();
+//             $excelHeadings = array_keys($firstRow);
+//             $currentUser = Auth::guard('admin')->user()->id;
+
+//             foreach ($data as $excelRowData) {
+//                 // Create pur_import record
+//                 $purImport = Pur_import::create([
+//                     'product_id' => $excelRowData[$excelHeadings[0]] ?? null,
+//                     'quantity' => $excelRowData[$excelHeadings[1]] ?? null,
+//                     'balance_req' => $excelRowData[$excelHeadings[2]] ?? null,
+//                     'note' => $excelRowData[$excelHeadings[3]] ?? null,
+//                     'pro_emp_code' => $currentUser,
+//                 ]);
+
+//                 // Create corresponding all_pur_import record
+//                 All_pur_import::create([
+//                     'product_id' => $purImport->product_id,
+//                     'quantity' => $purImport->quantity,
+//                     'balance_req' => $purImport->balance_req,
+//                     'note' => $purImport->note,
+//                     'status' => 0,
+//                     'status_request' => 0,
+//                     'pro_emp_code' => $currentUser,
+//                 ]);
+//             }
+//         }
+
+//         DB::commit();
+//         return redirect('/admin')->with('success', 'Excel data imported successfully!');
+
+//     } catch (\Exception $e) {
+//         DB::rollBack();
+//         return redirect()->back()->with('error', 'Error importing data: ' . $e->getMessage());
+//     }
+// }
 
     public function create()
     {
