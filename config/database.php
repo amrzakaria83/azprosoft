@@ -91,7 +91,7 @@ return [
             'odbc_datasource_name' => "Driver={ODBC Driver 17 for SQL Server};Server=41.33.4.126,1433;Database=Emanger;",
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
+                // PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
                 // 👇 Disable Named Pipes explicitly
                 // PDO::SQLSRV_ATTR_CONNECTION_POOLING => false,
             ],
