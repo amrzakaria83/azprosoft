@@ -93,7 +93,7 @@ return [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 // PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
                 // 👇 Disable Named Pipes explicitly
-                // PDO::SQLSRV_ATTR_CONNECTION_POOLING => false,
+                PDO::SQLSRV_ATTR_CONNECTION_POOLING => false,
             ],
         ],
         // 'sqlsrv' => [
