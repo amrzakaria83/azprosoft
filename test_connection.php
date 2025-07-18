@@ -1,11 +1,12 @@
 <?php
-try {
-    $conn = new PDO(
-        "sqlsrv:Server=DESKTOP-PMNDNNT;Database=Emanger", 
-        "sa",
-        "1"
-    );
-    echo "Connected successfully with sa account!";
-} catch (PDOException $e) {
-    echo "SA connection failed: " . $e->getMessage();
+$host = '41.33.4.126';
+$port = 1433;
+$timeout = 5;
+
+$socket = @fsockopen($host, $port, $errno, $errstr, $timeout);
+if ($socket) {
+    echo "Port $port is open!";
+    fclose($socket);
+} else {
+    echo "Port $port is closed or blocked. Error: $errstr";
 }

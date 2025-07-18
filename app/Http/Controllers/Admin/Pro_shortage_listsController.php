@@ -57,7 +57,7 @@ class Pro_shortage_listsController extends Controller
                         ['product_id', $row->getprod->product_id],
                         ['prod_amount', '>', 0]
                     ])->sum('prod_amount') ?? 0;
-
+                        
                     return $balance;
                 })
                 ->addColumn('sell_price', function($row){

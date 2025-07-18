@@ -76,7 +76,7 @@
                                 name="store_id" 
                                 id="store_id"  data-control="select2">
                                 <option value="">Select an option</option>
-                                    @foreach (\App\Models\Pro_store::get() as $store)
+                                    @foreach (\App\Models\Pro_store::active()->get() as $store)
                                         <option value="{{ $store->store_id }}" >{{ $store->store_name }}</option>
                                     @endforeach
                                 </select>

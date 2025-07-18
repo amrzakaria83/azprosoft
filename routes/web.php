@@ -19,17 +19,26 @@ Route::get('/clear_cache', function () {
     \Artisan::call('storage:link');
 });
 Route::get('/test-db', function() {
+//     try {
+//     $conn = new PDO(
+//         "sqlsrv:Server=41.33.4.126,1433;Database=Emanger",
+//         'sa',
+//         '1'
+//     );
+//     echo "Connected successfully";
+// } catch (PDOException $e) {
+//     echo "Connection failed: " . $e->getMessage();
+// }
     try {
-        DB::connection()->getPdo();
-        return response()->json([
-            'status' => 'success',
-            'database' => DB::connection()->getDatabaseName()
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ], 500);
+        $pdo = new PDO(
+            "sqlsrv:Server=" . env('DB_HOST') . ";Database=" . env('DB_DATABASE'),
+            env('DB_USERNAME'),
+            env('DB_PASSWORD'),
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        return "Connected successfully!";
+    } catch (PDOException $e) {
+        return "Connection failed: " . $e->getMessage();
     }
 });
 // Route::get('/',[AdminLoginController::class ,'index'])->name('index');

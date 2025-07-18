@@ -77,34 +77,65 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
-
         'sqlsrv' => [
             'driver' => 'sqlsrv',
-            'url' => env('DATABASE_URL'),
-            'host' => env('DB_SQLSRV_HOST', 'localhost'),
+            'host' => env('DB_SQLSRV_HOST', '41.33.4.126'),
             'port' => env('DB_SQLSRV_PORT', '1433'),
-            'database' => env('DB_SQLSRV_DATABASE', 'forge'),
-            'username' => env('DB_SQLSRV_USERNAME', 'forge'),
-            'password' => env('DB_SQLSRV_PASSWORD', ''),
+            'database' => env('DB_SQLSRV_DATABASE', 'Emanger'),
+            'username' => env('DB_SQLSRV_USERNAME', 'sa'),
+            'password' => env('DB_SQLSRV_PASSWORD', '1'),
             'charset' => 'utf8',
             'prefix' => '',
-            'prefix_indexes' => true,
+            // 👇 Force TCP/IP and disable Named Pipes
+            'odbc' => true,
+            'odbc_datasource_name' => "Driver={ODBC Driver 17 for SQL Server};Server=41.33.4.126,1433;Database=Emanger;",
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_CASE => PDO::CASE_NATURAL,
-                PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true
+                PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
+                // 👇 Disable Named Pipes explicitly
+                // PDO::SQLSRV_ATTR_CONNECTION_POOLING => false,
             ],
-             'retries' => [
-                    'max' => env('DB_SQLSRV_RETRIES', 3), // Max reconnection attempts
-                    'delay' => 2000, // Delay between attempts in milliseconds
-                ],
-                    // Add these for better connection handling
-                'pooling' => true,
-                'connection_pooling' => 1,
-                'appname' => 'Laravel', // Helps identify connections in SQL Server
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+        // 'sqlsrv' => [
+        //     'driver' => 'sqlsrv',
+        //     'url' => env('DATABASE_URL'),
+        //     'host' => env('DB_SQLSRV_HOST', 'localhost'),
+        //     'port' => env('DB_SQLSRV_PORT', '1433'),
+        //     'database' => env('DB_SQLSRV_DATABASE', 'Emanger'),
+        //     'username' => env('DB_SQLSRV_USERNAME', 'sa'),
+        //     'password' => env('DB_SQLSRV_PASSWORD', '1'),
+        //     'charset' => 'utf8',
+        //     'prefix' => '',
+        //     'prefix_indexes' => true,
+        //     'encrypt' => false, // Add this if not using SSL
+        //     'trust_server_certificate' => true, // Add this for self-signed certs
+        //     'timeout' => env('DB_SQLSRV_TIMEOUT', 30), // Connection timeout in seconds
+        //     'options' => [
+        //         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        //         PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
+        //         PDO::ATTR_CASE => PDO::CASE_NATURAL,
+        //         // PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        //         // PDO::ATTR_CASE => PDO::CASE_NATURAL,
+        //         // PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
+        //         // PDO::ATTR_TIMEOUT => 30,
+        //         // PDO::ATTR_STRINGIFY_FETCHES => false,
+        //         // PDO::SQLSRV_ATTR_DIRECT_QUERY => false,
+        //         // PDO::ATTR_EMULATE_PREPARES => true,  // Workaround for unsupported PDO attributes
+        //         // PDO::ATTR_STRINGIFY_FETCHES => true, // Prevents numeric values from being fetched as strings
+        //     ],
+        //         'odbc' => true,
+        //         'odbc_datasource_name' => "Driver={ODBC Driver 17 for SQL Server};Server=41.33.4.126,1433;Database=Emanger;",
+        //      'retries' => [
+        //             'max' => env('DB_SQLSRV_RETRIES', 3), // Max reconnection attempts
+        //             'delay' => 2000, // Delay between attempts in milliseconds
+        //         ],
+        //             // Add these for better connection handling
+        //         'pooling' => true,
+        //         'connection_pooling' => 1,
+        //         // 'appname' => env('APP_NAME', 'Laravel') . ' v' . env('APP_VERSION', '1.0'),
+        //     // 'encrypt' => env('DB_ENCRYPT', 'yes'),
+        //     // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        // ],
         // 'sqlsrv' => [
         //     'driver' => 'sqlsrv',
         //     'host' => env('DB_SQLSRV_HOST', 'localhost'),
