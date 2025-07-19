@@ -150,6 +150,18 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/ProdName','Store_pur_requestsController@ProdName')->name('ProdName');
 
         });
+        Route::name('pur_waitings.')->prefix('pur_waitings')->group(function(){
+            Route::get('/','Pur_waitingsController@index')->name('index');
+            Route::get('/show/{id}','Pur_waitingsController@show')->name('show');
+            Route::post('/delete', 'Pur_waitingsController@destroy')->name('delete');
+            Route::get('/create','Pur_waitingsController@create')->name('create');
+            Route::post('/store','Pur_waitingsController@store')->name('store');
+            Route::get('/edit/{id}', 'Pur_waitingsController@edit')->name('edit');
+            Route::post('/update', 'Pur_waitingsController@update')->name('update');
+            Route::get('/ProdName','Pur_waitingsController@ProdName')->name('ProdName');
+            Route::get('/update_pur','Pur_waitingsController@update_pur')->name('update_pur');
+
+        });
         Route::name('pur_imports.')->prefix('pur_imports')->group(function(){
             Route::get('/','Pur_importsController@index')->name('index');
             Route::get('/show/{id}','Pur_importsController@show')->name('show');

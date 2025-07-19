@@ -20,10 +20,7 @@ class Store_pur_requestsController extends Controller
 {
     public function index(Request $request)
     {
-        set_time_limit(3600);
-        ini_set('max_execution_time', 4800);
-        ini_set('memory_limit', '4096M');
-        // $data = Store_pur_request::take(100)->get();
+
         if ($request->ajax()) {
             $data = Store_pur_request::query();
             $data = $data->orderBy('id', 'DESC');
@@ -36,22 +33,39 @@ class Store_pur_requestsController extends Controller
                     return $checkbox;
                 })
                 ->addColumn('name_ar', function($row){
-                    $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->cust_name.'</a></div>';
+                    $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->getprod->product_name_en.'</a></div>';
                     // $name_ar .= '<br><span>'.$row->product_name.'</span>';
                     return $name_ar;
                 })
-                ->addColumn('phone', function($row){
-                    $phone = $row->cust_tel1 ?? '';
-                    $phone .= '<br><span>'.$row->cust_tel2 ?? ''.'</span>';
-                    return $phone;
+                ->addColumn('pro_start_id', function($row){
+                    
+                    $pro_start_id = '<span>'.$row->getstore->store_name ?? ''.'</span>';
+                    return $pro_start_id;
                 })
-                ->addColumn('address', function($row){
-                    $address = $row->cust_addr;
-                    return $address;
+                ->addColumn('status', function($row){ //0 =  Pending - 1 = Requested - 2 = Arrived at the store - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution
+                    $status = $row->status ?? '<span class="text-info">'.trans('lang.without').'</span>';
+                    switch ($status) {
+                        case '0':
+                            return '<span class="text-danger">'.trans('lang.waiting'). ' '. trans('lang.buying').'</span>';
+                        case '1':
+                            return '<span class="text-info">'.trans('lang.requested_done').'</span>';
+                        case '2':
+                            return '<span class="text-success">'.trans('lang.arrived_store') .'</span>';
+                        case '3':
+                            return trans('lang.delay');
+                        
+                        default:
+                            return $status; // Fallback in case of unexpected value
+                    }
+                    
                 })
-                ->addColumn('cust_current_money', function($row){
-                    $cust_current_money = $row->cust_current_money;
-                    return $cust_current_money;
+                ->addColumn('name_cust', function($row){
+                    $name_cust = $row->name_cust;
+                    return $name_cust;
+                })
+                ->addColumn('phone_cust', function($row){
+                    $phone_cust = $row->phone_cust;
+                    return $phone_cust;
                 })
                 ->addColumn('address1', function($row){
                     $address1 = $row->cust_addr1 ?? '<span class="text-info">'.trans('lang.without').'</span>';
@@ -93,7 +107,12 @@ class Store_pur_requestsController extends Controller
                     // if ($request->get('is_active') == 0 || $request->get('is_active') == 1) {
                     //     $instance->where('is_active', $request->get('is_active'));
                     // }
-                    
+                    if ($request->get('store_id') != Null)
+                    {
+                    $instance->where(function ($query) use ($request) {
+                        $query->where('pro_start_id', $request->get('store_id'));
+                    });
+                    }
 
                     if (!empty($request->get('search'))) {
                             $instance->where(function($w) use($request){
@@ -104,7 +123,7 @@ class Store_pur_requestsController extends Controller
                         });
                     }
                 })
-                ->rawColumns(['name_ar','phone','address','cust_current_money','address1','address2','address3','address4','active','checkbox','actions'])
+                ->rawColumns(['name_ar','pro_start_id','status','name_cust','phone_cust','address2','address3','address4','active','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.store_pur_request.index');

@@ -47,6 +47,8 @@ return [
     "request" => "Request",
     "requests" => "Requests",
     "requested" => "Requested",
+    "requested_done" => "Requested Done",
+
     "customer" => "Customer",
     "customers" => "Customers",
     "waiting" => "Waiting",
@@ -338,6 +340,8 @@ return [
     "price" => "Price",
     "profit" => "Profit",
     "shortcomings" => "Shortcomings",
+    "supply_orders" => "Supply Orders",
+    "arrived_store" => "Arrived at the Store",
 
 
 ];

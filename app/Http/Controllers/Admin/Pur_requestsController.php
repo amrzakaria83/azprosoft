@@ -12,6 +12,7 @@ use App\Models\All_pur_import;
 use App\Models\Store_pur_request;
 use App\Models\Pro_prod_amount;
 use App\Models\Pur_trans;
+use App\Models\Pur_waiting;
 use DataTables;
 use Validator;
 use Carbon\Carbon;
@@ -403,7 +404,7 @@ class Pur_requestsController extends Controller
     //     }
     //     $databefor->update([
     //         'status_pur' => 1, //0 =  Pending - 1 = done - 2 = some_done - 3 = cancell_all
-    //         'status' => 1,//0 =  Pending - 1 = Requested - 2 = Arrived at the pharmacy - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase - 7 = done - 8 = updated
+    //         'status' => 1,//0 =  Pending - 1 = Requested - 2 = Arrived at the store - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase - 7 = done - 8 = updated
     //     ]);
     //      Pur_trans::create([
     //             'pro_emp_code' => Auth::guard('admin')->user()->id,
@@ -442,7 +443,7 @@ class Pur_requestsController extends Controller
             ]);
 
             // Create transaction record
-            $this->createPurTransaction($databefor);
+            $this->createPurTransaction($databefor, $suppl_id);
 
             DB::commit();
 
@@ -495,23 +496,34 @@ class Pur_requestsController extends Controller
             Store_pur_request::whereIn('id', $storePurRequestIds)
                 ->update([
                     'status_request' => 1,
-                    'status' => 1,//0 =  Pending - 1 = Requested - 2 = Arrived at the pharmacy - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution
+                    'status' => 1,//0 =  Pending - 1 = Requested - 2 = Arrived at the store - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution
                 ]);
         }
     }
 
-    protected function createPurTransaction(Pur_request $purRequest)
+    protected function createPurTransaction(Pur_request $purRequest, $suppl_id)
     {
-        return Pur_trans::create([
+        
+         $purTrans = Pur_trans::create([
             'pro_emp_code' => Auth::guard('admin')->user()->id,
             'id_in_pur_requests' => $purRequest->id,
             'pro_prod_id' => $purRequest->pro_prod_id,
+            'pro_vendor_id' => $suppl_id,
             'note' => $purRequest->note,
             'quantity' => $purRequest->quantity,
             'type_action' => 0, // 0 = done_pur
             'quantity_befor' => $purRequest->quantity ?? null,
             'quantity_after' => $purRequest->quantity ?? null,
             'status' => $purRequest->status ?? 0,
+        ]);
+        $purWaiting = Pur_waiting::create([
+            'pro_emp_code' => Auth::guard('admin')->user()->id,
+            'pur_requests_id' => $purRequest->id,
+            'pur_trans_id' => $purTrans->id,
+            'quantity' => $purRequest->quantity,
+            'status_pur' => 0, // 0 =  waiting - 1 = done - 2 = some_done - 3 = cancell_all
+            'status' => $purRequest->status ?? 0,
+            'note' => $purRequest->note,
         ]);
     }
     public function pur_unavilable($id,$suppl_id)

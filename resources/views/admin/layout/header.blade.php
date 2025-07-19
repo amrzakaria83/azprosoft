@@ -146,13 +146,14 @@
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item py-3" href="{{route('admin.pur_imports.create')}}">
+                    <a class="dropdown-item py-3" href="{{route('admin.store_pur_requests.index')}}">
                       <span class="menu-icon me-3">
                       <i class="fa-solid fa-users"></i>
                       </span>
-                      <span class="menu-title fs-3">{{trans('lang.import')}} {{trans('lang.products')}} {{trans('lang.purchases')}}</span>
+                      <span class="menu-title fs-3">{{trans('lang.requests')}} {{trans('lang.purchases')}} {{trans('lang.pharmacy')}}</span>
                     </a>
                   </li>
+                  
                 </ul>
               </li>
               @endcan
@@ -165,6 +166,14 @@
                   <span class="menu-arrow"></span>
                 </a>
                 <ul class="dropdown-menu dropdown-submenu-lg" aria-labelledby="pur_requestsDropdown">
+                  <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pur_imports.create')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.import')}} {{trans('lang.products')}} {{trans('lang.purchases')}}</span>
+                    </a>
+                  </li>
                   <li>
                     <a class="dropdown-item py-3" href="{{route('admin.pur_requests.updaterequest')}}">
                       <span class="menu-icon me-3">
@@ -189,7 +198,14 @@
                       <span class="menu-title fs-3">{{trans('lang.shortcomings')}}</span>
                     </a>
                   </li>
-                
+                <li>
+                    <a class="dropdown-item py-3" href="{{route('admin.pur_waitings.index')}}">
+                      <span class="menu-icon me-3">
+                      <i class="fa-solid fa-users"></i>
+                      </span>
+                      <span class="menu-title fs-3">{{trans('lang.supply_orders')}}</span>
+                    </a>
+                  </li>
                 </ul>
               </li>
               

@@ -3,6 +3,8 @@
 @section('css')
     <link href="{{asset('dash/assets/plugins/custom/datatables/datatables.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('dash/assets/plugins/custom/datatables/buttons.bootstrap4.min.css')}}" rel="stylesheet" type="text/css" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
 @endsection
 
 @section('style')
@@ -21,7 +23,7 @@
         <span class="h-20px border-gray-300 border-start mx-4"></span>
         <ul class="breadcrumb breadcrumb-separatorless fw-bold fs-7 my-1">
             <li class="breadcrumb-item text-muted px-2">
-                <a  href="#" class="text-muted text-hover-primary">{{trans('lang.requests')}} {{trans('lang.purchases')}} {{trans('lang.pharmacy')}}</a>
+                <a  href="#" class="text-muted text-hover-primary">{{trans('lang.movement')}} {{trans('lang.supply_orders')}}</a>
             </li>
             {{-- <li class="breadcrumb-item">
                 <span class="bullet bg-gray-300 w-5px h-2px"></span>
@@ -55,7 +57,7 @@
                     <div class="card-toolbar">
                         <!--begin::Toolbar-->
                         <div class="d-flex justify-content-end dbuttons">
-                            <a href="{{route('admin.store_pur_requests.create')}}" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3">
+                            <a href="{{route('admin.pur_waitings.create')}}" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3">
                                 <i class="bi bi-plus-square fs-1x"></i></a>
                             <button type="button" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3" data-bs-toggle="modal" data-bs-target="#kt_modal_filter">
                                 <i class="bi bi-funnel-fill fs-1x"></i></button>
@@ -69,20 +71,19 @@
                 <!--begin::Card body-->
                 <div class="card-body py-4">
                     <div class="row mb-6">
-                        <div class="col-sm-2">
-                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.store')}}</label>
+                        <div class="col-sm-4">
+                            <label class="col-sm-8 fw-semibold fs-6 mb-2">{{trans('lang.supplier')}}</label>
                             <div class="col-sm-12 fv-row">
                             <select data-placeholder="Select an option" class="input-text form-control form-select mb-3 mb-lg-0 text-center" 
-                                name="store_id" 
-                                id="store_id"  data-control="select2">
+                                name="vendor_id" 
+                                id="vendor_id"  data-control="select2">
                                 <option value="">Select an option</option>
-                                    @foreach (\App\Models\Pro_store::active()->get() as $store)
-                                        <option value="{{ $store->store_id }}" >{{ $store->store_name }}</option>
+                                    @foreach (\App\Models\Pro_vendor::get() as $store)
+                                        <option value="{{ $store->vendor_id }}" >{{ $store->vendor_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
-                        
                         <div class="col-sm-2">
                             <label class="required fw-semibold fs-6 mb-2">{{trans('lang.start_from')}}</label>
                             <div class="position-relative d-flex align-items-center">
@@ -116,6 +117,7 @@
                         </div>
                     </div>
                     
+                    
                     <!--begin::Table-->
                     <table class="table align-middle table-rounded table-striped table-row-dashed fs-6" id="kt_datatable_table">
                         <!--begin::Table head-->
@@ -128,10 +130,11 @@
                                     </div>
                                 </th>
                                 <th class="min-w-125px text-center">{{trans('lang.products')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.store')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.status')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.name')}}</th>
-                                <th class="min-w-125px text-center">{{trans('lang.phone')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.quantity')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.supplier')}} {{trans('lang.request')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.created_at')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.supplier')}} {{trans('lang.buying')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.valued_date')}} {{trans('lang.buying')}}</th>
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th> -->
                                 
                                 
@@ -215,7 +218,7 @@
 <script src="{{asset('dash/assets/plugins/custom/datatables/buttons.print.min.js')}}"></script>
 <script>
     $("#kt_datepicker_1").flatpickr({
-        defaultDate: new Date().setDate(new Date().getDate() - 30),
+        defaultDate: new Date().setDate(new Date().getDate() - 15),
         allowInput: true,           // Allow manual input
         enableTime: false,
     });
@@ -253,12 +256,11 @@
                 //{extend: 'colvis', className: 'btn secondary', text: 'إظهار / إخفاء الأعمدة '}
             ],
             ajax: {
-                url: "{{ route('admin.store_pur_requests.index') }}",
+                url: "{{ route('admin.pur_waitings.index') }}",
                 data: function (d) {
-                    d.store_id = $('#store_id').val(),
-                    // d.to_store_id = $('#to_store_id').val(),
-                    // d.from_date = $('#kt_datepicker_1').val(),
-                    // d.to_date = $('#kt_datepicker_2').val(),
+                    
+                    d.from_date = $('#kt_datepicker_1').val(),
+                    d.to_date = $('#kt_datepicker_2').val(),
                     
                     d.search = $('#search').val()
                 }
@@ -266,13 +268,13 @@
             columns: [
                 {data: 'checkbox', name: 'checkbox'},
                 {data: 'name_ar', name: 'name_ar'},
-                {data: 'pro_start_id', name: 'pro_start_id'},
-                {data: 'status', name: 'status'},
-                {data: 'name_cust', name: 'name_cust'},
-                {data: 'phone_cust', name: 'phone_cust'},
-                // {data: 'r_emp_id', name: 'r_emp_id'},
-                // {data: 'inv_total', name: 'inv_total'},
-                // {data: 'note', name: 'note'},
+                {data: 'quantity', name: 'quantity'},
+                {data: 'pro_vendor_id', name: 'pro_vendor_id'},
+                {data: 'created_at', name: 'created_at'},
+                {data: 'status_pur', name: 'status_pur'},
+                {data: 'purchase_date', name: 'purchase_date'},
+                // {data: 'sell_price', name: 'sell_price'},
+                // {data: 'factory_name', name: 'factory_name'},
                 // {data: 'new_amount', name: 'new_amount'},
                 // {data: 'expire_date', name: 'expire_date'},
                 // {data: 'total_buy', name: 'total_buy'},
@@ -288,7 +290,7 @@
         filterSearch.addEventListener('keyup', function (e) {
             table.draw();
         });
-        $('#store_id,#kt_datepicker_1,#kt_datepicker_2').change(function() {
+        $('#store_id,#to_store_id,#kt_datepicker_1,#kt_datepicker_2').change(function() {
             table.draw();
         });
 
@@ -311,7 +313,7 @@
             confirmButtonText: 'موافق',cancelButtonText: 'لا'}).then(function (isConfirm) {
                 if (isConfirm.value) {
             $.ajax({
-                url: "{{route('admin.store_pur_requests.delete')}}",
+                url: "{{route('admin.pur_waitings.delete')}}",
                 type: 'post',
                 dataType: "JSON",
                 data: {
@@ -332,4 +334,5 @@
             }});
     });
 </script>
+
 @endsection

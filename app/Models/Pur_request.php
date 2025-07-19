@@ -16,7 +16,7 @@ class Pur_request extends Model
         'pro_prod_id',
         'quantity',
         'note', 
-        'status', //0 =  Pending - 1 = Requested - 2 = Arrived at the pharmacy - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase - 7 = done - 8 = updated
+        'status', //0 =  Pending - 1 = Requested - 2 = Arrived at the store - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase - 7 = done - 8 = updated
         'status_pur', //0 =  Pending - 1 = done - 2 = some_done - 3 = cancell_all
         
     ];

@@ -94,6 +94,10 @@ return [
             'password' => env('DB_SQLSRV_PASSWORD', '1'),
             'charset' => 'utf8',
             'prefix' => '',
+            'retries' => [
+                    'max' => env('DB_SQLSRV_RETRIES', 3), // Max reconnection attempts
+                    'delay' => 2000, // Delay between attempts in milliseconds
+                ],
             // 👇 Force TCP/IP and disable Named Pipes
             'odbc' => true,
             'odbc_datasource_name' => "Driver={ODBC Driver 17 for SQL Server};Server=41.33.4.126,1433;Database=Emanger;",

@@ -46,6 +46,7 @@ return [
     "request" => "طلب",
     "requests" => "طلبات",
     "requested" => "مطلوب",
+    "requested_done" => "تم الطلب",
     "customer" => "عميل",
     "customers" => "عملاء",
     "waiting" => "انتظار",
@@ -337,6 +338,8 @@ return [
     "transfer_from" => "تحويل من",
     "transfer_to" => "تحويل الى",
     "shortcomings" => "نواقص",
+    "supply_orders" => "اوامر التوريد",
+    "arrived_store" => "وصل المخزن",
 
 
 ];
