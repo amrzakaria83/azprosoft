@@ -53,13 +53,13 @@
                                     <div class="row mb-6">
                                         <label class="col-lg-2 col-form-label required fw-semibold fs-6 ">{{trans('lang.name_ar')}}</label>
                                         <div class="col-lg-8 fv-row">
-                                            <input type="text" id="name_ar" name="name_ar" placeholder="{{trans('lang.name_ar')}}" value="" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" />
+                                            <input type="text" id="name_ar" name="name_ar" placeholder="{{trans('lang.name_ar')}}" value="{{$data->emp_name}}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" />
                                         </div>
                                     </div>
                                     <div class="row mb-6">
                                         <label class="col-lg-2 col-form-label  fw-semibold fs-6">{{trans('lang.name_en')}}</label>
                                         <div class="col-lg-8 fv-row">
-                                            <input type="text" id="name_en" name="name_en" placeholder="{{trans('lang.name_en')}}" value="" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" />
+                                            <input type="text" id="name_en" name="name_en" placeholder="{{trans('lang.name_en')}}" value="{{$data->emp_name_en}}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" />
                                         </div>
                                     </div>
                                     <div class="row mb-6">
@@ -84,7 +84,7 @@
                                             <i class="fas fa-exclamation-circle ms-1 fs-7" data-bs-toggle="tooltip" title="لا يقل عن 6 حروف"></i>
                                         </label>
                                         <div class="col-lg-8 fv-row">
-                                            <input type="password" name="password" placeholder="{{trans('lang.password')}}" value="" class="form-control form-control-lg form-control-solid" />
+                                            <input type="password" name="password" placeholder="{{trans('lang.password')}}" value="{{$data->emp_pass}}" class="form-control form-control-lg form-control-solid" />
                                         </div>
                                     </div>
                                     
