@@ -86,7 +86,7 @@ class EmangerempsController extends Controller
 
                     if (!$emp_code) {
                         $emangeremp_id = '<div class="ms-2">
-                                <a href="'.route('admin.employees.show', $row->emp_id).'" class="btn btn-lg btn-icon btn-success btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                <a href="'.route('admin.employees.addemanger', $row->emp_id).'" class="btn btn-lg btn-icon btn-success btn-active-dark me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                                     <i class="bi bi-plus-square fs-1x"></i> 
                                 </a>
                                 

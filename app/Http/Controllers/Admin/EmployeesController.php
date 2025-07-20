@@ -9,6 +9,7 @@ use App\Models\Employee;
 use \Yajra\Datatables\Datatables;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Spatie\Permission\Models\Role;
+use App\Models\Emangeremp;
 
 use Validator;
 use Auth;
@@ -225,6 +226,15 @@ class EmployeesController extends Controller
 
         return back()->withInput($request->only('emp_code'));
     }}}}
+
+    public function addemanger($id)
+    {
+        // $data = Emangeremp::find($emp_id);
+        $data = Emangeremp::where('emp_id', $id)->first();
+        // dd($data);
+        return view('admin.employee.addemanger', compact('data'));
+    }
+
     
     
 

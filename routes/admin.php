@@ -35,6 +35,7 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/import','EmployeesController@import')->name('import');
             Route::post('/importfile','EmployeesController@importfile')->name('importfile');
             Route::post('/importstore','EmployeesController@importstore')->name('importstore');
+            Route::get('/addemanger/{id}','EmployeesController@addemanger')->name('addemanger');
         });
         Route::name('roles.')->prefix('roles')->group(function(){
             Route::get('/','RolesController@index')->name('index');
