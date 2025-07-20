@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\Pur_waiting;
+use App\Models\Pur_request;
 use App\Models\Pro_product;
 use App\Models\Store_pur_request;
 use App\Models\All_pur_import;
@@ -286,7 +287,7 @@ class Pur_waitingsController extends Controller
                             'id_in_purchase_details' => $purchaseDetail->id,
                             'status_pur' => 1,
                         ]);
-                        $updat = Pur_request::find($item->pur_requests_id);
+                        $updat = Pur_request::where('id', $item->pur_requests_id)->first();
                         $updat->update([
                             'status' => 2,//0 =  Pending - 1 = Requested - 2 = Arrived at the store - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution - 6 = import purshase - 7 = done - 8 = updated
                         ]);

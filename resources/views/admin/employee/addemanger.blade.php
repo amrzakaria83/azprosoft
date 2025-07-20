@@ -44,22 +44,17 @@
                                 <!--begin::Card body-->
                                 <div class="card-body border-top " >
                                     <input type="hidden" name="id" value="{{$data->id}}" />
-                                    <div class="row mb-6">
-                                        <label class="col-lg-2 col-form-label required fw-semibold fs-6 ">{{trans('lang.emp_id')}}</label>
-                                        <div class="col-lg-8 fv-row">
-                                            <input type="text" required id="emp_code" name="emp_code" placeholder="{{trans('lang.emp_id')}}" value="{{$data->emp_id}}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" />
-                                        </div>
-                                    </div>
+                                    
                                     <div class="row mb-6">
                                         <label class="col-lg-2 col-form-label required fw-semibold fs-6 ">{{trans('lang.name_ar')}}</label>
                                         <div class="col-lg-8 fv-row">
-                                            <input type="text" id="name_ar" name="name_ar" placeholder="{{trans('lang.name_ar')}}" value="{{$data->emp_name}}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" />
+                                            <input type="text" id="name_ar" name="name_ar" placeholder="{{trans('lang.name_ar')}}" value="{{$data->emp_name}}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0 text-center" />
                                         </div>
                                     </div>
                                     <div class="row mb-6">
                                         <label class="col-lg-2 col-form-label  fw-semibold fs-6">{{trans('lang.name_en')}}</label>
                                         <div class="col-lg-8 fv-row">
-                                            <input type="text" id="name_en" name="name_en" placeholder="{{trans('lang.name_en')}}" value="{{$data->emp_name_en}}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" />
+                                            <input type="text" id="name_en" name="name_en" placeholder="{{trans('lang.name_en')}}" value="{{$data->emp_name_en}}" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0 text-center" />
                                         </div>
                                     </div>
                                     <div class="row mb-6">
@@ -67,14 +62,14 @@
                                         {{trans('lang.phone')}}
                                         </label>
                                         <div class="col-lg-8 fv-row">
-                                            <input type="text" name="phone" placeholder="{{trans('lang.phone')}}" id="phone" value="" class="form-control form-control-lg form-control-solid text-center" />
+                                            <input type="text" name="phone" placeholder="{{trans('lang.phone')}}" id="phone" value="{{$data->emp_tell}}" class="form-control form-control-lg form-control-solid text-center" />
                                         </div>
                                         
                                     </div>
                                     <div class="row mb-6">
                                         <label class="col-lg-2 col-form-label required fw-semibold fs-6">{{trans('lang.email')}}</label>
                                         <div class="col-lg-8 fv-row">
-                                            <input type="text" required id="emailaz" name="emailaz" placeholder="{{trans('lang.email')}}" value="" class="form-control form-control-lg form-control-solid" />
+                                            <input type="text" required id="emailaz" name="emailaz" placeholder="{{trans('lang.email')}}" value="null" class="bg bg-danger text-dark form-control form-control-lg form-control-solid text-center" />
                                         </div>
                                     </div>
                                     
@@ -84,7 +79,7 @@
                                             <i class="fas fa-exclamation-circle ms-1 fs-7" data-bs-toggle="tooltip" title="لا يقل عن 6 حروف"></i>
                                         </label>
                                         <div class="col-lg-8 fv-row">
-                                            <input type="password" name="password" placeholder="{{trans('lang.password')}}" value="{{$data->emp_pass}}" class="form-control form-control-lg form-control-solid" />
+                                            <input type="password" name="password" placeholder="{{trans('lang.password')}}" value="null" class="bg bg-danger text-dark form-control form-control-lg form-control-solid text-center" />
                                         </div>
                                     </div>
                                     
@@ -102,31 +97,32 @@
                                         <label class="col-sm-2 col-form-label required fw-semibold fs-6" style=" max-width: 7% !important;">is_active</label>
                                         <div class="col-sm-2 d-flex align-items-center">
                                             <select  class="form-select form-select-lg form-select-solid text-center" id="is_active"  name="is_active" value="" >
-                                                <option value="0">not active</option>
-                                                <option value="1">active</option>
-                                                <option value="2">suspended</option>
-                                                <option value="3">terminated</option>
+                                                <option value="1">{{trans('lang.active')}}</option>
+                                                <option value="0">{{trans('lang.inactive')}}</option>
+                                                <option value="2">{{trans('lang.suspended')}}</option>
+                                                <option value="3">{{trans('lang.terminated')}}</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row mb-6">
-                                        <label class="col-lg-2 col-form-label required fw-semibold fs-3 text-info">{{trans('lang.role_id')}} </label>
-                                        <div class="col-lg-8 fv-row">
-                                            <select  data-control="select2" data-placeholder="Select an option" class=" input-text form-control  form-select  mb-3 mb-lg-0"  name="role_id">
-                                            <option value="">Select {{trans('lang.role_id')}}</option>
-                                                @foreach (Spatie\Permission\Models\Role::all() as $item=>$row)
-                                                    <option value="{{$row->id}}">{{$row->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
+                                    
                                     <div class="row mb-6">
                                         <label class="col-lg-2 col-form-label required fw-semibold fs-3 text-info">{{trans('lang.name_ar')}} </label>
                                         <div class="col-lg-8 fv-row">
                                             <select  data-control="select2" data-placeholder="Select an option" class=" input-text form-control  form-select  mb-3 mb-lg-0" id="emangeremp_id" name="emangeremp_id">
                                             <option value="">Select {{trans('lang.name_ar')}}</option>
                                                 @foreach (App\Models\Emangeremp::get() as $item)
-                                                    <option value="{{$item->emp_id}}">{{$item->emp_name}}</option>
+                                                    <option value="{{$item->emp_id}}" @if(isset($data) && $data->emp_id == $item->emp_id) selected @endif>{{$item->emp_name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-6">
+                                        <label class="col-lg-2 col-form-label required fw-semibold fs-3 text-info">{{trans('lang.role_id')}} </label>
+                                        <div class="col-lg-8 fv-row">
+                                            <select  data-control="select2" data-placeholder="Select an option" required class=" input-text form-control  form-select  mb-3 mb-lg-0"  name="role_id">
+                                            <option value="">Select {{trans('lang.role_id')}}</option>
+                                                @foreach (Spatie\Permission\Models\Role::all() as $item=>$row)
+                                                    <option value="{{$row->id}}">{{$row->name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>

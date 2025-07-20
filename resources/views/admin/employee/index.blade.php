@@ -55,12 +55,12 @@
                     <div class="card-toolbar">
                         <!--begin::Toolbar-->
                         <div class="d-flex justify-content-end dbuttons">
-                            <a href="{{route('admin.employees.create')}}" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3">
-                                <i class="bi bi-plus-square fs-1x"></i></a>
-                            <button type="button" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3" data-bs-toggle="modal" data-bs-target="#kt_modal_filter">
-                                <i class="bi bi-funnel-fill fs-1x"></i></button>
-                            <button type="button" class="btn btn-sm btn-icon btn-danger btn-active-dark me-3 p-3" id="btn_delete" data-token="{{ csrf_token() }}">
-                                <i class="bi bi-trash3-fill fs-1x"></i></button>
+                            <!-- <a href="{{route('admin.employees.create')}}" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3">
+                                <i class="bi bi-plus-square fs-1x"></i></a> -->
+                            <!-- <button type="button" class="btn btn-sm btn-icon btn-primary btn-active-dark me-3 p-3" data-bs-toggle="modal" data-bs-target="#kt_modal_filter">
+                                <i class="bi bi-funnel-fill fs-1x"></i></button> -->
+                            <!-- <button type="button" class="btn btn-sm btn-icon btn-danger btn-active-dark me-3 p-3" id="btn_delete" data-token="{{ csrf_token() }}">
+                                <i class="bi bi-trash3-fill fs-1x"></i></button> -->
                         </div>
                     </div>
                     <!--end::Card toolbar-->

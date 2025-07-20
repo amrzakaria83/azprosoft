@@ -103,15 +103,16 @@ class EmployeesController extends Controller
             return redirect()->back()->with('message', $validate->messages()->first())->with('status', 'error');}
 
         $row = Employee::create([
-            'emp_code' => $request->emp_code,
+            'emp_code' => Auth::guard('admin')->user()->id,
             'name_ar' => $request->name_ar,
             'name_en' => $request->name_en,
             'phone' => $request->phone,
             'emailaz' => $request->emailaz,
             'password' => Hash::make($request->password),
-            'type' => $request->type , //0 = admin, 1 = no dash 3 = subadmin, 4 = superadmin
-            'is_active' => $request->is_active ?? 1,
             'role_id' => $request->role_id,
+            'is_active' => $request->is_active ?? 1,
+            'type' => $request->type , //0 = admin, 1 = no dash 3 = subadmin, 4 = superadmin
+            'emangeremp_id' => $request->emangeremp_id , 
             
         ]);
         if($request->hasFile('attach') && $request->file('attach')->isValid()){
