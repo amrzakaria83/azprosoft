@@ -33,7 +33,9 @@ class Store_pur_requestsController extends Controller
                     return $checkbox;
                 })
                 ->addColumn('name_ar', function($row){
-                    $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'.$row->getprod->product_name_en.'</a></div>';
+                    $name_ar = '<div class="d-flex flex-column"><a href="javascript:;" class="text-gray-800 text-hover-primary mb-1">'
+                    .$row->getprod->product_name_en. ' <span>('.$row->getprod->sell_price.')</span>'.
+                    '</a></div>';
                     // $name_ar .= '<br><span>'.$row->product_name.'</span>';
                     return $name_ar;
                 })
@@ -67,17 +69,32 @@ class Store_pur_requestsController extends Controller
                     $phone_cust = $row->phone_cust;
                     return $phone_cust;
                 })
-                ->addColumn('address1', function($row){
-                    $address1 = $row->cust_addr1 ?? '<span class="text-info">'.trans('lang.without').'</span>';
-                    return $address1;
+                ->addColumn('quantity', function($row){
+                    $quantity = $row->quantity;
+                    return $quantity;
                 })
-                ->addColumn('address2', function($row){
-                    $address2 = $row->cust_addr2 ?? '<span class="text-info">'.trans('lang.without').'</span>';
-                    return $address2;
+                ->addColumn('type_request', function($row){ // 0 = cash - 1 = phone - 2 = whatsapp - 3 = page - 4 = instagram
+                    $type_request = $row->type_request ?? '<span class="text-info">'.trans('lang.without').'</span>';
+                    switch ($type_request) {
+                        case '0':
+                            return '<span class="text-danger">Cash</span>';
+                        case '1':
+                            return '<span class="text-info">'.trans('lang.phone').'</span>';
+                        case '2':
+                            return '<span class="text-success">whatsapp</span>';
+                        case '3':
+                            return '<span class="text-success">page</span>';
+                         case '4':
+                            return '<span class="text-success">instagram</span>';
+                        
+                        default:
+                            return $type_request; // Fallback in case of unexpected value
+                    }
+                    
                 })
-                ->addColumn('address3', function($row){
-                    $address3 = $row->cust_addr3 ?? '<span class="text-info">'.trans('lang.without').'</span>';
-                    return $address3;
+                ->addColumn('pro_emp_code', function($row){
+                    $pro_emp_code = $row->getemp->emp_name ?? 'Unknowen';
+                    return $pro_emp_code;
                 })
                 ->addColumn('address4', function($row){
                     $address4 = $row->cust_addr4 ?? '<span class="text-info">'.trans('lang.without').'</span>';
@@ -123,7 +140,7 @@ class Store_pur_requestsController extends Controller
                         });
                     }
                 })
-                ->rawColumns(['name_ar','pro_start_id','status','name_cust','phone_cust','address2','address3','address4','active','checkbox','actions'])
+                ->rawColumns(['name_ar','pro_start_id','status','name_cust','phone_cust','quantity','type_request','pro_emp_code','active','checkbox','actions'])
                 ->make(true);
         }
         return view('admin.store_pur_request.index');

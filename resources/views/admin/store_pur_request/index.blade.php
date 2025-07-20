@@ -132,6 +132,9 @@
                                 <th class="min-w-125px text-center">{{trans('lang.status')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.name')}}</th>
                                 <th class="min-w-125px text-center">{{trans('lang.phone')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.quantity')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.type_type')}}</th>
+                                <th class="min-w-125px text-center">{{trans('lang.employee')}}</th>
                                 <!-- <th class="min-w-125px text-center">{{trans('lang.expiry_date')}}</th> -->
                                 
                                 
@@ -270,9 +273,9 @@
                 {data: 'status', name: 'status'},
                 {data: 'name_cust', name: 'name_cust'},
                 {data: 'phone_cust', name: 'phone_cust'},
-                // {data: 'r_emp_id', name: 'r_emp_id'},
-                // {data: 'inv_total', name: 'inv_total'},
-                // {data: 'note', name: 'note'},
+                {data: 'quantity', name: 'quantity'},
+                {data: 'type_request', name: 'type_request'},
+                {data: 'pro_emp_code', name: 'pro_emp_code'},
                 // {data: 'new_amount', name: 'new_amount'},
                 // {data: 'expire_date', name: 'expire_date'},
                 // {data: 'total_buy', name: 'total_buy'},

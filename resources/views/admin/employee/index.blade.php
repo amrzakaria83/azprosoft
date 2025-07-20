@@ -92,10 +92,10 @@
                                         <input class="form-check-input" type="checkbox" data-kt-check="true" data-kt-check-target="#kt_datatable_table .form-check-input" value="1" />
                                     </div>
                                 </th>
-                                <th class="min-w-125px text-start">الموظف</th>
-                                <th class="min-w-125px text-start">رقم الهاتف</th>
-                                <th class="min-w-125px text-start">الحالة</th>
-                                <th class="min-w-125px text-start">الاجراء</th>
+                                <th class="min-w-125px text-start">{{trans('auth.profile')}}</th>
+                                <th class="min-w-125px text-start">{{trans('lang.phone')}}</th>
+                                <th class="min-w-125px text-start">{{trans('lang.status')}}</th>
+                                <th class="min-w-125px text-start">{{trans('lang.action')}}</th>
                             </tr>
                             <!--end::Table row-->
                         </thead>

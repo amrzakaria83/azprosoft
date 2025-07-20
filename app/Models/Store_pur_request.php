@@ -19,7 +19,7 @@ class Store_pur_request extends Model
         'note', 
         'status', //0 =  Pending - 1 = Requested - 2 = Arrived at the store - 3 = Cancelled - 4 = Executed - 5 = Cancel the execution
         'quantity', 
-        'type_request', // 0 = cash - 1 = phone - 2 = whatsapp - 3 = page - 4 = instagram 
+        'type_request', // 0 = cash - 1 = phone - 2 = whatsapp - 3 = page - 4 = instagram
         'balance_req', 
         'status_request',// 0 = waitting - 1 = pur_drug_requests
         
@@ -32,4 +32,9 @@ class Store_pur_request extends Model
     {
         return $this->belongsTo(Pro_store::class, 'pro_start_id');
     }
+    public function getemp() {
+
+        return $this->belongsTo(Emangeremp::class, 'pro_emp_code', 'emp_id');
+    }
+
 }
