@@ -23,7 +23,35 @@ Route::name('admin.')->middleware(['auth:admin'])->group(function () {
             Route::get('/edit/{id}', 'SettingsController@edit')->name('edit');
             Route::post('/update', 'SettingsController@update')->name('update');
         });
+        Route::name('attendances.')->prefix('attendances')->group(function(){
+            Route::get('/','AttendanceController@index')->name('index');
+            Route::get('/createin','AttendanceController@createin')->name('createin');
+            Route::post('/in_attendance','AttendanceController@in_attendance')->name('in_attendance');
+            Route::get('/createout','AttendanceController@createout')->name('createout');
+            Route::post('/out_attendance','AttendanceController@out_attendance')->name('out_attendance');
 
+            Route::get('/index_in','AttendanceController@index_in')->name('index_in');
+            Route::get('/index_all','AttendanceController@index_all')->name('index_all');
+            Route::get('/plan_att','AttendanceController@plan_att')->name('plan_att');
+            Route::get('/plan_att_emp_vacation','AttendanceController@plan_att_emp_vacation')->name('plan_att_emp_vacation');
+            Route::get('/emp_index_all','AttendanceController@emp_index_all')->name('emp_index_all');
+            Route::get('/getplan_att_emp_vacation','AttendanceController@getplan_att_emp_vacation')->name('getplan_att_emp_vacation');
+            Route::get('/pay_emp_vacation','AttendanceController@pay_emp_vacation')->name('pay_emp_vacation');
+            Route::get('/emp_index_all_notready','AttendanceController@emp_index_all_notready')->name('emp_index_all_notready');
+            Route::get('/show/{id}','AttendanceController@show')->name('show');
+            Route::post('/delete', 'AttendanceController@destroy')->name('delete');
+            Route::post('/store','AttendanceController@store')->name('store');
+            Route::post('/store_emp_index_plan','AttendanceController@store_emp_index_plan')->name('store_emp_index_plan');
+            Route::post('/store_plan_att','AttendanceController@store_plan_att')->name('store_plan_att');
+            Route::post('/store_plan_att_emp_vacation','AttendanceController@store_plan_att_emp_vacation')->name('store_plan_att_emp_vacation');
+            Route::get('/edit/{id}', 'AttendanceController@edit')->name('edit');
+            Route::post('/update', 'AttendanceController@update')->name('update');
+            Route::get('/getempdel', 'AttendanceController@getempdel')->name('getempdel');
+            Route::post('/getempdelselect', 'AttendanceController@getempdelselect')->name('getempdelselect');
+            Route::get('/getemp', 'AttendanceController@getemp')->name('getemp');
+            Route::get('/done/{id}/{status}', 'AttendanceController@done')->name('done');
+
+        });
         Route::name('employees.')->prefix('employees')->group(function(){
             Route::get('/','EmployeesController@index')->name('index');
             Route::get('/show/{id}','EmployeesController@show')->name('show');
