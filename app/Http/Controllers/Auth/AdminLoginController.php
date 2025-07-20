@@ -64,17 +64,17 @@ class AdminLoginController extends Controller
             if ($employee->is_active == 1) {
                 if ($employee->type == '0') {
                     if (Auth::guard('admin')->attempt(['emailaz' => $employee->emailaz,'password' => $request->password, 'type' => '0', 'emp_code' => $employee->emp_code ], $request->get('remember'))) {
-                        
+                        $request->session()->put('locale', 'ar');
                         return redirect()->intended('/admin');
                     }
                 } else if ($employee->type == '2') {
                     if (Auth::guard('subadmin')->attempt(['emailaz' => $employee->emailaz,'password' => $request->password, 'type' => '2', 'emp_code' => $employee->emp_code ], $request->get('remember'))) {
-                        
+                        $request->session()->put('locale', 'ar');
                         return Redirect::to('/subadmin');
                     }
                 } else if ($employee->type == '3') {
                     if (Auth::guard('superadmin')->attempt(['emailaz' => $employee->emailaz,'password' => $request->password, 'type' => '3', 'emp_code' => $employee->emp_code ], $request->get('remember'))) {
-                        
+                        $request->session()->put('locale', 'ar');
                         return Redirect::to('/superadmin');
                     }
                 } else {
